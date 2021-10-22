@@ -207,7 +207,7 @@ export class Client {
         },
         {
             ...this.keyboard.panel(account.igUsername),
-            caption:`${this.translate('dofollow',{username:user.username}).msg}`,
+            caption:`${this.translate('dofollow',{username:user.username}).msg}\n${this.translate('moregemsmorefollowers').msg}`,
             parse_mode:"HTML",
         }
         )
