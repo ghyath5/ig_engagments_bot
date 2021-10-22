@@ -30,7 +30,6 @@
     "instagram-private-api": "https://github.com/ghyath5/instagram-private-api",
     "redis": "^4.0.0-rc.3",
     "telegraf": "^4.4.2",
-    "telegraf-session-local": "^2.1.0",
     "ts-node": "^10.2.0"
   }
 }
