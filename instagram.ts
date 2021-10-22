@@ -66,8 +66,12 @@ class IG {
         } catch (e) { }
     }
     static async checkProfile(username: any){
+        console.log('Getting ', username);
         return new Promise((resolve)=>{
-            axios(`https://www.instagram.com/${username}/?__a=1`).then((res)=>resolve((res?.data as any).graphql?.user)).catch((e)=>{
+            axios(`https://www.instagram.com/${username}/?__a=1`).then((res)=>{
+                console.log(res.data);
+                return resolve((res?.data as any).graphql?.user)
+            }).catch((e)=>{
                 console.log(e);
                 resolve(false)
             })
