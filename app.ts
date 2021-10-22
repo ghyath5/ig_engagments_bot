@@ -4,7 +4,7 @@ import { bot,IG } from './global';
 import './middlewares/onStart'
 import fastify from 'fastify';
 import telegrafPlugin from 'fastify-telegraf'
-const app = fastify({ logger: true, });
+const app = fastify({ logger: false, });
 
 const WEBHOOK_URL = process.env.WEBHOOK_URL!;
 const WEBHOOK_PATH = process.env.WEBHOOK_PATH!;
@@ -32,7 +32,7 @@ bot.action('changelang', (ctx) => {
 bot.action("showmyinsta", async (ctx) => {
   let username = await ctx.self.getUsername();
   ctx.deleteMessage();
-  ctx.self.getIGProfile(username);
+  return ctx.self.getIGProfile(username);
 })
 bot.action('changeigprofile',(ctx)=>{
   ctx.self.redis.set(`sendingusername`,'true','EX',60*2)
