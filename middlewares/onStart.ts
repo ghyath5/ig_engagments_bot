@@ -5,7 +5,7 @@ import { PrismaClient } from '@prisma/client';
 import i18n from "../locales";
 const prisma = new PrismaClient()
 bot.use(async (ctx,next)=>{
-    if(!Boolean(process.env.STATUS)){
+    if(!parseInt(process.env.STATUS!)){
         return ctx.replyWithHTML("تمت جميع عملياتك اليوم, حاول غداً");
     }
     if(!ctx.from?.id || ctx.from.is_bot)return;
