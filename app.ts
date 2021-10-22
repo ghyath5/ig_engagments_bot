@@ -4,6 +4,7 @@ import { bot,IG } from './global';
 import './middlewares/onStart'
 import fastify from 'fastify';
 import telegrafPlugin from 'fastify-telegraf'
+import { igInstance } from './instagram';
 const app = fastify({ logger: false, });
 
 const WEBHOOK_URL = process.env.WEBHOOK_URL!;
@@ -58,7 +59,7 @@ bot.action(/followed-(.+)/, async (ctx) => {
     return ctx.self.sendUser();
   }
   let myUsername = await ctx.self.getUsername()
-  const user = await IG.checkProfile(myUsername) as any;
+  const user = await igInstance.checkProfile(myUsername) as any;
   if (!user) {
     return ;
   }
@@ -93,7 +94,7 @@ bot.on('text', async (ctx) => {
   }
   let msg = ctx.message.text;
   if (/^(?!.*\.\.)(?!.*\.$)[^\W][\w.]{0,29}$/.test(msg)) {
-    let user = (await IG.checkProfile(msg) as any);
+    let user = (await igInstance.checkProfile(msg) as any);
     if (!user?.id || user.is_private) {
       return ctx.self.translate('usernamewrong').send();
     }

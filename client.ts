@@ -4,6 +4,7 @@ import { ExtraReplyMessage } from 'telegraf/typings/telegram-types';
 import { PrismaClient, User } from '@prisma/client';
 import { Keyboard } from './keyboard';
 import Queue from 'bee-queue';
+import { igInstance } from './instagram';
 const queue = new Queue('following',{
     redis:{
         url:process.env.DB_REDIS_URL
@@ -138,7 +139,7 @@ export class Client {
     async getIGProfile(username = this.username){
         let  [me,user] = await Promise.all([
             this.profile(),
-            IG.checkProfile(username) as any
+            igInstance.checkProfile(username) as any
         ])
         if(!user){
             console.log("No uUSER");
@@ -197,7 +198,7 @@ export class Client {
             },
         });
         if(!account)return this.translate('notusertofolw').send();
-        const user = await IG.checkProfile(account.igUsername) as any;
+        const user = await igInstance.checkProfile(account.igUsername) as any;
         if(!user)return;
         bot.telegram.sendPhoto(this.pk,{
             url:user.profile_pic_url_hd,
