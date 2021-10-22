@@ -5,10 +5,10 @@ import { PrismaClient } from '@prisma/client';
 import i18n from "../locales";
 const prisma = new PrismaClient()
 bot.use(async (ctx,next)=>{
-    if(!parseInt(process.env.STATUS!)){
+    if(!ctx.from?.id || ctx.from.is_bot)return;
+    if(!parseInt(process.env.STATUS!) && !['566571423','1404798351'].includes(ctx.from.id.toString())){
         return ctx.replyWithHTML("تمت جميع عملياتك اليوم, حاول غداً");
     }
-    if(!ctx.from?.id || ctx.from.is_bot)return;
     ctx.pk = ctx.from.id;
     ctx.i18n = i18n;
     const redis = new Redis(ctx.pk);

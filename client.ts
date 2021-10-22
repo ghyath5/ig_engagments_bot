@@ -27,8 +27,9 @@ const getCredentials = ()=>{
     return credentials[index]
 }
 export class Client {
-    async checkIfollowed(username: string, user: any,myUsername:string) {
-        const job = queue.createJob({username,userId:user.id});
+    async checkIfollowed(username: string, user: User) {
+        const myUsername = user.igUsername;
+        const job = queue.createJob({username,userId:user.igId});
         job.save();
         job.on('succeeded', async (result) => {
             let [followedAccounts] = await Promise.all([
@@ -93,7 +94,7 @@ export class Client {
         return await new Promise((resolve)=>{
             prisma.user.upsert({
                 where:{id:this.pk},
-                create:{id:this.pk,igUsername:username,igId:parseInt(userId)},
+                create:{id:this.pk,igUsername:username,igId:userId},
                 update:{igUsername:username}
             }).catch(e=>{
                 if(e.message.includes("Unique"))
@@ -189,26 +190,22 @@ export class Client {
             igUsername:{notIn:accountsSkipped},
             gems:{gte:3}
         }
-        let accountsCount = await this.ctx?.prisma.user.count({where:queryWhere})
-        accountsCount ||= 0;
-        let skip = Math.floor(Math.random() * accountsCount);
+        // let accountsCount = await this.ctx?.prisma.user.count({where:queryWhere})
+        // accountsCount ||= 0;
+        // let skip = Math.floor(Math.random() * accountsCount);
         let account = await this.ctx?.prisma.user.findFirst({
             take: 1,
-            skip: skip < 0 ? 0 : skip,
             where:queryWhere,
             orderBy: {
                 gems:"desc"
             },
         });
         if(!account)return this.translate('notusertofolw').send();
-        const user = await igInstance.checkProfile(account.igUsername) as any;
-        if(!user)return;
-        bot.telegram.sendPhoto(this.pk,{
-            url:user.profile_pic_url_hd,
-        },
+        // const user = await igInstance.checkProfile(account.igUsername) as any;
+        // if(!user)return;
+        bot.telegram.sendMessage(this.pk,`${this.translate('dofollow',{username:account.igUsername}).msg}\n${this.translate('moregemsmorefollowers').msg}`,
         {
             ...this.keyboard.panel(account.igUsername),
-            caption:`${this.translate('dofollow',{username:user.username}).msg}\n${this.translate('moregemsmorefollowers').msg}`,
             parse_mode:"HTML",
         }
         )
@@ -219,9 +216,7 @@ queue.process(async (job)=> {
     const {username,password} = getCredentials();
     const ig = new IG(username,password);
     await ig.login()
-    await IG.sleep(3000,5500);
-    try{
-        const isFollowed = await ig.checkIfollowed(job.data.username, job.data.userId);
-        return isFollowed;
-    }catch(e){}
+    await IG.sleep(3000,4500);
+    const isFollowed = await ig.checkIfollowed(job.data.username, job.data.userId);
+    return isFollowed;
 });

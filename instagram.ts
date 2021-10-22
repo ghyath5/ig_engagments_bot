@@ -75,8 +75,12 @@ class IG {
     // }
     async checkProfile(username: any){
         this.fetchSession()
+        //,headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}
         return new Promise((resolve)=>{
-            axios(`https://www.instagram.com/${username}/?__a=1`,{withCredentials:true,headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}}).then((res)=>resolve((res?.data as any).graphql?.user)).catch(()=>resolve(false))
+            axios(`https://www.instagram.com/${username}/?__a=1`,{withCredentials:true}).then((res)=>resolve((res?.data as any).graphql?.user)).catch((e)=>{
+                console.log(e);
+                resolve(false)
+            })
         })
     }
     async checkIfollowed(username: string,id:string){
@@ -92,6 +96,7 @@ class IG {
         }
         
         let items =  await getAllItemsFromFeed(feed)
+        console.log(items.length);
         return items.some((item)=>(item as any).username == username)
     }
 }

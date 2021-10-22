@@ -13,7 +13,7 @@ datasource db {
 model User {
   id         Int       @id
   igUsername String    @unique
-  igId       Int       @unique
+  igId       String    @unique
   gems       Int       @default(0)
   followers  Account[] @relation("follower")
   followed   Account[] @relation("followed")
