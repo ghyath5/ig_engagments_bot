@@ -46,6 +46,7 @@ export class Client {
                 let otherClient = new Client(otherUser.id,undefined,this.ctx);
                 let userLang = await otherClient.getLang();
                 bot.telegram.sendMessage(otherUser.id,`<b>${myUsername}</b> ${otherClient.translate('followedyou',{},userLang).msg}`,{
+                    ...this.keyboard.inlineKeyboard([{text:this.translate('startfollowbtn').msg,callback_data:"sendusertofollow"}]),
                     parse_mode:"HTML"});
                 this.saveFollowAction(otherUser.id)
             } 

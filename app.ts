@@ -43,6 +43,9 @@ bot.action('startfollowing', async (ctx) => {
   ctx.deleteMessage();
   return ctx.self.sendUser()
 })
+bot.action('sendusertofollow', async (ctx) => {
+  return ctx.self.sendUser()
+})
 
 bot.action(/followed-(.+)/, async (ctx) => {
   let username = ctx.match['input'].split('-')[1]
