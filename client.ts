@@ -188,7 +188,7 @@ export class Client {
             id:{not:{equals:this.pk}},
             followed:{none:{follower_id:{equals:this.pk}}},
             igUsername:{notIn:accountsSkipped},
-            gems:{gte:3}
+            gems:{gte:2}
         }
         // let accountsCount = await this.ctx?.prisma.user.count({where:queryWhere})
         // accountsCount ||= 0;
