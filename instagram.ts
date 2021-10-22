@@ -67,9 +67,17 @@ class IG {
     }
     static async checkProfile(username: any){
         return new Promise((resolve)=>{
-            axios(`https://www.instagram.com/${username}/?__a=1`,{withCredentials:true}).then((res)=>resolve((res?.data as any).graphql?.user)).catch((e)=>resolve(false))
+            axios(`https://www.instagram.com/${username}/channel/?__a=1`,{withCredentials:true,headers:{
+                "Accept":"*/*",
+                "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36"
+            }}).then((res)=>resolve((res?.data as any).graphql?.user)).catch((e)=>resolve(false))
         })
     }
+    // async checkProfile(username: any){
+    //     return new Promise((resolve)=>{
+    //         axios(`https://www.instagram.com/${username}/?__a=1`,{withCredentials:true,headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}}).then((res)=>resolve((res?.data as any).graphql?.user)).catch(()=>resolve(false))
+    //     })
+    // }
     async checkIfollowed(username: string,id:string){
        let feed = this.client.feed.accountFollowing(id);
        async function getAllItemsFromFeed(feed: AccountFollowingFeed) {
