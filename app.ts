@@ -1,8 +1,14 @@
 import dotenv from 'dotenv';
 dotenv.config();
 import { bot,IG } from './global';
-
 import './middlewares/onStart'
+import fastify from 'fastify';
+import telegrafPlugin from 'fastify-telegraf'
+const app = fastify({ logger: false, });
+
+const WEBHOOK_URL = process.env.WEBHOOK_URL!;
+const WEBHOOK_PATH = process.env.WEBHOOK_PATH!;
+
 bot.start(async (ctx) => {
   if (!ctx.lang) {
     return ctx.self.translate('startupmsg').send(ctx.self.keyboard.langagues());
@@ -103,4 +109,10 @@ bot.on('text', async (ctx) => {
   }
   return ctx.self.translate('usernamewrong').send();
 })
-bot.launch();
+app.register(telegrafPlugin, { bot, path: WEBHOOK_PATH })
+
+bot.telegram.setWebhook(WEBHOOK_URL + WEBHOOK_PATH).then(() => {
+    console.log('Webhook is set on', WEBHOOK_URL)
+})
+
+app.listen(process.env.PORT!, '0.0.0.0')
