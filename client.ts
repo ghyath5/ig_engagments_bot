@@ -175,7 +175,7 @@ export class Client {
             accounts.shift();
         }
         accounts.push(username)
-        this.redis.set('skipped',JSON.stringify(accounts),'Ex',60*60);
+        this.redis.set('skipped',JSON.stringify(accounts),'EX',60*60);
     }
     async sendUser(){
         let me = await this.profile();
@@ -197,7 +197,7 @@ export class Client {
             skip: skip < 0 ? 0 : skip,
             where:queryWhere,
             orderBy: {
-                followers:{_count:'desc'}
+                gems:"desc"
             },
         });
         if(!account)return this.translate('notusertofolw').send();
