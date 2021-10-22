@@ -141,7 +141,8 @@ export class Client {
             IG.checkProfile(username) as any
         ])
         if(!user){
-            return;
+            console.log("No uUSER");
+            return this.translate('notuserfound').send();
         }
         bot.telegram.sendPhoto(this.pk,{
             url:user.profile_pic_url_hd,
