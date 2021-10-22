@@ -27,7 +27,7 @@ const getCredentials = ()=>{
     return credentials[index]
 }
 export class Client {
-    async checkIfollowed(username: string, user: any) {
+    async checkIfollowed(username: string, user: any,myUsername:string) {
         const job = queue.createJob({username,userId:user.id});
         job.save();
         job.on('succeeded', async (result) => {
@@ -43,7 +43,9 @@ export class Client {
                 )
                 let otherUser = await this.findUserByUsername(username);
                 if(!otherUser)return;
-                bot.telegram.sendMessage(otherUser.id,`<b>${username}</b> ${this.translate('followedyou').msg}`,{
+                let otherClient = new Client(otherUser.id,undefined,this.ctx);
+                let userLang = await otherClient.getLang();
+                bot.telegram.sendMessage(otherUser.id,`<b>${myUsername}</b> ${otherClient.translate('followedyou',{},userLang).msg}`,{
                     parse_mode:"HTML"});
                 this.saveFollowAction(otherUser.id)
             } 
