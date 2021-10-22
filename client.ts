@@ -163,7 +163,7 @@ export class Client {
         if(username){
             return this.translate(`startfollow`).send(this.keyboard.home());
         }
-        this.redis.set(`sendingusername`,'true','EX',60*60)
+        this.redis.set(`sendingusername`,'true',{"EX":60*60})
         return this.translate(`sendUrUsername`).send();
     }
     async accountSkipped():Promise<string[]>{
@@ -175,7 +175,7 @@ export class Client {
             accounts.shift();
         }
         accounts.push(username)
-        this.redis.set('skipped',JSON.stringify(accounts),'EX',60*60);
+        this.redis.set('skipped',JSON.stringify(accounts),{"EX":60*60});
     }
     async sendUser(){
         let me = await this.profile();

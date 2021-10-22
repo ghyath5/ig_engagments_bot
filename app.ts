@@ -36,7 +36,7 @@ bot.action("showmyinsta", async (ctx) => {
   return ctx.self.getIGProfile(username);
 })
 bot.action('changeigprofile',(ctx)=>{
-  ctx.self.redis.set(`sendingusername`,'true','EX',60*2)
+  ctx.self.redis.set(`sendingusername`,'true',{"EX":60*2})
   return ctx.self.translate(`sendUrUsername`).send();
 })
 bot.action('startfollowing', async (ctx) => {
