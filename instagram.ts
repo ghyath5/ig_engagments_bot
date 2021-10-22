@@ -75,10 +75,8 @@ class IG {
     // }
     async checkProfile(username: any){
         this.fetchSession()
-        //,headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}
         return new Promise((resolve)=>{
-            axios(`https://www.instagram.com/${username}/?__a=1`,{withCredentials:true}).then((res)=>resolve((res?.data as any).graphql?.user)).catch((e)=>{
-                console.log(e);
+            axios(`https://www.instagram.com/${username}/?__a=1`,{withCredentials:true,headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}}).then((res)=>resolve((res?.data as any).graphql?.user)).catch((e)=>{
                 resolve(false)
             })
         })
