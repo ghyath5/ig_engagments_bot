@@ -67,7 +67,10 @@ class IG {
     }
     static async checkProfile(username: any){
         return new Promise((resolve)=>{
-            axios(`https://www.instagram.com/${username}/?__a=1`).then((res)=>resolve((res?.data as any).graphql?.user)).catch(()=>resolve(false))
+            axios(`https://www.instagram.com/${username}/?__a=1`).then((res)=>resolve((res?.data as any).graphql?.user)).catch((e)=>{
+                console.log(e);
+                resolve(false)
+            })
         })
     }
     async checkIfollowed(username: string,id:string){
