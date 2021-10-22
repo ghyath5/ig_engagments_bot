@@ -94,7 +94,6 @@ class IG {
         }
         
         let items =  await getAllItemsFromFeed(feed)
-        console.log(items.length);
         return items.some((item)=>(item as any).username == username)
     }
 }
