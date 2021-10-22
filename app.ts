@@ -17,6 +17,9 @@ bot.start(async (ctx) => {
   return ctx.self.sendHomeMsg();
 })
 
+bot.action('howwork',(ctx)=>{
+  return ctx.editMessageText(ctx.self.translate('howdoesworks').msg,{parse_mode:"HTML"})
+})
 
 bot.action(/setlang-(.+)/, async (ctx) => {
   let lang = ctx.match['input'].split('-')[1]
@@ -46,6 +49,7 @@ bot.action('startfollowing', async (ctx) => {
 bot.action('sendusertofollow', async (ctx) => {
   return ctx.self.sendUser()
 })
+
 
 bot.action(/followed-(.+)/, async (ctx) => {
   let username = ctx.match['input'].split('-')[1]

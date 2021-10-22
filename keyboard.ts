@@ -35,6 +35,7 @@ export class Keyboard {
             [{text:this.client.translate('startfollowbtn').msg, callback_data:`startfollowing`}],
             [{text:this.client.translate('myinstabtn').msg, callback_data:`showmyinsta`}],
             [{text:this.client.translate('changelang').msg, callback_data:`changelang`}],
+            [{text:this.client.translate('howwork').msg, callback_data:`howwork`}],
         ];
         return this.inlineKeyboard(buttons)
     }
