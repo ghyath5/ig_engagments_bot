@@ -16,6 +16,7 @@ i18n.configure({
     autoReload:true,
     retryInDefaultLocale:true,
     locales:Object.keys(langs),
+    defaultLocale:'en'
 })
 
 export default i18n;
