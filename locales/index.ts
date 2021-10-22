@@ -12,7 +12,7 @@ export const langs = {
 };
 
 i18n.configure({
-    directory:path.join(__dirname, './'),
+    directory:path.join(__dirname, '/'),
     autoReload:true,
     retryInDefaultLocale:true,
     locales:Object.keys(langs),
