@@ -175,7 +175,7 @@ export class Client {
     }
     async addAccountToSkipped(username: string){
         let accounts = await this.accountSkipped();
-        if(accounts.length > 10){
+        if(accounts.length > 40){
             accounts.shift();
         }
         accounts.push(username)
