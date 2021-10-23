@@ -1,4 +1,5 @@
 import { AccountFollowingFeed, IgApiClient } from 'instagram-private-api';
+import { SocksProxyAgent } from 'socks-proxy-agent'
 const ig = new IgApiClient();
 import { promises as fs } from "fs";
 import axios from 'axios'
@@ -12,6 +13,7 @@ class IG {
     session: { userAgent: string; appAgent: string; cookies: string; };
     client = ig;
     password:string
+    useProxy:Boolean = false;
     constructor(username: string,password: string){
         this.username = username;
         this.password = password
@@ -84,24 +86,36 @@ class IG {
         })
     }
     async checkIfollowed(username: string,id:string){
-        try{
-            username =  username.toLowerCase()
-            let feed = this.client.feed.accountFollowing(id);
-            async function getAllItemsFromFeed(feed: AccountFollowingFeed) {
-                let items:any = [];
-                do {
-                    items = items.concat(await feed.items());                
-                    const time = Math.round(Math.random() * 900) + 500;
-                    await new Promise(resolve => setTimeout(resolve, time));
-                } while (feed.isMoreAvailable());
-                return items;
+        return await new Promise(async (resolve)=>{
+            try{
+                username =  username.toLowerCase()
+                let feed = this.client.feed.accountFollowing(id);
+                async function getAllItemsFromFeed(feed: AccountFollowingFeed) {
+                    let items:any = [];
+                    do {
+                        items = items.concat(await feed.items());                
+                        const time = Math.round(Math.random() * 900) + 500;
+                        await new Promise(resolve => setTimeout(resolve, time));
+                    } while (feed.isMoreAvailable());
+                    return items;
+                }
+                
+                let items =  await getAllItemsFromFeed(feed)
+                return resolve(items.some((item)=>(item as any).username == username))
+            }catch(e){
+                if(!this.useProxy){
+                    ig.request.defaults.agent = new SocksProxyAgent({
+                        host:process.env.PROXY_IP,
+                        port:process.env.PROXY_PORT,
+                        userId:process.env.PROXY_ID,
+                        password:process.env.PROXY_PASS
+                    })
+                    this.useProxy = true;
+                    return resolve(await this.checkIfollowed(username,id))
+                }
+                console.log("IG error checkIfollowed:", e)
             }
-            
-            let items =  await getAllItemsFromFeed(feed)
-            return items.some((item)=>(item as any).username == username)
-        }catch(e){
-            console.log("IG error checkIfollowed:", e)
-        }
+        })
     }
 }
 // addQueue.process(function (job, done) {
