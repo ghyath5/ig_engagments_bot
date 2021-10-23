@@ -14,7 +14,7 @@
     "startfollowbtn":"Start following ➡️",
     "myinstabtn":"My profile 🟠",
     "mygembtn":"My Gems 💎",
-    "followedyou":"has just followed you!",
+    "followedyou":"has just followed you!\nYour gems left: {{gems}} 💎",
     "constraintUsername":"This account is already registered by someone.",
     "wearechecking":"We are checking your follow, don't worry you will get your gem when we finish this process.",
     "youvfollowed":"You got a 💎 since you have followed <b>{{username}}</b>",
