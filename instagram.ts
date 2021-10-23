@@ -28,6 +28,9 @@ class IG {
             })
             this.useProxy = true;
             console.log('In this request I am using proxy');            
+        }else {
+            console.log("Now I am regular request");
+            
         }
     }
     static async sleep(min:number,max:number){
