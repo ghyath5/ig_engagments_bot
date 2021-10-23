@@ -203,7 +203,7 @@ export class Client {
                     }
                 },
                 igUsername:{notIn:accountsSkipped},
-                gems:{gte:3}
+                gems:{gte:2}
             },
             orderBy: {
                 gems:"desc"
