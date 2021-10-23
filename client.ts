@@ -42,14 +42,15 @@ export class Client {
                     parse_mode:"HTML"
                 }
                 ).catch((e)=>{})
+                
                 let otherUser = await this.findUserByUsername(username);
                 if(!otherUser)return;
+                let oClient = await this.saveFollowAction(otherUser.id)
                 let otherClient = new Client(otherUser.id,undefined,this.ctx);
                 let userLang = await otherClient.getLang();
-                bot.telegram.sendMessage(otherUser.id,`<b>${myUsername}</b> ${otherClient.translate('followedyou',{gems:otherUser.gems},userLang).msg}`,{
+                bot.telegram.sendMessage(otherUser.id,`<b>${myUsername}</b> ${otherClient.translate('followedyou',{gems:oClient.gems},userLang).msg}`,{
                     ...this.keyboard.inlineKeyboard([{text:otherClient.translate('startfollowbtn').msg,callback_data:"sendusertofollow"}]),
                     parse_mode:"HTML"}).catch((e)=>{});
-                this.saveFollowAction(otherUser.id)
             } 
         });
         this.translate('wearechecking').send();
@@ -69,20 +70,20 @@ export class Client {
         this.keyboard = new Keyboard(this);
     }
     async saveFollowAction(otherUserId){
-        await prisma.user.update({
-            where:{id:this.pk},
-            data:{gems:{increment:1}}
-        })
-        await prisma.user.update({
-            where:{
-                id:otherUserId},
-                data:{gems:{decrement:1}}
-        })
-        return await prisma.account.create({
+        await prisma.account.create({
             data:{
                 followed_id:otherUserId,
                 follower_id:this.pk
             }
+        })
+        await prisma.user.update({
+            where:{id:this.pk},
+            data:{gems:{increment:1}}
+        })
+        return await prisma.user.update({
+            where:{
+                id:otherUserId},
+                data:{gems:{decrement:1}}
         })
     }
     async followedAccounts(){
