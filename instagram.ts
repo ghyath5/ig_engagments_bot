@@ -82,6 +82,7 @@ class IG {
         })
     }
     async checkIfollowed(username: string,id:string){
+       username =  username.toLowerCase()
        let feed = this.client.feed.accountFollowing(id);
        async function getAllItemsFromFeed(feed: AccountFollowingFeed) {
             let items:any = [];

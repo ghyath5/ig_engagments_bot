@@ -94,7 +94,7 @@ export class Client {
         return await new Promise((resolve)=>{
             prisma.user.upsert({
                 where:{id:this.pk},
-                create:{id:this.pk,igUsername:username,igId:userId},
+                create:{id:this.pk,igUsername:username.toLowerCase(),igId:userId},
                 update:{igUsername:username}
             }).catch(e=>{
                 if(e.message.includes("Unique"))
