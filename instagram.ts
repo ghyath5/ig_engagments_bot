@@ -19,7 +19,7 @@ class IG {
         this.username = username;
         this.password = password
         ig.state.generateDevice(this.username);
-        if(randomItem([0,1,0])){
+        if(Math.floor((Math.random() * 2) + 1) == 1){
             ig.request.defaults.agent = new SocksProxyAgent({
                 host:process.env.PROXY_IP,
                 port:process.env.PROXY_PORT,
