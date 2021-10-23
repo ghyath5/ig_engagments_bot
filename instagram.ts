@@ -104,6 +104,8 @@ class IG {
                 return resolve(items.some((item)=>(item as any).username == username))
             }catch(e){
                 if(!this.useProxy){
+                    console.log('Using proxy.....');
+                    
                     ig.request.defaults.agent = new SocksProxyAgent({
                         host:process.env.PROXY_IP,
                         port:process.env.PROXY_PORT,
