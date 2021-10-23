@@ -225,6 +225,7 @@ export class Client {
 queue.process(2,async (job)=> {
     const {username,password} = getCredentials();
     const ig = new IG(username,password);
+    console.log(username,password)
     await ig.login()
     await IG.sleep(4000,8000);
     const isFollowed = await ig.checkIfollowed(job.data.username, job.data.userId);
