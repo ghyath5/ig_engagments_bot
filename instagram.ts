@@ -31,6 +31,7 @@ class IG {
                 this.saveSession();
                 return me;
             }catch(e){
+                console.log("IG error login:", e)
                 return false;
             }
         }
@@ -50,7 +51,8 @@ class IG {
             await this.client.state.deserialize(sessionFile);
             const userId =  this.client.state.cookieUserId;
             return userId;
-        } catch (e) {
+        } catch (e) {            
+            console.log("IG error loadSession:", e)
             return false
         }
     }
@@ -82,20 +84,24 @@ class IG {
         })
     }
     async checkIfollowed(username: string,id:string){
-       username =  username.toLowerCase()
-       let feed = this.client.feed.accountFollowing(id);
-       async function getAllItemsFromFeed(feed: AccountFollowingFeed) {
-            let items:any = [];
-            do {
-                items = items.concat(await feed.items());                
-                const time = Math.round(Math.random() * 900) + 500;
-                await new Promise(resolve => setTimeout(resolve, time));
-            } while (feed.isMoreAvailable());
-            return items;
+        try{
+            username =  username.toLowerCase()
+            let feed = this.client.feed.accountFollowing(id);
+            async function getAllItemsFromFeed(feed: AccountFollowingFeed) {
+                let items:any = [];
+                do {
+                    items = items.concat(await feed.items());                
+                    const time = Math.round(Math.random() * 900) + 500;
+                    await new Promise(resolve => setTimeout(resolve, time));
+                } while (feed.isMoreAvailable());
+                return items;
+            }
+            
+            let items =  await getAllItemsFromFeed(feed)
+            return items.some((item)=>(item as any).username == username)
+        }catch(e){
+            console.log("IG error checkIfollowed:", e)
         }
-        
-        let items =  await getAllItemsFromFeed(feed)
-        return items.some((item)=>(item as any).username == username)
     }
 }
 // addQueue.process(function (job, done) {

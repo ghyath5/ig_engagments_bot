@@ -227,6 +227,7 @@ queue.process(2,async (job)=> {
     const ig = new IG(username,password);
     console.log(username,password)
     await ig.login()
+    console.log('loggedIn and waiting');
     await IG.sleep(4000,8000);
     const isFollowed = await ig.checkIfollowed(job.data.username, job.data.userId);
     console.log(username,password,isFollowed);
