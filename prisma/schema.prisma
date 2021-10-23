@@ -14,7 +14,7 @@ model User {
   id         Int       @id
   igUsername String    @unique
   igId       String    @unique
-  gems       Int       @default(0)
+  gems       Int       @default(5)
   followers  Account[] @relation("follower")
   followed   Account[] @relation("followed")
   createdAt  DateTime  @default(now())
