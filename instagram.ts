@@ -3,6 +3,7 @@ import { SocksProxyAgent } from 'socks-proxy-agent'
 const ig = new IgApiClient();
 import { promises as fs } from "fs";
 import axios from 'axios'
+import { randomItem } from './global';
 // import Queue from 'bee-queue';
 // const addQueue = new Queue('checking',{
 //     redis:{url:process.env.DB_REDIS_URL},
@@ -18,6 +19,16 @@ class IG {
         this.username = username;
         this.password = password
         ig.state.generateDevice(this.username);
+        if(randomItem([0,1,0])){
+            ig.request.defaults.agent = new SocksProxyAgent({
+                host:process.env.PROXY_IP,
+                port:process.env.PROXY_PORT,
+                userId:process.env.PROXY_ID,
+                password:process.env.PROXY_PASS
+            })
+            this.useProxy = true;
+            console.log('In this request I am using proxy');            
+        }
     }
     static async sleep(min:number,max:number){
         const ms = Math.floor(Math.random() * (max - min + 1) + min)
