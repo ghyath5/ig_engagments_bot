@@ -184,18 +184,27 @@ export class Client {
             return this.sendHomeMsg()
         }
         const accountsSkipped = await this.accountSkipped();
-        const queryWhere = {
-            id:{not:{equals:this.pk}},
-            followed:{none:{follower_id:{equals:this.pk}}},
-            igUsername:{notIn:accountsSkipped},
-            gems:{gte:3}
-        }
+        // const queryWhere = {
+        //     id:{not:{equals:this.pk}},
+        //     follower:{every:{follower_id:{n:this.pk}}},
+        //     igUsername:{notIn:accountsSkipped},
+        //     gems:{gte:3}
+        // }
         // let accountsCount = await this.ctx?.prisma.user.count({where:queryWhere})
         // accountsCount ||= 0;
         // let skip = Math.floor(Math.random() * accountsCount);
         let account = await this.ctx?.prisma.user.findFirst({
             take: 1,
-            where:queryWhere,
+            where:{
+                id:{not:{equals:this.pk}},
+                followed:{
+                    none:{
+                        follower_id:{equals:this.pk}
+                    }
+                },
+                igUsername:{notIn:accountsSkipped},
+                gems:{gte:3}
+            },
             orderBy: {
                 gems:"desc"
             },
