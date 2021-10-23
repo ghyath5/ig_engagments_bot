@@ -7,6 +7,7 @@ import Queue from 'bee-queue';
 import { igInstance } from './instagram';
 const queue = new Queue('following',{
     removeOnSuccess:true,
+    stallInterval:10000,
     redis:{
         url:process.env.DB_REDIS_URL
     }
