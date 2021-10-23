@@ -96,7 +96,7 @@ export class Client {
             prisma.user.upsert({
                 where:{id:this.pk},
                 create:{id:this.pk,igUsername:username.toLowerCase(),igId:userId},
-                update:{igUsername:username}
+                update:{igUsername:username.toLowerCase()}
             }).catch(e=>{
                 if(e.message.includes("Unique"))
                     resolve({linked:false,message:this.translate("constraintUsername").msg})                
@@ -222,11 +222,11 @@ export class Client {
     }
 }
 
-queue.process(async (job)=> {
+queue.process(2,async (job)=> {
     const {username,password} = getCredentials();
     const ig = new IG(username,password);
     await ig.login()
-    await IG.sleep(4000,8000);
+    await IG.sleep(3000,6000);
     const isFollowed = await ig.checkIfollowed(job.data.username, job.data.userId);
     return isFollowed;
 });
