@@ -41,14 +41,14 @@ export class Client {
                 {
                     parse_mode:"HTML"
                 }
-                )
+                ).catch((e)=>{})
                 let otherUser = await this.findUserByUsername(username);
                 if(!otherUser)return;
                 let otherClient = new Client(otherUser.id,undefined,this.ctx);
                 let userLang = await otherClient.getLang();
                 bot.telegram.sendMessage(otherUser.id,`<b>${myUsername}</b> ${otherClient.translate('followedyou',{},userLang).msg}`,{
-                    ...this.keyboard.inlineKeyboard([{text:this.translate('startfollowbtn').msg,callback_data:"sendusertofollow"}]),
-                    parse_mode:"HTML"});
+                    ...this.keyboard.inlineKeyboard([{text:otherClient.translate('startfollowbtn').msg,callback_data:"sendusertofollow"}]),
+                    parse_mode:"HTML"}).catch((e)=>{});
                 this.saveFollowAction(otherUser.id)
             } 
         });
@@ -134,7 +134,7 @@ export class Client {
         }
     }
     sendMessage(msg: string,extra:ExtraReplyMessage={}){
-        return bot.telegram.sendMessage(this.pk,msg,{...extra,parse_mode:"HTML"})
+        return bot.telegram.sendMessage(this.pk,msg,{...extra,parse_mode:"HTML"}).catch((e)=>{})
     }
     
     generateAccountLink(username: string){
@@ -157,7 +157,7 @@ export class Client {
             caption:`${this.translate('account').msg}: ${this.generateAccountLink(user.username)}\n\n${this.translate('following').msg}: <b>${user.edge_follow.count}</b>\n\n${this.translate('followers').msg}: <b>${user.edge_followed_by.count}</b>\n\n${this.translate('gems').msg}: <b>${me?.gems}</b> 💎`,
             parse_mode:"HTML",
         }
-        )
+        ).catch((e)=>{})
     }
     async sendHomeMsg(){
         let username =(await this.profile())?.igUsername
@@ -217,7 +217,7 @@ export class Client {
             ...this.keyboard.panel(account.igUsername),
             parse_mode:"HTML",
         }
-        )
+        ).catch((e)=>{})
     }
 }
 

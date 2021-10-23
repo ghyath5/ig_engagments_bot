@@ -111,9 +111,9 @@ bot.on('text', async (ctx) => {
         parse_mode: "HTML",
         caption: `${ctx.self.generateAccountLink(user.username)} ${ctx.self.translate("accountUpdated").msg}`,
         ...ctx.self.keyboard.home()
-      })
+      }).catch((e)=>{})
     }
-    return ctx.replyWithHTML(saved.message!);
+    return ctx.replyWithHTML(saved.message!).catch((e)=>{});
   }
   return ctx.self.translate('usernamewrong').send();
 })
