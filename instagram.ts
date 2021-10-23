@@ -20,17 +20,20 @@ class IG {
         this.password = password
         ig.state.generateDevice(this.username);
         if(Math.floor((Math.random() * 2) + 1) == 1){
+            let hosts = process.env.PROXY_IP!.split(',')!
+            let host = hosts[Math.floor(Math.random()*hosts.length)].split(':')
+            let ip = host[0]
+            let port = host[1];
             ig.request.defaults.agent = new SocksProxyAgent({
-                host:process.env.PROXY_IP,
-                port:process.env.PROXY_PORT,
+                host:ip,
+                port:port,
                 userId:process.env.PROXY_ID,
                 password:process.env.PROXY_PASS
             })
             this.useProxy = true;
-            console.log('In this request I am using proxy');            
+            console.log('Im using '+ ip,port);            
         }else {
             console.log("Now I am regular request");
-            
         }
     }
     static async sleep(min:number,max:number){
@@ -119,10 +122,13 @@ class IG {
             }catch(e){
                 if(!this.useProxy){
                     console.log('Using proxy.....');
-                    
+                    let hosts = process.env.PROXY_IP!.split(',')!
+                    let host = hosts[Math.floor(Math.random()*hosts.length)].split(':')
+                    let ip = host[0]
+                    let port = host[1];
                     ig.request.defaults.agent = new SocksProxyAgent({
-                        host:process.env.PROXY_IP,
-                        port:process.env.PROXY_PORT,
+                        host:ip,
+                        port:port,
                         userId:process.env.PROXY_ID,
                         password:process.env.PROXY_PASS
                     })
