@@ -53,6 +53,12 @@ bot.action('sendusertofollow', async (ctx) => {
 
 bot.action(/followed-(.+)/, async (ctx) => {
   let username = ctx.match['input'].split('-')[1]
+  let todayfollowed = parseInt(await ctx.self.redis.get('todayfollowed')||"0")
+  if(todayfollowed >= 10){
+    return ctx.self.translate('followedexcedded').send();
+  }
+  todayfollowed++;
+  ctx.self.redis.set('todayfollowed',todayfollowed.toString(),{"EX":60*60*2})
   // if(ctx.session.wating)return;
   // if(ctx.session.recentlyFollowed == username)return;
   // ctx.session.wating = true;
