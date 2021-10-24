@@ -185,9 +185,9 @@ export class Client {
     }
     async addAccountToSkipped(username: string){
         let accounts = await this.accountSkipped();
-        if(accounts.length > 40){
-            accounts.shift();
-        }
+        // if(accounts.length > 40){
+        //     accounts.shift();
+        // }
         accounts.push(username)
         this.redis.set('skipped',JSON.stringify(accounts),{"EX":60*60});
     }
