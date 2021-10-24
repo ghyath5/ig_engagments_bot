@@ -8,30 +8,31 @@ import { randomItem } from './global';
 // const addQueue = new Queue('checking',{
 //     redis:{url:process.env.DB_REDIS_URL},
 // });
-
+let useProxy = false;
 class IG {
     username:string
     session: { userAgent: string; appAgent: string; cookies: string; };
     client = ig;
     password:string
-    useProxy:Boolean = false;
     constructor(username: string,password: string){
         this.username = username;
         this.password = password
         ig.state.generateDevice(this.username);
-        if(Math.floor((Math.random() * 2) + 1) == 1){
+        if(useProxy){
             let hosts = process.env.PROXY_IP!.split(',')!
             let host = hosts[Math.floor(Math.random()*hosts.length)].split(':')
-            let ip = host[0]
-            let port = host[1];
+            let userId = host[0]
+            let password = host[1];
+            let ip = host[2];
+            let port = host[3];
             ig.request.defaults.agent = new SocksProxyAgent({
                 host:ip,
                 port:port,
-                userId:process.env.PROXY_ID,
-                password:process.env.PROXY_PASS
+                userId,
+                password
             })
-            this.useProxy = true;
-            console.log('Im using '+ ip,port);            
+            console.log('Im using '+ ip,port);
+            useProxy = true;        
         }else {
             console.log("Now I am regular request");
         }
@@ -120,21 +121,6 @@ class IG {
                 let items =  await getAllItemsFromFeed(feed)
                 return resolve(items.some((item)=>(item as any).username == username))
             }catch(e){
-                if(!this.useProxy){
-                    console.log('Using proxy.....');
-                    let hosts = process.env.PROXY_IP!.split(',')!
-                    let host = hosts[Math.floor(Math.random()*hosts.length)].split(':')
-                    let ip = host[0]
-                    let port = host[1];
-                    ig.request.defaults.agent = new SocksProxyAgent({
-                        host:ip,
-                        port:port,
-                        userId:process.env.PROXY_ID,
-                        password:process.env.PROXY_PASS
-                    })
-                    this.useProxy = true;
-                    return resolve(await this.checkIfollowed(username,id))
-                }
                 console.log("IG error checkIfollowed:", e)
             }
         })
