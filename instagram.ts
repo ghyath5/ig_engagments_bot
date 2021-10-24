@@ -57,17 +57,16 @@ class IG {
         return await new Promise(r => setTimeout(() => r(true), ms))
     }
     async login(){
-        // let proxy = await getProxy()
-        // if(proxy){
-            // this.ip = proxy.ip;
-            // ig.request.defaults.agent = new SocksProxyAgent({
-            //     host:proxy.ip,
-            //     port:proxy.port,
-            //     ...(proxy.password&&{userId:proxy.username,password:proxy.password})
-            // })            
-            // console.log('Im using '+ proxy.ip,proxy.port);
-        // }
-        ig.request.defaults.agent = new SocksProxyAgent('socks5h://127.0.0.1:9050')
+        let proxy = await getProxy()
+        if(proxy){
+            this.ip = proxy.ip;
+            ig.request.defaults.agent = new SocksProxyAgent({
+                host:proxy.ip,
+                port:proxy.port,
+                ...(proxy.password&&{userId:proxy.username,password:proxy.password})
+            })            
+            console.log('Im using '+ proxy.ip,proxy.port);
+        }
         const userId = await this.loadSession()
         if(!userId){
             try{
@@ -147,23 +146,22 @@ class IG {
                 let items =  await getAllItemsFromFeed(feed)
                 return resolve(items.some((item)=>(item as any).username == username))
             }catch(e){
-                // let proxy = await getProxy();
-                // (async ()=>{
-                //     blockedIp.set(this.ip)
-                //     await proxies.remove(this.ip)
-                //     bot.telegram.sendMessage('566571423',`${(e as any).message}`);
-                //     bot.telegram.sendMessage('566571423',`Proxy Removed: ${this.ip}\nProxies Number: ${(await proxies.get()).length}`)
-                // })();
-                // console.log("IG error checkIfollowed:", this.ip)
-                // if(proxy.ip){
-                //     this.ip = proxy.ip;
-                //     ig.request.defaults.agent = new SocksProxyAgent({
-                //         host:proxy.ip,
-                //         port:proxy.port,
-                //         ...(proxy.password&&{userId:proxy.userId,password:proxy.password})
-                //     })
-                // }
-                ig.request.defaults.agent = new SocksProxyAgent('socks5h://127.0.0.1:9050')
+                let proxy = await getProxy();
+                (async ()=>{
+                    blockedIp.set(this.ip)
+                    await proxies.remove(this.ip)
+                    bot.telegram.sendMessage('566571423',`${(e as any).message}`);
+                    bot.telegram.sendMessage('566571423',`Proxy Removed: ${this.ip}\nProxies Number: ${(await proxies.get()).length}`)
+                })();
+                console.log("IG error checkIfollowed:", this.ip)
+                if(proxy.ip){
+                    this.ip = proxy.ip;
+                    ig.request.defaults.agent = new SocksProxyAgent({
+                        host:proxy.ip,
+                        port:proxy.port,
+                        ...(proxy.password&&{userId:proxy.userId,password:proxy.password})
+                    })
+                }
                 resolve(await this.checkIfollowed(username,id));
             }
         })
