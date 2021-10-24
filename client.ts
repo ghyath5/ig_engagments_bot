@@ -144,11 +144,21 @@ export class Client {
         return `<a href='https://www.instagram.com/${username}'>@${username}</a>`
     }
     async getIGProfile(username = this.username){
-        let  [me,user] = await Promise.all([
-            this.profile(),
-            igInstance.checkProfile(username) as any
-        ])
-        if(!user){
+        let user = JSON.parse(await this.redis.get('ig')||"{}")
+        if(!user.id){
+            user = await igInstance.checkProfile(username) as any
+            if(user){
+                this.redis.set('ig',JSON.stringify({
+                    id:user.id,
+                    username:user.username,
+                    profile_pic_url_hd:user?.profile_pic_url_hd,
+                    edge_follow:{count:user?.edge_follow?.count},
+                    edge_followed_by:{count:user?.edge_followed_by?.count},
+                }),{'EX':60*60})
+            }
+        }
+        let me = await this.profile()
+        if(!user.id){
             console.log("No uUSER");
             return this.translate('notuserfound').send();
         }
@@ -224,11 +234,11 @@ export class Client {
     }
 }
 
-queue.process(2,async (job)=> {
+queue.process(1,async (job)=> {
     const {username,password} = getCredentials();
     const ig = new IG(username,password);
     await ig.login()
-    await IG.sleep(7000,13000);
+    await IG.sleep(8000,13000);
     const isFollowed = await ig.checkIfollowed(job.data.username, job.data.userId);
     return isFollowed;
 });
