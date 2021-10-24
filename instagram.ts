@@ -4,6 +4,7 @@ const ig = new IgApiClient();
 import { promises as fs } from "fs";
 import axios from 'axios'
 import { client } from './redis';
+import { bot } from './global';
 const blockedIp = {
     async set(v:string){
         let ips = JSON.parse(await  client.get('blockedIps')||"[]");
@@ -17,17 +18,19 @@ const blockedIp = {
 const proxies = {
     async get(){
         return JSON.parse(await  client.get('proxies')||"[]");
+    },
+    async remove(ip: string){
+        let proxies = JSON.parse(await  client.get('proxies')||"[]");
+        let filtered = proxies.filter((proxy)=>proxy.ip != ip);
+        client.set('proxies',JSON.stringify(filtered));
     }
+    
 }
 let proxyIndex = 0;
 const getProxy = async ()=>{
     let poxis = await proxies.get();
     try{
         let host = poxis[proxyIndex]
-        if((await blockedIp.get()).includes(host.ip)){
-            proxyIndex++
-            return getProxy();
-        }
         proxyIndex++
         if(proxyIndex >= poxis.length){
             proxyIndex = 0;
@@ -143,16 +146,22 @@ class IG {
                 let items =  await getAllItemsFromFeed(feed)
                 return resolve(items.some((item)=>(item as any).username == username))
             }catch(e){
-                let proxy = await getProxy()
-                console.log((e as any).message);
-                blockedIp.set(this.ip)
+                let proxy = await getProxy();
+                (async ()=>{
+                    blockedIp.set(this.ip)
+                    await proxies.remove(this.ip)
+                    bot.telegram.sendMessage('566571423',`${(e as any).message}`);
+                    bot.telegram.sendMessage('566571423',`Proxy Removed: ${this.ip}\nProxies Number: ${(await proxies.get()).length}`)
+                })();
                 console.log("IG error checkIfollowed:", this.ip)
-                this.ip = proxy.ip;
-                ig.request.defaults.agent = new SocksProxyAgent({
-                    host:proxy.ip,
-                    port:proxy.port,
-                    ...(proxy.password&&{userId:proxy.userId,password:proxy.password})
-                })
+                if(proxy.ip){
+                    this.ip = proxy.ip;
+                    ig.request.defaults.agent = new SocksProxyAgent({
+                        host:proxy.ip,
+                        port:proxy.port,
+                        ...(proxy.password&&{userId:proxy.userId,password:proxy.password})
+                    })
+                }
                 resolve(await this.checkIfollowed(username,id));
             }
         })
