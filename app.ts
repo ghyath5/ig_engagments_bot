@@ -54,11 +54,11 @@ bot.action('sendusertofollow', async (ctx) => {
 bot.action(/followed-(.+)/, async (ctx) => {
   let username = ctx.match['input'].split('-')[1]
   let todayfollowed = parseInt(await ctx.self.redis.get('todayfollowed')||"0")
-  if(todayfollowed >= 8){
+  if(todayfollowed >= 10){
     return ctx.self.translate('followedexcedded').send();
   }
   if(!todayfollowed){
-    ctx.self.redis.set('todayfollowed',"0",{"EX":60*60*2})
+    ctx.self.redis.set('todayfollowed',"0",{"EX":60*60*1})
   }
   ctx.self.redis.client.incr(`${ctx.from!.id}:todayfollowed`);
   // if(ctx.session.wating)return;
