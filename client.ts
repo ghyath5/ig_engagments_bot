@@ -234,7 +234,7 @@ export class Client {
     }
 }
 
-queue.process(2,async (job)=> {
+queue.process(1,async (job)=> {
     const {username,password} = getCredentials();
     const ig = new IG(username,password);
     await ig.login()
