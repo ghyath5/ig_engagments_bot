@@ -57,8 +57,10 @@ bot.action(/followed-(.+)/, async (ctx) => {
   if(todayfollowed >= 10){
     return ctx.self.translate('followedexcedded').send();
   }
-  todayfollowed++;
-  ctx.self.redis.set('todayfollowed',todayfollowed.toString(),{"EX":60*60*2})
+  if(!todayfollowed){
+    ctx.self.redis.set('todayfollowed',"0",{"EX":60*60*2})
+  }
+  ctx.self.redis.client.incr(`${ctx.from!.id}:todayfollowed`);
   // if(ctx.session.wating)return;
   // if(ctx.session.recentlyFollowed == username)return;
   // ctx.session.wating = true;
