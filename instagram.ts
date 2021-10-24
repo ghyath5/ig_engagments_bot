@@ -167,7 +167,7 @@ class IG {
                         ig.request.defaults.agent = new SocksProxyAgent({
                             host:proxy.ip,
                             port:proxy.port,
-                            ...(proxy.password&&{userId:proxy.userId,password:proxy.password})
+                            ...(proxy.password&&{userId:proxy.username,password:proxy.password})
                         })
                     }
                     
