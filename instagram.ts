@@ -60,11 +60,15 @@ class IG {
         let proxy = await getProxy()
         if(proxy){
             this.ip = proxy.ip;
-            ig.request.defaults.agent = new SocksProxyAgent({
-                host:proxy.ip,
-                port:proxy.port,
-                ...(proxy.password&&{userId:proxy.username,password:proxy.password})
-            })
+            if(proxy.type?.toLowerCase().startsWith('http')){
+                ig.state.proxyUrl = `http://${proxy.ip}:${proxy.port}`
+            }else{
+                ig.request.defaults.agent = new SocksProxyAgent({
+                    host:proxy.ip,
+                    port:proxy.port,
+                    ...(proxy.password&&{userId:proxy.username,password:proxy.password})
+                })
+            }
             ig.request.defaults.timeout = 3000;
             console.log('Im using '+ proxy.ip,proxy.port);
         }
@@ -157,11 +161,16 @@ class IG {
                 console.log("IG error checkIfollowed:", this.ip)
                 if(proxy?.ip){
                     this.ip = proxy.ip;
-                    ig.request.defaults.agent = new SocksProxyAgent({
-                        host:proxy.ip,
-                        port:proxy.port,
-                        ...(proxy.password&&{userId:proxy.userId,password:proxy.password})
-                    })
+                    if(proxy.type?.toLowerCase().startsWith('http')){
+                        ig.state.proxyUrl = `http://${proxy.ip}:${proxy.port}`
+                    }else{
+                        ig.request.defaults.agent = new SocksProxyAgent({
+                            host:proxy.ip,
+                            port:proxy.port,
+                            ...(proxy.password&&{userId:proxy.userId,password:proxy.password})
+                        })
+                    }
+                    
                 }
                 resolve(await this.checkIfollowed(username,id));
             }
