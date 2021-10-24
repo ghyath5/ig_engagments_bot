@@ -69,7 +69,7 @@ class IG {
                     ...(proxy.password&&{userId:proxy.username,password:proxy.password})
                 })
             }
-            ig.request.defaults.timeout = 20000;
+            ig.request.defaults.timeout = 35000;
             console.log('Im using '+ proxy.ip,proxy.port);
         }
         const userId = await this.loadSession()
