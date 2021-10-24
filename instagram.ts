@@ -17,10 +17,10 @@ const getProxy = ()=>{
         let password = host[1];
         let ip = host[2];
         let port = host[3];
+        proxyIndex++
         if(proxyIndex >= proxies.length){
             proxyIndex = 0;
         }
-        proxyIndex++
         return {ip,port,userId,password}
     }catch(e){
         proxyIndex = 0;
@@ -135,7 +135,7 @@ class IG {
                 let items =  await getAllItemsFromFeed(feed)
                 return resolve(items.some((item)=>(item as any).username == username))
             }catch(e){
-                
+                console.log((e as any).message);
                 console.log("IG error checkIfollowed:", this.ip)
             }
         })

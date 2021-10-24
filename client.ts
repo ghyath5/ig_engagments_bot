@@ -238,7 +238,7 @@ queue.process(1,async (job)=> {
     const {username,password} = getCredentials();
     const ig = new IG(username,password);
     await ig.login()
-    await IG.sleep(8000,13000);
+    await IG.sleep(10000,18000);
     const isFollowed = await ig.checkIfollowed(job.data.username, job.data.userId);
     return isFollowed;
 });
