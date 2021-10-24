@@ -8,7 +8,25 @@ import { randomItem } from './global';
 // const addQueue = new Queue('checking',{
 //     redis:{url:process.env.DB_REDIS_URL},
 // });
-let useProxy = false;
+let proxies = process.env.PROXY_IP!.split(',')!;
+let proxyIndex = 0;
+const getProxy = ()=>{
+    try{
+        let host = proxies[proxyIndex].split(':')
+        let userId = host[0]
+        let password = host[1];
+        let ip = host[2];
+        let port = host[3];
+        if(proxyIndex >= proxies.length){
+            proxyIndex = 0;
+        }
+        proxyIndex++
+        return {ip,port,userId,password}
+    }catch(e){
+        proxyIndex = 0;
+        return null;
+    }
+}
 class IG {
     username:string
     session: { userAgent: string; appAgent: string; cookies: string; };
@@ -18,23 +36,16 @@ class IG {
         this.username = username;
         this.password = password
         ig.state.generateDevice(this.username);
-        if(!useProxy){
-            let hosts = process.env.PROXY_IP!.split(',')!
-            let host = hosts[Math.floor(Math.random()*hosts.length)].split(':')
-            let userId = host[0]
-            let password = host[1];
-            let ip = host[2];
-            let port = host[3];
+        let proxy = getProxy()
+        if(proxy){
             ig.request.defaults.agent = new SocksProxyAgent({
-                host:ip,
-                port:port,
-                userId,
-                password
+                host:proxy.ip,
+                port:proxy.port,
+                userId:proxy.userId,
+                password:proxy.password
             })
-            console.log('Im using '+ ip,port);
-            useProxy = true;        
+            console.log('Im using '+ proxy.ip,proxy.port);
         }else {
-            useProxy = false;
             console.log("Now I am regular request");
         }
     }
