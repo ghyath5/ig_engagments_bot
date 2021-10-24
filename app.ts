@@ -109,7 +109,7 @@ bot.on('text', async (ctx) => {
         }else{
           let username = host[0];
           let password = host[1];
-          return {password,username,ip:host[0],port:host[1]}
+          return {password,username,ip:host[2],port:host[3]}
         }
       }).filter((p)=>p)
       prxis = [...prxis,...proxies];
