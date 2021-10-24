@@ -3,25 +3,36 @@ import { SocksProxyAgent } from 'socks-proxy-agent'
 const ig = new IgApiClient();
 import { promises as fs } from "fs";
 import axios from 'axios'
-import { randomItem } from './global';
-// import Queue from 'bee-queue';
-// const addQueue = new Queue('checking',{
-//     redis:{url:process.env.DB_REDIS_URL},
-// });
-let proxies = process.env.PROXY_IP!.split(',')!;
+import { client } from './redis';
+const blockedIp = {
+    async set(v:string){
+        let ips = JSON.parse(await  client.get('blockedIps')||"[]");
+        ips.push(v);
+        client.set('blockedIps',JSON.stringify(ips));
+    },
+    async get(){
+        return JSON.parse(await  client.get('blockedIps')||"[]");
+    }
+}
+const proxies = {
+    async get(){
+        return JSON.parse(await  client.get('proxies')||"[]");
+    }
+}
 let proxyIndex = 0;
-const getProxy = ()=>{
+const getProxy = async ()=>{
+    let poxis = await proxies.get();
     try{
-        let host = proxies[proxyIndex].split(':')
-        let userId = host[0]
-        let password = host[1];
-        let ip = host[2];
-        let port = host[3];
+        let host = poxis[proxyIndex]
+        if((await blockedIp.get()).includes(host.ip)){
+            proxyIndex++
+            return getProxy();
+        }
         proxyIndex++
-        if(proxyIndex >= proxies.length){
+        if(proxyIndex >= poxis.length){
             proxyIndex = 0;
         }
-        return {ip,port,userId,password}
+        return host
     }catch(e){
         proxyIndex = 0;
         return null;
@@ -37,25 +48,22 @@ class IG {
         this.username = username;
         this.password = password
         ig.state.generateDevice(this.username);
-        let proxy = getProxy()
-        if(proxy){
-            this.ip = proxy.ip;
-            ig.request.defaults.agent = new SocksProxyAgent({
-                host:proxy.ip,
-                port:proxy.port,
-                userId:proxy.userId,
-                password:proxy.password
-            })
-            console.log('Im using '+ proxy.ip,proxy.port);
-        }else {
-            console.log("Now I am regular request");
-        }
     }
     static async sleep(min:number,max:number){
         const ms = Math.floor(Math.random() * (max - min + 1) + min)
         return await new Promise(r => setTimeout(() => r(true), ms))
     }
     async login(){
+        let proxy = await getProxy()
+        if(proxy){
+            this.ip = proxy.ip;
+            ig.request.defaults.agent = new SocksProxyAgent({
+                host:proxy.ip,
+                port:proxy.port,
+                ...(proxy.password&&{userId:proxy.username,password:proxy.password})
+            })            
+            console.log('Im using '+ proxy.ip,proxy.port);
+        }
         const userId = await this.loadSession()
         if(!userId){
             try{
@@ -135,8 +143,17 @@ class IG {
                 let items =  await getAllItemsFromFeed(feed)
                 return resolve(items.some((item)=>(item as any).username == username))
             }catch(e){
+                let proxy = await getProxy()
                 console.log((e as any).message);
+                blockedIp.set(this.ip)
                 console.log("IG error checkIfollowed:", this.ip)
+                this.ip = proxy.ip;
+                ig.request.defaults.agent = new SocksProxyAgent({
+                    host:proxy.ip,
+                    port:proxy.port,
+                    ...(proxy.password&&{userId:proxy.userId,password:proxy.password})
+                })
+                resolve(await this.checkIfollowed(username,id));
             }
         })
     }

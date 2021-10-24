@@ -1,6 +1,6 @@
 import { createClient } from 'redis';
 import {RedisClientType} from 'redis/dist/lib/client'
-const client = createClient({url:process.env.DB_REDIS_URL});
+export const client = createClient({url:process.env.DB_REDIS_URL});
 client.connect();
 
 export class Redis {
