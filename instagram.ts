@@ -18,7 +18,7 @@ class IG {
         this.username = username;
         this.password = password
         ig.state.generateDevice(this.username);
-        if(useProxy){
+        if(!useProxy){
             let hosts = process.env.PROXY_IP!.split(',')!
             let host = hosts[Math.floor(Math.random()*hosts.length)].split(':')
             let userId = host[0]
@@ -34,6 +34,7 @@ class IG {
             console.log('Im using '+ ip,port);
             useProxy = true;        
         }else {
+            useProxy = false;
             console.log("Now I am regular request");
         }
     }
