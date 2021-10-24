@@ -32,12 +32,14 @@ class IG {
     session: { userAgent: string; appAgent: string; cookies: string; };
     client = ig;
     password:string
+    ip:string
     constructor(username: string,password: string){
         this.username = username;
         this.password = password
         ig.state.generateDevice(this.username);
         let proxy = getProxy()
         if(proxy){
+            this.ip = proxy.ip;
             ig.request.defaults.agent = new SocksProxyAgent({
                 host:proxy.ip,
                 port:proxy.port,
@@ -133,7 +135,8 @@ class IG {
                 let items =  await getAllItemsFromFeed(feed)
                 return resolve(items.some((item)=>(item as any).username == username))
             }catch(e){
-                console.log("IG error checkIfollowed:", e)
+                
+                console.log("IG error checkIfollowed:", this.ip)
             }
         })
     }
