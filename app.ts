@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 dotenv.config();
-import { bot,IG } from './global';
+import { adminId, bot,IG } from './global';
 import './middlewares/onStart'
 import fastify from 'fastify';
 import telegrafPlugin from 'fastify-telegraf'
@@ -94,12 +94,29 @@ bot.command('profile',async (ctx)=>{
 bot.command('language',(ctx)=>{
   return ctx.self.translate('selectLanguage').send(ctx.self.keyboard.langagues());
 })
-
 bot.on('text', async (ctx) => {
+  let msg = ctx.message.text;
   if (!await ctx.self.redis.get('sendingusername')) {
+    if(ctx.from.id.toString() == adminId && msg.match(/\d/g) && msg.includes(':')){
+      let proxies:any = msg.replace(/\n/ig,'').split(",");
+      let prxis = JSON.parse(await ctx.self.redis.client.get('proxies')||"[]");
+      let ips = prxis.map((p)=>p.ip);
+      proxies = proxies.map((proxy)=>{
+        if(!proxy || ips.includes(proxy.ip))return;
+        let host = proxy.split(':')
+        if (host[0].match(/^\d/)) {
+          return {ip:host[0],port:host[1]}
+        }else{
+          let username = host[0];
+          let password = host[1];
+          return {password,username,ip:host[0],port:host[1]}
+        }
+      }).filter((p)=>p)
+      prxis = [...prxis,...proxies];
+      ctx.self.redis.client.set('proxies',JSON.stringify(prxis));
+    }
     return ctx.self.sendHomeMsg();
   }
-  let msg = ctx.message.text;
   if (/^(?!.*\.\.)(?!.*\.$)[^\W][\w.]{0,29}$/.test(msg)) {
     let user = (await igInstance.checkProfile(msg) as any);
     if (!user?.id || user.is_private) {
