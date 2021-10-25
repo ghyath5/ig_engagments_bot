@@ -210,6 +210,7 @@ export class Client {
             take: 1,
             where:{
                 id:{not:{equals:this.pk}},
+                active:{equals:true},
                 followed:{
                     none:{
                         follower_id:{equals:this.pk}

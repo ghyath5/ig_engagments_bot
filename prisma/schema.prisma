@@ -15,6 +15,7 @@ model User {
   igUsername String    @unique
   igId       String    @unique
   gems       Int       @default(5)
+  active     Boolean   @default(true)
   followers  Account[] @relation("follower")
   followed   Account[] @relation("followed")
   createdAt  DateTime  @default(now())
