@@ -1,6 +1,6 @@
 import { AccountFollowingFeed, IgApiClient } from 'instagram-private-api';
 import { SocksProxyAgent } from 'socks-proxy-agent'
-const ig = new IgApiClient();
+
 import { promises as fs } from "fs";
 import axios from 'axios'
 import { client } from './redis';
@@ -44,7 +44,7 @@ const getProxy = async ()=>{
 class IG {
     username:string
     session: { userAgent: string; appAgent: string; cookies: string; };
-    client = ig;
+    client:IgApiClient;
     password:string
     proxy:{ip:string,port:string,type:string,username?:string,password?:string};
     protocols:string[] = ['socks4','socks5'];
@@ -52,7 +52,8 @@ class IG {
     constructor(username: string,password: string){
         this.username = username;
         this.password = password
-        ig.state.generateDevice(this.username);
+        this.client = new IgApiClient();
+        this.client.state.generateDevice(this.username);
     }
     static async sleep(min:number,max:number){
         const ms = Math.floor(Math.random() * (max - min + 1) + min)
@@ -64,16 +65,16 @@ class IG {
             if(this.proxy.type){
                 let proxy = `${this.proxy.type}://${this.proxy.ip}:${this.proxy.port}`
                 console.log(`Im using ${proxy}`);
-                ig.request.defaults.agent = new SocksProxyAgent(proxy);
+                this.client.request.defaults.agent = new SocksProxyAgent(proxy);
             }else{
-                ig.request.defaults.agent = new SocksProxyAgent({
+                this.client.request.defaults.agent = new SocksProxyAgent({
                     host:this.proxy.ip,
                     port:this.proxy.port,
                     ...(this.proxy.password&&{userId:this.proxy.username,password:this.proxy.password})
                 })
                 console.log('Im using '+ this.proxy.ip,this.proxy.port);
             }
-            ig.request.defaults.timeout = 25000;
+            this.client.request.defaults.timeout = 25000;
         }
         const userId = await this.loadSession()
         if(!userId){
@@ -136,6 +137,19 @@ class IG {
             })
         })
     }
+    async checkIfStoryWatched(){
+        return await new Promise(async (resolve)=>{
+            try{
+                resolve(await this.client.media.likers('CFdpcPTHmij'));
+            }catch(e){
+                console.log(e);
+                
+                resolve(await this.recallWithDifferentProtocol(async (protocol)=>{
+                    return await this.checkIfStoryWatched()
+                }))
+            }
+        })
+    }
     async checkIfollowed(username: string,id:string,protocolUsed?:string){
         return await new Promise(async (resolve)=>{
             try{
@@ -171,9 +185,9 @@ class IG {
             let proxy = `${protocol}://${this.proxy.ip}:${this.proxy.port}`
             console.log('Trying another protocol ',proxy);
             if(protocol == 'http'){
-                ig.state.proxyUrl = proxy;
+                this.client.state.proxyUrl = proxy;
             }else{
-                ig.request.defaults.agent = new SocksProxyAgent(proxy);
+                this.client.request.defaults.agent = new SocksProxyAgent(proxy);
             }
             return await func(protocol)
         }
@@ -186,9 +200,9 @@ class IG {
         console.log('Trying another Proxy: ',this.proxy);
         if(this.proxy){
             if(this.proxy.type){
-                ig.request.defaults.agent = new SocksProxyAgent(`${this.proxy.type}://${this.proxy.ip}:${this.proxy.port}`);
+                this.client.request.defaults.agent = new SocksProxyAgent(`${this.proxy.type}://${this.proxy.ip}:${this.proxy.port}`);
             }else{
-                ig.request.defaults.agent = new SocksProxyAgent({
+                this.client.request.defaults.agent = new SocksProxyAgent({
                     host:this.proxy.ip,
                     port:this.proxy.port,
                     ...(this.proxy.password&&{userId:this.proxy.username,password:this.proxy.password})
