@@ -26,12 +26,12 @@ const proxies = {
     }
     
 }
-let proxyIndex = 0;
+let proxyIndex = -1;
 const getProxy = async ()=>{
+    proxyIndex++
     let poxis = await proxies.get();
     try{
         let host = poxis[proxyIndex]
-        proxyIndex++
         if(proxyIndex >= poxis.length){
             proxyIndex = 0;
         }
@@ -46,7 +46,9 @@ class IG {
     session: { userAgent: string; appAgent: string; cookies: string; };
     client = ig;
     password:string
-    ip:string
+    proxy:{ip:string,port:string,type:string,username?:string,password?:string};
+    protocols:string[] = ['socks4','socks4a','socks5','socks5h','http'];
+    triedProtocols:string[] = [];
     constructor(username: string,password: string){
         this.username = username;
         this.password = password
@@ -57,24 +59,21 @@ class IG {
         return await new Promise(r => setTimeout(() => r(true), ms))
     }
     async login(){
-        let proxy = await getProxy()
-        if(proxy){
-            this.ip = proxy.ip;
-            if(proxy.type?.toLowerCase().startsWith('http')){
-                ig.state.proxyUrl = `http://${proxy.ip}:${proxy.port}`
+        this.proxy = await getProxy()
+        if(this.proxy){
+            if(this.proxy.type){
+                let proxy = `${this.proxy.type}://${this.proxy.ip}:${this.proxy.port}`
+                console.log(`Im using ${proxy}`);
+                ig.request.defaults.agent = new SocksProxyAgent(proxy);
             }else{
-                if(proxy.type){
-                    ig.request.defaults.agent = new SocksProxyAgent(`${proxy.type}://${proxy.ip}:${proxy.port}`);
-                }else{
-                    ig.request.defaults.agent = new SocksProxyAgent({
-                        host:proxy.ip,
-                        port:proxy.port,
-                        ...(proxy.password&&{userId:proxy.username,password:proxy.password})
-                    })
-                }
+                ig.request.defaults.agent = new SocksProxyAgent({
+                    host:this.proxy.ip,
+                    port:this.proxy.port,
+                    ...(this.proxy.password&&{userId:this.proxy.username,password:this.proxy.password})
+                })
+                console.log('Im using '+ this.proxy.ip,this.proxy.port);
             }
             ig.request.defaults.timeout = 40000;
-            console.log('Im using '+ proxy.ip,proxy.port);
         }
         const userId = await this.loadSession()
         if(!userId){
@@ -137,7 +136,7 @@ class IG {
             })
         })
     }
-    async checkIfollowed(username: string,id:string){
+    async checkIfollowed(username: string,id:string,protocolUsed?:string){
         return await new Promise(async (resolve)=>{
             try{
                 username =  username.toLowerCase()
@@ -151,38 +150,51 @@ class IG {
                     } while (feed.isMoreAvailable());
                     return items;
                 }
-                
                 let items =  await getAllItemsFromFeed(feed)
+                protocolUsed && console.log('Succedded protocol: ',protocolUsed); 
                 return resolve(items.some((item)=>(item as any).username == username))
             }catch(e){
-                let proxy = await getProxy();
-                (async (ip)=>{
-                    blockedIp.set(ip)
-                    await proxies.remove(ip)
-                    bot.telegram.sendMessage('566571423',`${(e as any).message}`);
-                    bot.telegram.sendMessage('566571423',`Proxy Removed: ${ip}\nProxies Number: ${(await proxies.get()).length}`)
-                })(this.ip);
-                console.log("IG error checkIfollowed:", this.ip)
-                if(proxy?.ip){
-                    this.ip = proxy.ip;
-                    if(proxy.type?.toLowerCase().startsWith('http')){
-                        ig.state.proxyUrl = `http://${proxy.ip}:${proxy.port}`
-                    }else{
-                        if(proxy.type){
-                            ig.request.defaults.agent = new SocksProxyAgent(`${proxy.type}://${proxy.ip}:${proxy.port}`);
-                        }else{
-                            ig.request.defaults.agent = new SocksProxyAgent({
-                                host:proxy.ip,
-                                port:proxy.port,
-                                ...(proxy.password&&{userId:proxy.username,password:proxy.password})
-                            })
-                        }
-                    }
-                    
-                }
-                resolve(await this.checkIfollowed(username,id));
+                console.log("IG error checkIfollowed:", (e as any).message)
+                return resolve(await this.recallWithDifferentProtocol(async (protocoleUsed)=>{
+                    return await this.checkIfollowed(username,id,protocoleUsed)
+                }));
             }
         })
+    }
+
+    async recallWithDifferentProtocol(func){
+        let setOfProtocols = this.protocols.filter((protocol)=>!this.triedProtocols.includes(protocol))
+        if(setOfProtocols.length > 0){
+            let protocol:string = setOfProtocols[0]
+            this.triedProtocols.push(protocol)
+            let proxy = `${protocol}://${this.proxy.ip}:${this.proxy.port}`
+            console.log('Trying another protocol ',proxy);
+            if(protocol == 'http'){
+                ig.state.proxyUrl = proxy;
+            }else{
+                ig.request.defaults.agent = new SocksProxyAgent(proxy);
+            }
+            return await func(protocol)
+        }
+        (async (ip)=>{
+            await proxies.remove(ip)
+            bot.telegram.sendMessage('566571423',`Proxy Removed: ${ip}\nProxies Number: ${(await proxies.get()).length}`)
+        })(this.proxy.ip);
+        this.triedProtocols = [];
+        this.proxy = await getProxy();
+        if(this.proxy){
+            if(this.proxy.type){
+                ig.request.defaults.agent = new SocksProxyAgent(`${this.proxy.type}://${this.proxy.ip}:${this.proxy.port}`);
+            }else{
+                ig.request.defaults.agent = new SocksProxyAgent({
+                    host:this.proxy.ip,
+                    port:this.proxy.port,
+                    ...(this.proxy.password&&{userId:this.proxy.username,password:this.proxy.password})
+                })
+            }
+            
+        }
+        return await func();
     }
 }
 // addQueue.process(function (job, done) {
