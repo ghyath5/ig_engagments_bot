@@ -63,11 +63,15 @@ class IG {
             if(proxy.type?.toLowerCase().startsWith('http')){
                 ig.state.proxyUrl = `http://${proxy.ip}:${proxy.port}`
             }else{
-                ig.request.defaults.agent = new SocksProxyAgent({
-                    host:proxy.ip,
-                    port:proxy.port,
-                    ...(proxy.password&&{userId:proxy.username,password:proxy.password})
-                })
+                if(proxy.type){
+                    ig.request.defaults.agent = new SocksProxyAgent(`${proxy.type}://${proxy.ip}:${proxy.port}`);
+                }else{
+                    ig.request.defaults.agent = new SocksProxyAgent({
+                        host:proxy.ip,
+                        port:proxy.port,
+                        ...(proxy.password&&{userId:proxy.username,password:proxy.password})
+                    })
+                }
             }
             ig.request.defaults.timeout = 40000;
             console.log('Im using '+ proxy.ip,proxy.port);
@@ -164,11 +168,15 @@ class IG {
                     if(proxy.type?.toLowerCase().startsWith('http')){
                         ig.state.proxyUrl = `http://${proxy.ip}:${proxy.port}`
                     }else{
-                        ig.request.defaults.agent = new SocksProxyAgent({
-                            host:proxy.ip,
-                            port:proxy.port,
-                            ...(proxy.password&&{userId:proxy.username,password:proxy.password})
-                        })
+                        if(proxy.type){
+                            ig.request.defaults.agent = new SocksProxyAgent(`${proxy.type}://${proxy.ip}:${proxy.port}`);
+                        }else{
+                            ig.request.defaults.agent = new SocksProxyAgent({
+                                host:proxy.ip,
+                                port:proxy.port,
+                                ...(proxy.password&&{userId:proxy.username,password:proxy.password})
+                            })
+                        }
                     }
                     
                 }
