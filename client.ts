@@ -224,7 +224,6 @@ queue.process(6,async (job)=> {
 });
 
 queue.on('succeeded',async (job,result)=>{
-    console.log(result);
     if(result){
         const usernameToFollow = job.data.usernameToFollow;
         const followerPk = job.data.followerPk;
