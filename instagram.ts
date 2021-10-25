@@ -5,16 +5,16 @@ import { promises as fs } from "fs";
 import axios from 'axios'
 import { client } from './redis';
 import { bot } from './global';
-const blockedIp = {
-    async set(v:string){
-        let ips = JSON.parse(await  client.get('blockedIps')||"[]");
-        ips.push(v);
-        client.set('blockedIps',JSON.stringify(ips));
-    },
-    async get(){
-        return JSON.parse(await  client.get('blockedIps')||"[]");
-    }
-}
+// const blockedIp = {
+//     async set(v:string){
+//         let ips = JSON.parse(await  client.get('blockedIps')||"[]");
+//         ips.push(v);
+//         client.set('blockedIps',JSON.stringify(ips));
+//     },
+//     async get(){
+//         return JSON.parse(await  client.get('blockedIps')||"[]");
+//     }
+// }
 const proxies = {
     async get(){
         return JSON.parse(await  client.get('proxies')||"[]");
@@ -151,7 +151,8 @@ class IG {
                     return items;
                 }
                 let items =  await getAllItemsFromFeed(feed)
-                protocolUsed && console.log('Succedded protocol: ',protocolUsed); 
+                protocolUsed && console.log('Succedded protocol: ',protocolUsed);
+                !protocolUsed && console.log('Succedded proxy: ',this.proxy.ip,this.proxy.port);
                 return resolve(items.some((item)=>(item as any).username == username))
             }catch(e){
                 console.log("IG error checkIfollowed:", (e as any).message)
@@ -182,6 +183,7 @@ class IG {
         })(this.proxy.ip);
         this.triedProtocols = [];
         this.proxy = await getProxy();
+        console.log('Trying another Proxy: ',this.proxy);
         if(this.proxy){
             if(this.proxy.type){
                 ig.request.defaults.agent = new SocksProxyAgent(`${this.proxy.type}://${this.proxy.ip}:${this.proxy.port}`);
