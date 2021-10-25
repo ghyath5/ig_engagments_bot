@@ -47,7 +47,7 @@ class IG {
     client = ig;
     password:string
     proxy:{ip:string,port:string,type:string,username?:string,password?:string};
-    protocols:string[] = ['socks4','socks4a','socks5','socks5h'];
+    protocols:string[] = ['socks4','socks5'];
     triedProtocols:string[] = [];
     constructor(username: string,password: string){
         this.username = username;
