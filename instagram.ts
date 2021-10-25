@@ -47,7 +47,7 @@ class IG {
     client = ig;
     password:string
     proxy:{ip:string,port:string,type:string,username?:string,password?:string};
-    protocols:string[] = ['socks4','socks4a','socks5','socks5h','http'];
+    protocols:string[] = ['socks4','socks4a','socks5','socks5h'];
     triedProtocols:string[] = [];
     constructor(username: string,password: string){
         this.username = username;
@@ -73,7 +73,7 @@ class IG {
                 })
                 console.log('Im using '+ this.proxy.ip,this.proxy.port);
             }
-            ig.request.defaults.timeout = 40000;
+            ig.request.defaults.timeout = 25000;
         }
         const userId = await this.loadSession()
         if(!userId){
