@@ -115,9 +115,7 @@ bot.on('text', async (ctx) => {
         if (host[0].match(/^\d/)) {
           return {ip:host[0],port:host[1]}
         }else{
-          let username = host[0];
-          let password = host[1];
-          return {password,username,ip:host[2],port:host[3]}
+          return {ip:host[1],port:host[2],type:host[0]}
         }
       }).filter((p)=>p)
       prxis = [...prxis,...proxies];
