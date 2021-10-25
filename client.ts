@@ -1,10 +1,12 @@
-import { bot, IG, MyContext, randomItem } from './global';
+import { bot, IG, MyContext, } from './global';
 import { Redis } from './redis';
 import { ExtraReplyMessage } from 'telegraf/typings/telegram-types';
 import { PrismaClient, User } from '@prisma/client';
 import { Keyboard } from './keyboard';
 import Queue from 'bee-queue';
 import { igInstance } from './instagram';
+import i18n from "./locales";
+import { I18n } from 'i18n';
 const queue = new Queue('following',{
     removeOnSuccess:true,
     redis:{
@@ -42,12 +44,15 @@ export class Client {
     redis:Redis
     keyboard:Keyboard
     username:string|undefined
+    i18n:I18n;
     constructor(pk:number,lang:string='en',ctx?:MyContext){
         this.ctx = ctx;
         this.lang = lang;
         this.pk = pk;
         this.redis = new Redis(this.pk);
         this.keyboard = new Keyboard(this);
+        this.i18n = i18n;
+        this.i18n.setLocale(this.lang);
     }
     async saveFollowAction(otherUserId){
         await prisma.account.create({
@@ -106,7 +111,7 @@ export class Client {
         return await this.redis.getProfileData(`locale`) || 'en';
     }
     translate(key:string,vars={},lang = this.lang){
-        const msg = this.ctx?.i18n.__({phrase:key,locale:lang},vars)
+        const msg = this.i18n.__({phrase:key,locale:lang},vars)
         return {
             msg:msg!,
             send:(extra:ExtraReplyMessage={})=>{
@@ -231,7 +236,6 @@ queue.on('succeeded',async (job,result)=>{
         const followerLang = job.data.followerLang;
         const follower = new Client(followerPk,followerLang);
         const followedAccounts = await follower.followedAccounts();
-        
         if(followedAccounts.includes(usernameToFollow))return;
         bot.telegram.sendMessage(followerPk,`${follower.translate('youvfollowed',{username:usernameToFollow}).msg}\n${follower.translate('moregemsmorefollowers').msg}`,{parse_mode:"HTML"}).catch((e)=>{})
         
