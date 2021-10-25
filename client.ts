@@ -31,7 +31,7 @@ const getCredentials = ()=>{
 export class Client {
     async checkIfollowed(username: string, user: User) {
         const myUsername = user.igUsername;
-        const job = queue.createJob({username,userId:user.igId});
+        const job = queue.createJob({username,userId:user.igId,myUsername});
         job.save();
         job.on('succeeded', async (result) => {
             let [followedAccounts] = await Promise.all([
@@ -235,11 +235,15 @@ export class Client {
     }
 }
 
-queue.process(1,async (job)=> {
+queue.process(2,async (job)=> {
     const {username,password} = getCredentials();
     const ig = new IG(username,password);
     await ig.login()
-    await IG.sleep(5000,8000);
+    await IG.sleep(1000,4000);
     const isFollowed = await ig.checkIfollowed(job.data.username, job.data.userId);
     return isFollowed;
 });
+
+// queue.on('stalled',(jobId)=>{
+
+// })
