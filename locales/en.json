@@ -10,7 +10,7 @@
     "followed":"Followed",
     "skip":"Skip",
     "notuserfound":"No user found",
-    "dofollow":"Follow <a href='https://instagram.com/{{username}}'>{{username}}</a> to get 1 💎",
+    "dofollow":"Follow <a href='https://instagram.com/{{username}}'>{{username}}</a> to get 1 💎\n\n<i>Note: If this account is private don't request to follow it, you will not earn gems if you followed a private account.</i>",
     "startfollowbtn":"Start following ➡️",
     "myinstabtn":"My profile 🟠",
     "mygembtn":"My Gems 💎",

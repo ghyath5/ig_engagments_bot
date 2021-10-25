@@ -10,7 +10,7 @@
     "followed":"He seguido",
     "skip":"Saltar",
     "notuserfound":"Ningún usuario encontrado",
-    "dofollow":"Seguir <a href='https://instagram.com/{{username}}'>{{username}}</a> para obtener 1 💎",
+    "dofollow":"Seguir <a href='https://instagram.com/{{username}}'>{{username}}</a> para obtener 1 💎\n\n<i>Nota: si esta cuenta es privada, no solicites seguirla, no ganarás gemas si seguiste una cuenta privada.</i>",
     "startfollowbtn":"Empezar a seguir ➡️",
     "myinstabtn":"Mi perfil 🟠",
     "mygembtn":"Mis gemas 💎",
