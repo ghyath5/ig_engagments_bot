@@ -7,7 +7,6 @@ import Queue from 'bee-queue';
 import { igInstance } from './instagram';
 const queue = new Queue('following',{
     removeOnSuccess:true,
-    stallInterval:10000,
     redis:{
         url:process.env.DB_REDIS_URL
     }
@@ -29,32 +28,11 @@ const getCredentials = ()=>{
     return credentials[index]
 }
 export class Client {
-    async checkIfollowed(username: string, user: User) {
+    async checkIfollowed(username: string) {       
+        let user:User = await this.profile();
         const myUsername = user.igUsername;
-        const job = queue.createJob({username,userId:user.igId,myUsername});
+        const job = queue.createJob({usernameToFollow:username,followerIGId:user.igId,followerUsername:myUsername,followerPk:this.pk,followerLang:this.lang});
         job.save();
-        job.on('succeeded', async (result) => {
-            let [followedAccounts] = await Promise.all([
-                this.followedAccounts()
-            ]);
-            if(followedAccounts.includes(username))return;
-            if(result){
-                bot.telegram.sendMessage(this.pk,`${this.translate('youvfollowed',{username:username}).msg}\n${this.translate('moregemsmorefollowers').msg}`,
-                {
-                    parse_mode:"HTML"
-                }
-                ).catch((e)=>{})
-                
-                let otherUser = await this.findUserByUsername(username);
-                if(!otherUser)return;
-                let oClient = await this.saveFollowAction(otherUser.id)
-                let otherClient = new Client(otherUser.id,undefined,this.ctx);
-                let userLang = await otherClient.getLang();
-                bot.telegram.sendMessage(otherUser.id,`<b>${myUsername}</b> ${otherClient.translate('followedyou',{gems:oClient.gems},userLang).msg}`,{
-                    ...this.keyboard.inlineKeyboard([{text:otherClient.translate('startfollowbtn').msg,callback_data:"sendusertofollow"}]),
-                    parse_mode:"HTML"}).catch((e)=>{});
-            } 
-        });
         this.translate('wearechecking').send();
         await this.addAccountToSkipped(username);
     }
@@ -111,10 +89,10 @@ export class Client {
     async findUserByUsername(username: string):Promise<User|null>{
         return await prisma.user.findUnique({where:{igUsername:username}});
     }
-    async profile():Promise<User | null>{
+    async profile():Promise<User>{
         let user = await prisma.user.findUnique({where:{id:this.pk}})
         this.username = user?.igUsername;
-        return user;
+        return user!;
     }
     async getUsername(){
         return this.username || (await this.profile())?.igUsername || "ghyathdarwish"
@@ -235,15 +213,36 @@ export class Client {
     }
 }
 
-queue.process(4,async (job)=> {
+queue.process(6,async (job)=> {
     const {username,password} = getCredentials();
     const ig = new IG(username,password);
     await ig.login()
     await IG.sleep(1000,4000);
-    const isFollowed = await ig.checkIfollowed(job.data.username, job.data.userId);
+    job.retries(2);
+    const isFollowed = await ig.checkIfollowed(job.data.usernameToFollow, job.data.followerIGId);
     return isFollowed;
 });
 
-// queue.on('stalled',(jobId)=>{
-
-// })
+queue.on('succeeded',async (job,result)=>{
+    console.log(result);
+    if(result){
+        const usernameToFollow = job.data.usernameToFollow;
+        const followerPk = job.data.followerPk;
+        const followerUsername = job.data.followerUsername;
+        const followerLang = job.data.followerLang;
+        const follower = new Client(followerPk,followerLang);
+        const followedAccounts = await follower.followedAccounts();
+        
+        if(followedAccounts.includes(usernameToFollow))return;
+        bot.telegram.sendMessage(followerPk,`${follower.translate('youvfollowed',{username:usernameToFollow}).msg}\n${follower.translate('moregemsmorefollowers').msg}`,{parse_mode:"HTML"}).catch((e)=>{})
+        
+        let otherUser = await follower.findUserByUsername(usernameToFollow);
+        if(!otherUser)return;
+        let oClient = await follower.saveFollowAction(otherUser.id)
+        let otherClient = new Client(otherUser.id);
+        let userLang = await otherClient.getLang();
+        bot.telegram.sendMessage(otherUser.id,`<b>${followerUsername}</b> ${otherClient.translate('followedyou',{gems:oClient.gems},userLang).msg}`,{
+            ...otherClient.keyboard.inlineKeyboard([{text:otherClient.translate('startfollowbtn').msg,callback_data:"sendusertofollow"}]),
+            parse_mode:"HTML"}).catch((e)=>{});
+    } 
+})

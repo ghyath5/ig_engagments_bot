@@ -73,12 +73,11 @@ bot.action(/followed-(.+)/, async (ctx) => {
     ctx.deleteMessage();
     return ctx.self.sendUser();
   }
-  let me = await ctx.self.profile();
   // const user = await igInstance.checkProfile(myUsername) as any;
   // if (!user) {
   //   return ;
   // }
-  await ctx.self.checkIfollowed(username,me!)
+  await ctx.self.checkIfollowed(username)
   ctx.deleteMessage();
   await IG.sleep(1000,3000);
   return ctx.self.sendUser();
