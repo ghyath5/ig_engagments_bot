@@ -6,7 +6,8 @@ export const langs = {
     // it: 'Italiana 🇮🇹',
     // fr: 'Français 🇫🇷',
     // de: 'Deutsch 🇩🇪',    
-    es: 'Española 🇪🇸'
+    es: 'Española 🇪🇸',
+    fa:'فارسی 🇮🇷'
     // tr: 'Türk 🇹🇷',
     // ru: 'русский 🇷🇺'
 };
