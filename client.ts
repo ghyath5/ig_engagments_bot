@@ -218,11 +218,11 @@ export class Client {
     }
 }
 
-queue.process(10,async (job)=> {
+queue.process(4,async (job)=> {
     const {username,password} = getCredentials();
     const ig = new IG(username,password);
     await ig.login()
-    await IG.sleep(1000,4000);
+    await IG.sleep(8000,15000);
     job.retries(2);
     const isFollowed = await ig.checkIfollowed(job.data.usernameToFollow, job.data.followerIGId);
     return isFollowed;
