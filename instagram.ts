@@ -1,6 +1,5 @@
 import { AccountFollowingFeed, IgApiClient } from 'instagram-private-api';
 import { SocksProxyAgent } from 'socks-proxy-agent'
-
 import { promises as fs } from "fs";
 import axios from 'axios'
 import { client } from './redis';
@@ -135,19 +134,6 @@ class IG {
             axios(`https://www.instagram.com/${username}/?__a=1`,{withCredentials:true,headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}}).then((res)=>resolve((res?.data as any).graphql?.user)).catch((e)=>{
                 resolve(false)
             })
-        })
-    }
-    async checkIfStoryWatched(){
-        return await new Promise(async (resolve)=>{
-            try{
-                resolve(await this.client.media.likers('CFdpcPTHmij'));
-            }catch(e){
-                console.log(e);
-                
-                resolve(await this.recallWithDifferentProtocol(async (protocol)=>{
-                    return await this.checkIfStoryWatched()
-                }))
-            }
         })
     }
     async checkIfollowed(username: string,id:string,protocolUsed?:string){

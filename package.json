@@ -28,6 +28,7 @@
     "fastify": "^3.22.1",
     "fastify-telegraf": "^1.0.2",
     "i18n": "^0.13.3",
+    "instagram-id-to-url-segment": "^0.0.0",
     "instagram-private-api": "https://github.com/ghyath5/instagram-private-api",
     "redis": "^4.0.0-rc.3",
     "socks-proxy-agent": "^6.1.0",
