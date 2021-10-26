@@ -179,7 +179,7 @@ class IG {
         }
         (async (ip)=>{
             await proxies.remove(ip)
-            bot.telegram.sendMessage('566571423',`Proxy Removed: ${ip}\nProxies Number: ${(await proxies.get()).length}`)
+            bot.telegram.sendMessage('566571423',`Proxy Removed: ${ip}\nProxies Number: ${proxyIndex+1}/${(await proxies.get()).length}`)
         })(this.proxy.ip);
         this.triedProtocols = [];
         this.proxy = await getProxy();
