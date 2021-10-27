@@ -144,8 +144,8 @@ class IG {
                 async function getAllItemsFromFeed(feed: AccountFollowingFeed) {
                     let items:any = [];
                     do {
-                        items = items.concat(await feed.items());                
-                        const time = Math.round(Math.random() * 900) + 500;
+                        items = items.concat(await feed.items());
+                        const time = Math.round(Math.random() * 5000) + 1000;
                         await new Promise(resolve => setTimeout(resolve, time));
                     } while (feed.isMoreAvailable());
                     return items;
@@ -155,19 +155,20 @@ class IG {
                 !protocolUsed && console.log('Succedded proxy: ',this.proxy.ip,this.proxy.port);
                 return resolve(items.some((item)=>(item as any).username == username))
             }catch(e){
+                let removed = true;
                 if((e as any).message.includes('429')){
                     bot.telegram.sendMessage('566571423',`Too many requests at ${JSON.stringify(this.proxy)}`)
-                    return reject((e as any).message);
+                    removed = false;
                 }
                 console.log("IG error checkIfollowed:", (e as any).message)
                 return resolve(await this.recallWithDifferentProtocol(async (protocoleUsed)=>{
                     return await this.checkIfollowed(username,id,protocoleUsed)
-                }));
+                },removed));
             }
         })
     }
 
-    async recallWithDifferentProtocol(func){
+    async recallWithDifferentProtocol(func,remove = true){
         let setOfProtocols = this.protocols.filter((protocol)=>!this.triedProtocols.includes(protocol))
         if(setOfProtocols.length > 0){
             let protocol:string = setOfProtocols[0]
@@ -182,6 +183,9 @@ class IG {
             return await func(protocol)
         }
         (async (ip)=>{
+            if(!remove){
+                return bot.telegram.sendMessage('566571423',`Proxy NOT Removed: ${ip}\nProxies Number: ${proxyIndex+1}/${(await proxies.get()).length}`)
+            }
             await proxies.remove(ip)
             bot.telegram.sendMessage('566571423',`Proxy Removed: ${ip}\nProxies Number: ${proxyIndex+1}/${(await proxies.get()).length}`)
         })(this.proxy.ip);
