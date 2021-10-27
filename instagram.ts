@@ -137,7 +137,7 @@ class IG {
         })
     }
     async checkIfollowed(username: string,id:string,protocolUsed?:string){
-        return await new Promise(async (resolve)=>{
+        return await new Promise(async (resolve,reject)=>{
             try{
                 username =  username.toLowerCase()
                 let feed = this.client.feed.accountFollowing(id);
@@ -155,6 +155,10 @@ class IG {
                 !protocolUsed && console.log('Succedded proxy: ',this.proxy.ip,this.proxy.port);
                 return resolve(items.some((item)=>(item as any).username == username))
             }catch(e){
+                if((e as any).message.includes('429')){
+                    bot.telegram.sendMessage('566571423',`Too many requests at ${JSON.stringify(this.proxy)}`)
+                    return reject((e as any).message);
+                }
                 console.log("IG error checkIfollowed:", (e as any).message)
                 return resolve(await this.recallWithDifferentProtocol(async (protocoleUsed)=>{
                     return await this.checkIfollowed(username,id,protocoleUsed)
