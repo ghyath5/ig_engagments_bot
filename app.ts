@@ -6,7 +6,7 @@ import fastify from 'fastify';
 import telegrafPlugin from 'fastify-telegraf'
 import { igInstance } from './instagram';
 const app = fastify({ logger: false, });
-
+const isPausedWorker = parseInt(process.env.PAUSE_WORKER||"0")
 const WEBHOOK_URL = process.env.WEBHOOK_URL!;
 const WEBHOOK_PATH = process.env.WEBHOOK_PATH!;
 
@@ -54,7 +54,7 @@ bot.action('sendusertofollow', async (ctx) => {
 bot.action(/followed-(.+)/, async (ctx) => {
   let username = ctx.match['input'].split('-')[1]
   let todayfollowed = parseInt(await ctx.self.redis.get('todayfollowed')||"0")
-  if(todayfollowed >= 8){
+  if(todayfollowed >= 8 || isPausedWorker){
     return ctx.self.translate('followedexcedded').send();
   }
   if(!todayfollowed){
