@@ -7,11 +7,14 @@ import Queue from 'bee-queue';
 import { igInstance } from './instagram';
 import i18n from "./locales";
 import { I18n } from 'i18n';
+const isPausedWorker = parseInt(process.env.PAUSE_WORKER||"0")
+
 const queue = new Queue('following',{
     removeOnSuccess:true,
     redis:{
         url:process.env.DB_REDIS_URL
-    }
+    },
+    isWorker:!isPausedWorker
 });
 const prisma = new PrismaClient()
 const credentials = [
@@ -217,35 +220,35 @@ export class Client {
         ).catch((e)=>{})
     }
 }
+if(!isPausedWorker){
+    queue.process(2,async (job)=> {
+        const {username,password} = getCredentials();
+        const ig = new IG(username,password);
+        await ig.login()
+        await IG.sleep(5000,12000);
+        const isFollowed = await ig.checkIfollowed(job.data.usernameToFollow, job.data.followerIGId);
+        return isFollowed;
+    });
 
-queue.process(4,async (job)=> {
-    const {username,password} = getCredentials();
-    const ig = new IG(username,password);
-    await ig.login()
-    await IG.sleep(8000,15000);
-    job.retries(2);
-    const isFollowed = await ig.checkIfollowed(job.data.usernameToFollow, job.data.followerIGId);
-    return isFollowed;
-});
-
-queue.on('succeeded',async (job,result)=>{
-    if(result){
-        const usernameToFollow = job.data.usernameToFollow;
-        const followerPk = job.data.followerPk;
-        const followerUsername = job.data.followerUsername;
-        const followerLang = job.data.followerLang;
-        const follower = new Client(followerPk,followerLang);
-        const followedAccounts = await follower.followedAccounts();
-        if(followedAccounts.includes(usernameToFollow))return;
-        bot.telegram.sendMessage(followerPk,`${follower.translate('youvfollowed',{username:usernameToFollow}).msg}\n${follower.translate('moregemsmorefollowers').msg}`,{parse_mode:"HTML"}).catch((e)=>{})
-        
-        let otherUser = await follower.findUserByUsername(usernameToFollow);
-        if(!otherUser)return;
-        let oClient = await follower.saveFollowAction(otherUser.id)
-        let otherClient = new Client(otherUser.id);
-        let userLang = await otherClient.getLang();
-        bot.telegram.sendMessage(otherUser.id,`<b>${followerUsername}</b> ${otherClient.translate('followedyou',{gems:oClient.gems},userLang).msg}`,{
-            ...otherClient.keyboard.inlineKeyboard([{text:otherClient.translate('startfollowbtn').msg,callback_data:"sendusertofollow"}]),
-            parse_mode:"HTML"}).catch((e)=>{});
-    } 
-})
+    queue.on('succeeded',async (job,result)=>{
+        if(result){
+            const usernameToFollow = job.data.usernameToFollow;
+            const followerPk = job.data.followerPk;
+            const followerUsername = job.data.followerUsername;
+            const followerLang = job.data.followerLang;
+            const follower = new Client(followerPk,followerLang);
+            const followedAccounts = await follower.followedAccounts();
+            if(followedAccounts.includes(usernameToFollow))return;
+            bot.telegram.sendMessage(followerPk,`${follower.translate('youvfollowed',{username:usernameToFollow}).msg}\n${follower.translate('moregemsmorefollowers').msg}`,{parse_mode:"HTML"}).catch((e)=>{})
+            
+            let otherUser = await follower.findUserByUsername(usernameToFollow);
+            if(!otherUser)return;
+            let oClient = await follower.saveFollowAction(otherUser.id)
+            let otherClient = new Client(otherUser.id);
+            let userLang = await otherClient.getLang();
+            bot.telegram.sendMessage(otherUser.id,`<b>${followerUsername}</b> ${otherClient.translate('followedyou',{gems:oClient.gems},userLang).msg}`,{
+                ...otherClient.keyboard.inlineKeyboard([{text:otherClient.translate('startfollowbtn').msg,callback_data:"sendusertofollow"}]),
+                parse_mode:"HTML"}).catch((e)=>{});
+        } 
+    })
+}
