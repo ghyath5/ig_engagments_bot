@@ -79,7 +79,7 @@ bot.action(/followed-(.+)/, async (ctx) => {
   // }
   await ctx.self.checkIfollowed(username)
   ctx.deleteMessage();
-  await IG.sleep(1000,3000);
+  await IG.sleep(2000,5000);
   return ctx.self.sendUser();
 })
 
