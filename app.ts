@@ -54,7 +54,7 @@ bot.action('sendusertofollow', async (ctx) => {
 bot.action(/followed-(.+)/, async (ctx) => {
   let username = ctx.match['input'].split('-')[1]
   let todayfollowed = parseInt(await ctx.self.redis.get('todayfollowed')||"0")
-  if(todayfollowed >= 10 || isPausedWorker){
+  if(todayfollowed >= 30 || isPausedWorker){
     return ctx.self.translate('followedexcedded').send();
   }
   if(!todayfollowed){
@@ -104,22 +104,22 @@ bot.command('language',(ctx)=>{
 bot.on('text', async (ctx) => {
   let msg = ctx.message.text;
   if (!await ctx.self.redis.get('sendingusername')) {
-    if(ctx.from.id.toString() == adminId && msg.match(/\d/g) && msg.includes(':')){
-      let proxies:any = msg.replace(/\n/ig,'').split(",");
-      let prxis = JSON.parse(await ctx.self.redis.client.get('proxies')||"[]");
-      let ips = prxis.map((p)=>p.ip);
-      proxies = proxies.map((proxy)=>{
-        if(!proxy || ips.includes(proxy.ip))return;
-        let host = proxy.split(':')
-        if (host[0].match(/^\d/)) {
-          return {ip:host[0],port:host[1]}
-        }else{
-          return {ip:host[1],port:host[2],type:host[0]}
-        }
-      }).filter((p)=>p)
-      prxis = [...prxis,...proxies];
-      ctx.self.redis.client.set('proxies',JSON.stringify(prxis));
-    }
+    // if(ctx.from.id.toString() == adminId && msg.match(/\d/g) && msg.includes(':')){
+    //   let proxies:any = msg.replace(/\n/ig,'').split(",");
+    //   let prxis = JSON.parse(await ctx.self.redis.client.get('proxies')||"[]");
+    //   let ips = prxis.map((p)=>p.ip);
+    //   proxies = proxies.map((proxy)=>{
+    //     if(!proxy || ips.includes(proxy.ip))return;
+    //     let host = proxy.split(':')
+    //     if (host[0].match(/^\d/)) {
+    //       return {ip:host[0],port:host[1]}
+    //     }else{
+    //       return {ip:host[1],port:host[2],type:host[0]}
+    //     }
+    //   }).filter((p)=>p)
+    //   prxis = [...prxis,...proxies];
+    //   ctx.self.redis.client.set('proxies',JSON.stringify(prxis));
+    // }
     return ctx.self.sendHomeMsg();
   }
   if (/^(?!.*\.\.)(?!.*\.$)[^\W][\w.]{0,29}$/.test(msg)) {

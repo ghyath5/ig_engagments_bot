@@ -175,7 +175,7 @@ export class Client {
         //     accounts.shift();
         // }
         accounts.push(username)
-        this.redis.set('skipped',JSON.stringify(accounts),{"EX":60*60*24*2});
+        this.redis.set('skipped',JSON.stringify(accounts),{"EX":60*60*24*1});
     }
     async sendUser(){
         let me = await this.profile();
@@ -221,11 +221,11 @@ export class Client {
     }
 }
 if(!isPausedWorker){
-    queue.process(2,async (job)=> {
+    queue.process(4,async (job)=> {
         const {username,password} = getCredentials();
         const ig = new IG(username,password);
         await ig.login()
-        await IG.sleep(5000,12000);
+        await IG.sleep(1000,2000);
         const isFollowed = await ig.checkIfollowed(job.data.usernameToFollow, job.data.followerIGId);
         return isFollowed;
     });
