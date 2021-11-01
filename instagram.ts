@@ -153,7 +153,8 @@ class IG {
         let usernames = result.edges.map((edge)=>edge.node.username);
         if(usernames.includes(username)) return true;
         if(!result.page_info?.has_next_page)return false;
-        return await this.checkIfollowed(username,id,result.page_info.end_cursor);
+       // return await this.checkIfollowed(username,id,result.page_info.end_cursor);
+         return false;
     }
     // async checkIfollowed(username: string,id:string,protocolUsed?:string){
     //     return await new Promise(async (resolve,reject)=>{
