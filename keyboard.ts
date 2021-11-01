@@ -36,14 +36,15 @@ export class Keyboard {
             [{text:this.client.translate('myinstabtn').msg, callback_data:`showmyinsta`}],
             [{text:this.client.translate('changelang').msg, callback_data:`changelang`}],
             [{text:this.client.translate('howwork').msg, callback_data:`howwork`}],
+            [{text:this.client.translate('sharebot').msg, callback_data:`sendLink`}]
         ];
         return this.inlineKeyboard(buttons)
     }
     panel(username: string){
         let buttons:any = [
             [{text:this.client.translate('followed').msg, callback_data:`followed-${username}`}],
-            [{text:this.client.translate('skip').msg, callback_data:`skip-${username}`}],
-            [{text:this.client.translate('report').msg, callback_data:`report-${username}`}],
+            [{text:this.client.translate('report').msg, callback_data:`report-${username}`},
+            {text:this.client.translate('skip').msg, callback_data:`skip-${username}`}],
         ];
         return this.inlineKeyboard(buttons)
     }
@@ -52,7 +53,12 @@ export class Keyboard {
             [{text:this.client.translate('private').msg, callback_data:`rep-private-${username}`},
             {text:this.client.translate('notfound').msg, callback_data:`rep-notfound-${username}`}],
             [{text:this.client.translate('cancel').msg, callback_data:`startfollowing`}],
-            
+        ];
+        return this.inlineKeyboard(buttons)
+    }
+    shareBot(){
+        let buttons:any = [
+            [{text:this.client.translate('sharebot').msg, callback_data:`sendLink`}]
         ];
         return this.inlineKeyboard(buttons)
     }

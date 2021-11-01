@@ -35,5 +35,7 @@
 	"reportdesc": "Report this account:",
 	"youspamfollow": "You haven't followed the accounts, Your acttions have been restricted for 10 mins.",
 	"cancel": "Cancel",
-	"back": "back"
+	"sharebot":"💎 Share the bot 💎",
+	"sharebotdesc":"Share this link to earn more gems 💎\n{{link}}",
+	"enterurlink":"تم دخول شخص ما من خلال الرابط الخاص بك, لقد حصلت على 💎"
 }

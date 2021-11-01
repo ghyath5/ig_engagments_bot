@@ -11,6 +11,10 @@ const WEBHOOK_URL = process.env.WEBHOOK_URL!;
 const WEBHOOK_PATH = process.env.WEBHOOK_PATH!;
 
 bot.start(async (ctx) => {
+  let splited = ctx.message?.text?.split(' ');
+  if(splited.length==2 && !isNaN(Number(splited[1]))){
+    ctx.self.enterByLink(splited[1]);
+  }
   if (!ctx.lang) {
     return ctx.self.translate('startupmsg').send(ctx.self.keyboard.langagues());
   }
@@ -45,6 +49,9 @@ bot.action('changeigprofile',(ctx)=>{
 bot.action('startfollowing', async (ctx) => {
   ctx.deleteMessage();
   return ctx.self.sendUser()
+})
+bot.action('sendLink', async (ctx) => {
+  return ctx.editMessageText(ctx.self.translate('sharebotdesc',{link:ctx.self.myLink()}).msg,{parse_mode:"HTML"});
 })
 bot.action('sendusertofollow', async (ctx) => {
   return ctx.self.sendUser()

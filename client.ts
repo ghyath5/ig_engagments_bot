@@ -33,6 +33,12 @@ const getCredentials = ()=>{
     return credentials[index]
 }
 export class Client {
+    async enterByLink(id) {
+        if(id == this.pk)return;  
+        let me = await  prisma.user.findUnique({where:{id:this.pk}});
+        if(me)return;
+        this.redis.set(`ref`,id,{'EX':60*10});
+    }
     async checkIfollowed(username: string) {       
         let user:User = await this.profile();
         const myUsername = user.igUsername;
@@ -56,6 +62,9 @@ export class Client {
         this.keyboard = new Keyboard(this);
         this.i18n = i18n;
         this.i18n.setLocale(this.lang);
+    }
+    myLink(){
+        return `https://t.me/${process.env.BOT_USERNAME}/?start=${this.pk}`
     }
     async saveFollowAction(otherUserId){
         await prisma.account.create({
@@ -89,10 +98,26 @@ export class Client {
                 if(e.message.includes("Unique"))
                     resolve({linked:false,message:this.translate("constraintUsername").msg})                
             }).then(()=>{
+                this.checkRef()
                 this.redis.del('sendingusername');
                 return resolve({linked:true})
             })
         })
+    }
+    async checkRef() {
+        let refId = await this.redis.get(`ref`);
+        if(!refId)return;
+        prisma.user.update({
+            where:{id:Number(refId)},
+            data:{
+                gems:{increment:1}
+            }
+        }).then(async ()=>{
+            let client = new Client(Number(refId));
+            await client.getLang();
+            client.translate('enterurlink').send()
+        }).catch(()=>{})
+        this.redis.del(`ref`);
     }
     async findUserByUsername(username: string):Promise<User|null>{
         return await prisma.user.findUnique({where:{igUsername:username}});
@@ -111,7 +136,9 @@ export class Client {
         this.redis.setProfileData(`locale`,lang);
     }
     async getLang(){
-        return await this.redis.getProfileData(`locale`) || 'en';
+        let lang = await this.redis.getProfileData(`locale`) || 'en';
+        this.lang = lang;
+        return this.lang;
     }
     translate(key:string,vars={},lang = this.lang){
         const msg = this.i18n.__({phrase:key,locale:lang},vars)
@@ -217,7 +244,8 @@ export class Client {
             ...this.keyboard.panel(account.igUsername),
             parse_mode:"HTML",
         }
-        ).catch((e)=>{})
+        ).catch((e)=>{console.log(e);
+        })
     }
 }
 if(!isPausedWorker){
@@ -251,7 +279,7 @@ if(!isPausedWorker){
             }
             const followedAccounts = await follower.followedAccounts();
             if(followedAccounts.includes(usernameToFollow))return;
-            bot.telegram.sendMessage(followerPk,`${follower.translate('youvfollowed',{username:usernameToFollow}).msg}\n${follower.translate('moregemsmorefollowers').msg}`,{parse_mode:"HTML"}).catch((e)=>{})
+            bot.telegram.sendMessage(followerPk,`${follower.translate('youvfollowed',{username:usernameToFollow}).msg}\n${follower.translate('moregemsmorefollowers').msg}`,{...follower.keyboard.shareBot(),parse_mode:"HTML"}).catch((e)=>{})
             
             let otherUser = await follower.findUserByUsername(usernameToFollow);
             if(!otherUser)return;

@@ -34,5 +34,8 @@
     "notfound":"Extraviado",
     "reportdesc":"Reportar esta cuenta:",
     "youspamfollow": "Ha estado restringido durante 10 minutos",
-    "cancel":"Cancel"
+    "cancel":"Cancel",
+	"sharebot":"💎 Share the bot 💎",
+	"sharebotdesc":"Share this link to earn more gems 💎\n{{link}}",
+	"enterurlink":"تم دخول شخص ما من خلال الرابط الخاص بك, لقد حصلت على 💎"
 }
