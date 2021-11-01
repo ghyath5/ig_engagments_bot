@@ -29,7 +29,9 @@ const proxies = {
     }
     
 }
+let gettingNewProxies = true;
 let proxyIndex = -1;
+let prxiesUsed = 0;
 const getProxy = async ()=>{
     proxyIndex++
     let poxis = await proxies.get();
@@ -170,20 +172,26 @@ class IG {
             let err = e as any;
             console.log(err.toString()); 
             bot.telegram.sendMessage(adminId,'No Ip found');
+            gettingNewProxies = false;
             return false;
         }
     }
     async getFollowing(id:string,cursor?:string){
         let agent;
+        if(prxiesUsed>=10){
+            prxiesUsed = 0;
+        }
         let prxis = await proxies.get();
-        if(!prxis?.length || prxis.length <= 15){
+        if((!prxis?.length || (prxis.length <= 25) || !prxiesUsed) && gettingNewProxies){
             this.proxy = await this.getProxy()
             agent = new SocksProxyAgent(this.proxy);
             console.log('New proxy',this.proxy);
+            prxiesUsed++;
         }else{
             this.proxy = await getProxy();
             agent = new SocksProxyAgent(this.proxy);
             console.log('saved proxy ',this.proxy);
+            prxiesUsed++;
         }
         this.fetchSession()
         return await new Promise((resolve)=>{
