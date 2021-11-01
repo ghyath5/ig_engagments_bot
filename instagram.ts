@@ -133,9 +133,23 @@ class IG {
     //     })
     // }
     async checkProfile(username: any){
+        let agent;
+        let prxis = await proxies.get();
+        if(!prxis?.length || prxis.length <= 15){
+            this.proxy = await this.getProxy()
+            agent = new SocksProxyAgent(this.proxy);
+            console.log('New proxy',this.proxy);
+        }else{
+            this.proxy = await getProxy();
+            agent = new SocksProxyAgent(this.proxy);
+            console.log('saved proxy ',this.proxy);
+        }
         this.fetchSession()
         return new Promise((resolve)=>{
-            axios(`https://www.instagram.com/${username}/?__a=1`,{withCredentials:true,headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}}).then((res)=>resolve((res?.data as any).graphql?.user)).catch((e)=>{
+            axios(`https://www.instagram.com/${username}/?__a=1`,{withCredentials:true,
+            proxy:false,
+            ...(agent&&{httpAgents:agent})
+            ,headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}}).then((res)=>resolve((res?.data as any).graphql?.user)).catch((e)=>{
                 resolve(false)
             })
         })
@@ -177,7 +191,8 @@ class IG {
         return await new Promise((resolve)=>{
             axios(`https://www.instagram.com/graphql/query/?query_id=17874545323001329&id=${id}&first=50${cursor? ('&after='+cursor):''}`,{withCredentials:true,
             proxy:false,
-            ...(agent&&{httpAgents:agent}),headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}}).then((res)=>{
+            ...(agent&&{httpAgents:agent}),
+            headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}}).then((res)=>{
                return resolve((res.data as any)?.data?.user.edge_follow);
             }).catch(async(e)=>{
                 console.log("Get Following Error:", ( e as any).message);
