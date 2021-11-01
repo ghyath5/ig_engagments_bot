@@ -133,22 +133,20 @@ class IG {
     //     })
     // }
     async checkProfile(username: any){
-        let agent;
-        let prxis = await proxies.get();
-        if(!prxis?.length || prxis.length <= 15){
-            this.proxy = await this.getProxy()
-            agent = new SocksProxyAgent(this.proxy);
-            console.log('New proxy',this.proxy);
-        }else{
-            this.proxy = await getProxy();
-            agent = new SocksProxyAgent(this.proxy);
-            console.log('saved proxy ',this.proxy);
-        }
+        // let agent;
+        // let prxis = await proxies.get();
+        // if(!prxis?.length || prxis.length <= 15){
+        //     this.proxy = await this.getProxy()
+        //     agent = new SocksProxyAgent(this.proxy);
+        //     console.log('New proxy',this.proxy);
+        // }else{
+        //     this.proxy = await getProxy();
+        //     agent = new SocksProxyAgent(this.proxy);
+        //     console.log('saved proxy ',this.proxy);
+        // }
         this.fetchSession()
         return new Promise((resolve)=>{
-            axios(`https://www.instagram.com/${username}/?__a=1`,{withCredentials:true,
-            proxy:false,
-            ...(agent&&{httpAgents:agent})
+            axios(`https://www.instagram.com/${username}/?__a=1`,{withCredentials:true
             ,headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}}).then((res)=>resolve((res?.data as any).graphql?.user)).catch((e)=>{
                 resolve(false)
             })
