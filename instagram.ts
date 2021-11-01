@@ -141,17 +141,15 @@ class IG {
         })
     }
     async getFollowing(id:string,cursor?:string){
-        // this.proxy = await getProxy();
         let agent;
         if(proxied){
-            agent = new SocksProxyAgent(`socks4://110.232.76.94:57401`);
+            this.proxy = await getProxy();
+            agent = new SocksProxyAgent(`${this.proxy.type}://${this.proxy.ip}:${this.proxy.port}`);
             proxied = false;
-            console.log('Proxy');            
         }else{
-            console.log('No proxy');
             proxied = true
         }
-        // console.log('using ',this.proxy.ip,':',this.proxy.port);
+        console.log('using ',this.proxy?.ip,':',this.proxy?.port);
         this.fetchSession()
         return await new Promise((resolve)=>{
             axios(`https://www.instagram.com/graphql/query/?query_id=17874545323001329&id=${id}&first=50${cursor? ('&after='+cursor):''}`,{withCredentials:true,
