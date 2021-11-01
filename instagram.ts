@@ -168,7 +168,7 @@ class IG {
             this.proxy = await this.getProxy()
             agent = new SocksProxyAgent(this.proxy);
             console.log('New proxy',this.proxy);
-        }else if(!this.proxy){
+        }else{
             this.proxy = await getProxy();
             agent = new SocksProxyAgent(this.proxy);
             console.log('saved proxy ',this.proxy);
