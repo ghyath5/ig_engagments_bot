@@ -51,8 +51,44 @@ bot.action('sendusertofollow', async (ctx) => {
 })
 
 
+bot.action(/rep-(.+)/, async (ctx) => {
+  let reason = ctx.match['input'].split('-')[1];
+  let username = ctx.match['input'].split('-')[2];
+  let profile = await igInstance.checkProfile(username) as any;
+  ctx.deleteMessage();
+  await ctx.self.addAccountToSkipped(username);
+  ctx.self.sendUser();
+  if(!profile || profile.is_private){
+    bot.telegram.sendMessage(adminId,`Report about @${username}`);
+    return ctx.prisma.user.update({where:{igUsername:username},data:{active:false}})
+  }
+  bot.telegram.sendMessage(adminId,`Report about @${username} but not deleted!`);
+  let reports = parseInt(await ctx.self.redis.get('fake-reports')||"0")
+  if(!reports){
+    await ctx.self.redis.set('fake-reports',"0",{"EX":60*10})
+  }
+  ctx.self.redis.client.incr(`${ctx.from!.id}:fake-reports`);
+})
+bot.action(/report-(.+)/, async (ctx) => {
+  let reports = parseInt(await ctx.self.redis.get('fake-reports')||"0")
+  if(reports >= 3){
+    return ctx.replyWithHTML("Don't spam");
+  }
+  let username = ctx.match['input'].split('-')[1];
+  // let profile = await igInstance.checkProfile(username) as any;
+  // if(profile.is_private){
+  //   return ctx.prisma.user.update({where:{igUsername:username},data:{active:false}})
+  // }
+  return ctx.editMessageText(ctx.self.translate('reportdesc').msg,ctx.self.keyboard.reportBtns(username))
+
+})
 bot.action(/followed-(.+)/, async (ctx) => {
-  let username = ctx.match['input'].split('-')[1]
+  let username = ctx.match['input'].split('-')[1];
+
+  let fakefollows = parseInt(await ctx.self.redis.get(`fakefollows`)||"0")
+  if(fakefollows>=4){
+    return ctx.self.translate('youspamfollow').send()
+  }
   let todayfollowed = parseInt(await ctx.self.redis.get('todayfollowed')||"0")
   if(todayfollowed >= 40 || isPausedWorker){
     return ctx.self.translate('followedexcedded').send();
@@ -79,7 +115,7 @@ bot.action(/followed-(.+)/, async (ctx) => {
   // }
   await ctx.self.checkIfollowed(username)
   ctx.deleteMessage();
-  await IG.sleep(2000,5000);
+  await IG.sleep(1000,3000);
   return ctx.self.sendUser();
 })
 

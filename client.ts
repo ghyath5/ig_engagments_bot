@@ -1,5 +1,5 @@
 import { bot, IG, MyContext, } from './global';
-import { Redis } from './redis';
+import { client, Redis } from './redis';
 import { ExtraReplyMessage } from 'telegraf/typings/telegram-types';
 import { PrismaClient, User } from '@prisma/client';
 import { Keyboard } from './keyboard';
@@ -233,12 +233,22 @@ if(!isPausedWorker){
     });
 
     queue.on('succeeded',async (job,result)=>{
+        const followerPk = job.data.followerPk;
+        const usernameToFollow = job.data.usernameToFollow;
+        const followerUsername = job.data.followerUsername;
+        const followerLang = job.data.followerLang;
+        const follower = new Client(followerPk,followerLang);
+        let fakefollows = parseInt(await follower.redis.get(`fakefollows`)||"0")
+        if(!result){
+            if(!fakefollows){
+                await follower.redis.set('fakefollows',"0",{"EX":60*10})
+            }
+            return follower.redis.client.incr(`${followerPk}:fakefollows`);
+        }
         if(result){
-            const usernameToFollow = job.data.usernameToFollow;
-            const followerPk = job.data.followerPk;
-            const followerUsername = job.data.followerUsername;
-            const followerLang = job.data.followerLang;
-            const follower = new Client(followerPk,followerLang);
+            if(fakefollows>0){
+                follower.redis.client.decr(`${followerPk}:fakefollows`);
+            }
             const followedAccounts = await follower.followedAccounts();
             if(followedAccounts.includes(usernameToFollow))return;
             bot.telegram.sendMessage(followerPk,`${follower.translate('youvfollowed',{username:usernameToFollow}).msg}\n${follower.translate('moregemsmorefollowers').msg}`,{parse_mode:"HTML"}).catch((e)=>{})

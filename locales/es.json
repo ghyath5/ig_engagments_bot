@@ -28,5 +28,10 @@
     "following":"Siguiente",
     "howwork":"Cómo funciona ? ❗️",
     "followedexcedded":"Has alcanzado el número máximo de seguidores permitidos, inténtelo de nuevo después de una hora.",
-    "howdoesworks":"<b>¿Cómo funciona este bot?</b>\nPuede aumentar sus seguidores de Instagram utilizando las gemas que ganó.\n\n<b>¿Cómo puedo ganar más gemas?</b>\nPor ahora puedes seguir a la gente aquí para ganar más gemas, y cuantas más gemas ganes, más seguidores obtendrás con este bot."
+    "howdoesworks":"<b>¿Cómo funciona este bot?</b>\nPuede aumentar sus seguidores de Instagram utilizando las gemas que ganó.\n\n<b>¿Cómo puedo ganar más gemas?</b>\nPor ahora puedes seguir a la gente aquí para ganar más gemas, y cuantas más gemas ganes, más seguidores obtendrás con este bot.",
+    "report":"Reporte🔴",
+    "private":"Cuenta privada",
+    "notfound":"Extraviado",
+    "reportdesc":"Reportar esta cuenta:",
+    "youspamfollow": "Ha estado restringido durante 10 minutos"
 }

@@ -43,6 +43,14 @@ export class Keyboard {
         let buttons:any = [
             [{text:this.client.translate('followed').msg, callback_data:`followed-${username}`}],
             [{text:this.client.translate('skip').msg, callback_data:`skip-${username}`}],
+            [{text:this.client.translate('report').msg, callback_data:`report-${username}`}],
+        ];
+        return this.inlineKeyboard(buttons)
+    }
+    reportBtns(username:string){
+        let buttons:any = [
+            [{text:this.client.translate('private').msg, callback_data:`rep-private-${username}`},
+            {text:this.client.translate('notfound').msg, callback_data:`rep-notfound-${username}`}],
         ];
         return this.inlineKeyboard(buttons)
     }

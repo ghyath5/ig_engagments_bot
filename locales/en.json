@@ -28,5 +28,10 @@
     "following":"Following",
     "howwork":"How it works ? ❗️",
     "followedexcedded":"You have reached to maximum follows allowed number, try again after one hours.",
-    "howdoesworks":"<b>How dose this bot work?</b>\nYou can increase your Instagram followers by using the gems that you earned.\n\n<b>How can I earn more gems?</b>\nFor now you can follow the people in here to earn more gems, and the more gems you earn the more followers you get by this bot."
+    "howdoesworks":"<b>How dose this bot work?</b>\nYou can increase your Instagram followers by using the gems that you earned.\n\n<b>How can I earn more gems?</b>\nFor now you can follow the people in here to earn more gems, and the more gems you earn the more followers you get by this bot.",
+    "report":"Report 🔴",
+    "private":"Private account",
+    "notfound":"Not found",
+    "reportdesc":"Report this account:",
+    "youspamfollow":"You have been restricted for 10 mins."
 }
