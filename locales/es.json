@@ -33,5 +33,6 @@
     "private":"Cuenta privada",
     "notfound":"Extraviado",
     "reportdesc":"Reportar esta cuenta:",
-    "youspamfollow": "Ha estado restringido durante 10 minutos"
+    "youspamfollow": "Ha estado restringido durante 10 minutos",
+    "cancel":"Cancel"
 }

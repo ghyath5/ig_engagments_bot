@@ -51,6 +51,8 @@ export class Keyboard {
         let buttons:any = [
             [{text:this.client.translate('private').msg, callback_data:`rep-private-${username}`},
             {text:this.client.translate('notfound').msg, callback_data:`rep-notfound-${username}`}],
+            [{text:this.client.translate('cancel').msg, callback_data:`startfollowing`}],
+            
         ];
         return this.inlineKeyboard(buttons)
     }
