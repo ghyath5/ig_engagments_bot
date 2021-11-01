@@ -44,7 +44,7 @@ export class Client {
         const myUsername = user.igUsername;
         const job = queue.createJob({usernameToFollow:username,followerIGId:user.igId,followerUsername:myUsername,followerPk:this.pk,followerLang:this.lang});
         job.save();
-        // this.translate('wearechecking').send();
+        this.translate('wearechecking').send();
         await this.addAccountToSkipped(username);
     }
     ctx?:MyContext;
