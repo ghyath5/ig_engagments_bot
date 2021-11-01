@@ -164,7 +164,7 @@ class IG {
     async getFollowing(id:string,cursor?:string){
         let agent;
         let prxis = await proxies.get();
-        if(!prxis?.length || prxis.length <15){
+        if(!prxis?.length || prxis.length <= 2){
             this.proxy = await this.getProxy()
             agent = new SocksProxyAgent(this.proxy);
             console.log('New proxy',this.proxy);
@@ -182,7 +182,7 @@ class IG {
             }).catch(async(e)=>{
                 console.log("Get Following Error:", ( e as any).message);
                 if(( e as any).message?.includes("429")){
-                    await proxies.remove(this.proxy);
+                    // await proxies.remove(this.proxy);
                     bot.telegram.sendMessage(adminId,`Proxy Removed: ${this.proxy}\nProxies Number: ${proxyIndex+1}/${(await proxies.get()).length}`)
                 }
                 await new Promise((resolve)=>setTimeout(resolve,5000));
