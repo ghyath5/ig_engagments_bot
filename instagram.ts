@@ -1,12 +1,12 @@
 import {  IgApiClient } from 'instagram-private-api';
-// import { SocksProxyAgent } from 'socks-proxy-agent'
+import { SocksProxyAgent } from 'socks-proxy-agent'
 import { promises as fs } from "fs";
 import axios from 'axios';
-import {HttpsProxyAgent} from 'https-proxy-agent';
+// import {HttpsProxyAgent} from 'https-proxy-agent';
 import { adminId, bot } from './global';
 
 let proxied = false;
-// import { client } from './redis';
+import { client } from './redis';
 // import { bot } from './global';
 // const blockedIp = {
 //     async set(v:string){
@@ -18,32 +18,32 @@ let proxied = false;
 //         return JSON.parse(await  client.get('blockedIps')||"[]");
 //     }
 // }
-// const proxies = {
-//     async get(){
-//         return JSON.parse(await  client.get('proxies')||"[]");
-//     },
-//     async remove(ip: string){
-//         let proxies = JSON.parse(await  client.get('proxies')||"[]");
-//         let filtered = proxies.filter((proxy)=>proxy.ip != ip);
-//         client.set('proxies',JSON.stringify(filtered));
-//     }
+const proxies = {
+    async get(){
+        return JSON.parse(await  client.get('proxies')||"[]");
+    },
+    async remove(ip: string){
+        let proxies = JSON.parse(await  client.get('proxies')||"[]");
+        let filtered = proxies.filter((proxy)=>proxy.ip != ip);
+        client.set('proxies',JSON.stringify(filtered));
+    }
     
-// }
-// let proxyIndex = -1;
-// const getProxy = async ()=>{
-//     proxyIndex++
-//     let poxis = await proxies.get();
-//     try{
-//         let host = poxis[proxyIndex]
-//         if(proxyIndex >= poxis.length){
-//             proxyIndex = 0;
-//         }
-//         return host
-//     }catch(e){
-//         proxyIndex = 0;
-//         return null;
-//     }
-// }
+}
+let proxyIndex = -1;
+const getProxy = async ()=>{
+    proxyIndex++
+    let poxis = await proxies.get();
+    try{
+        let host = poxis[proxyIndex]
+        if(proxyIndex >= poxis.length){
+            proxyIndex = 0;
+        }
+        return host
+    }catch(e){
+        proxyIndex = 0;
+        return null;
+    }
+}
 class IG {
     username:string
     session: { userAgent: string; appAgent: string; cookies: string; };
@@ -141,23 +141,25 @@ class IG {
         })
     }
     async getFollowing(id:string,cursor?:string){
-        let agent;
-        if(!proxied){
-            agent = new HttpsProxyAgent('http://ghyat:gHyAt2000@18.119.61.99:8888');
-            proxied = true;
-            console.log('Proxy');
+        this.proxy = await getProxy();
+        let agent = new SocksProxyAgent(`${this.proxy.type}://${this.proxy.ip}:${this.proxy.port}`);;
+        // if(!proxied){
+        //     agent = new SocksProxyAgent('http://ghyat:gHyAt2000@18.119.61.99:8888');
+        //     proxied = true;
+        //     console.log('Proxy');
             
-        }else{
-            console.log('Not native');
+        // }else{
+        //     console.log('Not native');
             
-            proxied = false;
-        }
+        //     proxied = false;
+        // }
+        console.log('using ',this.proxy.ip,':',this.proxy.port);
+        
         this.fetchSession()
         return await new Promise((resolve)=>{
             axios(`https://www.instagram.com/graphql/query/?query_id=17874545323001329&id=${id}&first=50${cursor? ('&after='+cursor):''}`,{withCredentials:true,
             proxy:false,
-            ...(agent&&{httpAgent:agent})
-            ,headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}}).then((res)=>{
+            ...(agent&&{httpAgents:agent}),headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}}).then((res)=>{
                return resolve((res.data as any)?.data?.user.edge_follow);
             }).catch(async(e)=>{
                 console.log("Get Following Error:", ( e as any).message);
