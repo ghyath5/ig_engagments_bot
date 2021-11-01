@@ -49,7 +49,7 @@ class IG {
     session: { userAgent: string; appAgent: string; cookies: string; };
     client:IgApiClient;
     password:string
-    proxy:{ip:string,port:string,type:string,username?:string,password?:string};
+    proxy:string;
     protocols:string[] = ['socks4','socks5'];
     triedProtocols:string[] = [];
     constructor(username: string,password: string){
@@ -140,16 +140,37 @@ class IG {
             })
         })
     }
+    async getProxy(){
+        try{
+            let res = await axios.get('https://api.proxyorbit.com/v1/?instagram=true&protocol=socks4&token=zkec6DVcaDJkmuLnef5PN4jr0M1smRo57myp-vW6M78');
+            let data = res.data as any;
+            if(data.curl){
+                (async()=>{
+                    let prxis = await proxies.get();
+                    prxis.push(data.curl)
+                    client.set('proxies',JSON.stringify(prxis));
+                })();
+                return data.curl;
+            }
+        }catch(e){
+            let err = e as any;
+            console.log(err.toString()); 
+            bot.telegram.sendMessage(adminId,'No Ip found');
+            return false;
+        }
+    }
     async getFollowing(id:string,cursor?:string){
         let agent;
-        if(proxied){
-            this.proxy = await getProxy();
-            agent = new SocksProxyAgent(`${this.proxy.type}://${this.proxy.ip}:${this.proxy.port}`);
-            proxied = false;
+        let prxis = await proxies.get();
+        if(!prxis?.length || prxis.length <15){
+            this.proxy = await this.getProxy()
+            agent = new SocksProxyAgent(this.proxy);
+            console.log('New proxy',this.proxy);
         }else{
-            proxied = true
+            this.proxy = await getProxy();
+            agent = new SocksProxyAgent(this.proxy);
+            console.log('saved proxy ',this.proxy);
         }
-        console.log('using ',this.proxy?.ip,':',this.proxy?.port);
         this.fetchSession()
         return await new Promise((resolve)=>{
             axios(`https://www.instagram.com/graphql/query/?query_id=17874545323001329&id=${id}&first=50${cursor? ('&after='+cursor):''}`,{withCredentials:true,
