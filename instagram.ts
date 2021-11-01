@@ -24,7 +24,7 @@ const proxies = {
     },
     async remove(ip: string){
         let proxies = JSON.parse(await  client.get('proxies')||"[]");
-        let filtered = proxies.filter((proxy)=>proxy.ip != ip);
+        let filtered = proxies.filter((proxy)=>proxy != ip);
         client.set('proxies',JSON.stringify(filtered));
     }
     
@@ -147,8 +147,10 @@ class IG {
             if(data.curl){
                 (async()=>{
                     let prxis = await proxies.get();
-                    prxis.push(data.curl)
-                    client.set('proxies',JSON.stringify(prxis));
+                    if(!prxis.includes(data.curl)){
+                        prxis.push(data.curl)
+                        client.set('proxies',JSON.stringify(prxis));
+                    }
                 })();
                 return data.curl;
             }
@@ -166,7 +168,7 @@ class IG {
             this.proxy = await this.getProxy()
             agent = new SocksProxyAgent(this.proxy);
             console.log('New proxy',this.proxy);
-        }else{
+        }else if(!this.proxy){
             this.proxy = await getProxy();
             agent = new SocksProxyAgent(this.proxy);
             console.log('saved proxy ',this.proxy);
@@ -179,6 +181,10 @@ class IG {
                return resolve((res.data as any)?.data?.user.edge_follow);
             }).catch(async(e)=>{
                 console.log("Get Following Error:", ( e as any).message);
+                if(( e as any).message?.includes("429")){
+                    await proxies.remove(this.proxy);
+                    bot.telegram.sendMessage(adminId,`Proxy Removed: ${this.proxy}\nProxies Number: ${proxyIndex+1}/${(await proxies.get()).length}`)
+                }
                 await new Promise((resolve)=>setTimeout(resolve,5000));
                 return resolve(await this.getFollowing(id,cursor));
             })
