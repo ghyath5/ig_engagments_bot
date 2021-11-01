@@ -249,7 +249,7 @@ export class Client {
     }
 }
 if(!isPausedWorker){
-    queue.process(3,async (job)=> {
+    queue.process(2,async (job)=> {
         const {username,password} = getCredentials();
         const ig = new IG(username,password);
         await ig.login()
