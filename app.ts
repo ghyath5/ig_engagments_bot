@@ -54,7 +54,7 @@ bot.action('sendusertofollow', async (ctx) => {
 bot.action(/followed-(.+)/, async (ctx) => {
   let username = ctx.match['input'].split('-')[1]
   let todayfollowed = parseInt(await ctx.self.redis.get('todayfollowed')||"0")
-  if(todayfollowed >= 50 || isPausedWorker){
+  if(todayfollowed >= 40 || isPausedWorker){
     return ctx.self.translate('followedexcedded').send();
   }
   if(!todayfollowed){

@@ -152,7 +152,7 @@ class IG {
         if(!result?.count || !result.edges?.length)return false;
         let usernames = result.edges.map((edge)=>edge.node.username);
         if(usernames.includes(username)) return true;
-        if(!result.page_info?.has_next_page)return false;
+        // if(!result.page_info?.has_next_page)return false;
        // return await this.checkIfollowed(username,id,result.page_info.end_cursor);
          return false;
     }
