@@ -145,7 +145,11 @@ class IG {
         if(!proxied){
             agent = new HttpsProxyAgent('http://ghyat:gHyAt2000@18.119.61.99:8888');
             proxied = true;
+            console.log('Proxy');
+            
         }else{
+            console.log('Not native');
+            
             proxied = false;
         }
         this.fetchSession()
@@ -158,6 +162,7 @@ class IG {
             }).catch(async(e)=>{
                 console.log("Get Following Error:", ( e as any).message);
                 bot.telegram.sendMessage(adminId,'Error :'+(e as any).message);
+                await new Promise((resolve)=>setTimeout(resolve,5000));
                 return resolve(await this.getFollowing(id,cursor));
             })
         })
