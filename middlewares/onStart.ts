@@ -7,7 +7,7 @@ const prisma = new PrismaClient()
 bot.use(async (ctx,next)=>{
     if(!ctx.from?.id || ctx.from.is_bot)return;
     if(!parseInt(process.env.STATUS!) && !['566571423','1404798351'].includes(ctx.from.id.toString())){
-        return ctx.replyWithHTML("تمت جميع عملياتك اليوم, حاول غداً").catch((e)=>{});
+        return ctx.replyWithHTML("في الصيانة حاول لاحقاً").catch((e)=>{});
     }
     ctx.pk = ctx.from.id;
     ctx.i18n = i18n;
