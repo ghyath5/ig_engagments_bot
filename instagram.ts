@@ -164,7 +164,7 @@ class IG {
     async getFollowing(id:string,cursor?:string){
         let agent;
         let prxis = await proxies.get();
-        if(!prxis?.length || prxis.length <= 2){
+        if(!prxis?.length || prxis.length <= 15){
             this.proxy = await this.getProxy()
             agent = new SocksProxyAgent(this.proxy);
             console.log('New proxy',this.proxy);
