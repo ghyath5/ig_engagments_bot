@@ -58,7 +58,7 @@ bot.action(/followed-(.+)/, async (ctx) => {
     return ctx.self.translate('followedexcedded').send();
   }
   if(!todayfollowed){
-    ctx.self.redis.set('todayfollowed',"0",{"EX":60*60*1})
+    await ctx.self.redis.set('todayfollowed',"0",{"EX":60*60*1})
   }
   ctx.self.redis.client.incr(`${ctx.from!.id}:todayfollowed`);
   // if(ctx.session.wating)return;
