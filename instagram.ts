@@ -84,8 +84,8 @@ class IG {
             try{
                 await this.client.simulate.preLoginFlow();
                 let me = await this.client.account.login(this.username,this.password);
-                await this.client.simulate.postLoginFlow();
                 this.saveSession();
+                await this.client.simulate.postLoginFlow();
                 return me;
             }catch(e){
                 console.log("IG error login:", e)
@@ -142,19 +142,8 @@ class IG {
     }
     async getFollowing(id:string,cursor?:string){
         this.proxy = await getProxy();
-        let agent = new SocksProxyAgent(`${this.proxy.type}://${this.proxy.ip}:${this.proxy.port}`);;
-        // if(!proxied){
-        //     agent = new SocksProxyAgent('http://ghyat:gHyAt2000@18.119.61.99:8888');
-        //     proxied = true;
-        //     console.log('Proxy');
-            
-        // }else{
-        //     console.log('Not native');
-            
-        //     proxied = false;
-        // }
+        let agent = new SocksProxyAgent(`${this.proxy.type}://${this.proxy.ip}:${this.proxy.port}`);
         console.log('using ',this.proxy.ip,':',this.proxy.port);
-        
         this.fetchSession()
         return await new Promise((resolve)=>{
             axios(`https://www.instagram.com/graphql/query/?query_id=17874545323001329&id=${id}&first=50${cursor? ('&after='+cursor):''}`,{withCredentials:true,
