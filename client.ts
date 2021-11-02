@@ -93,7 +93,7 @@ export class Client {
             prisma.user.upsert({
                 where:{id:this.pk},
                 create:{id:this.pk,igUsername:username.toLowerCase(),igId:userId},
-                update:{igUsername:username.toLowerCase()}
+                update:{igUsername:username.toLowerCase(),active:true}
             }).catch(e=>{
                 if(e.message.includes("Unique"))
                     resolve({linked:false,message:this.translate("constraintUsername").msg})                
