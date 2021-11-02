@@ -165,7 +165,7 @@ bot.on('text', async (ctx) => {
   }
   if (/^(?!.*\.\.)(?!.*\.$)[^\W][\w.]{0,29}$/.test(msg)) {
     let user = (await igInstance.checkProfile(msg) as any);
-    if (!user?.id || user.is_private) {
+    if (!user?.id || user.is_private || user.is_verified) {
       return ctx.self.translate('usernamewrong').send();
     }
     let saved = await ctx.self.save(msg,user.id);
