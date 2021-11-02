@@ -27,6 +27,7 @@ export class Keyboard {
     changeProfileBtn() {
         let buttons:any = [
             [{text:this.client.translate('change').msg, callback_data:`changeigprofile`}],
+            [{text:this.client.translate('sharebot').msg, callback_data:`sendLink`}]
         ];
         return this.inlineKeyboard(buttons)
     }

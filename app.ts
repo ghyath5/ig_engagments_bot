@@ -51,7 +51,9 @@ bot.action('startfollowing', async (ctx) => {
   return ctx.self.sendUser()
 })
 bot.action('sendLink', async (ctx) => {
-  return ctx.editMessageText(ctx.self.translate('sharebotdesc',{link:ctx.self.myLink()}).msg,{parse_mode:"HTML"});
+    return ctx.editMessageText(ctx.self.translate('sharebotdesc',{link:ctx.self.myLink()}).msg,{parse_mode:"HTML"}).catch(()=>{
+      return ctx.editMessageCaption(ctx.self.translate('sharebotdesc',{link:ctx.self.myLink()}).msg,{...ctx.self.keyboard.changeProfileBtn(),parse_mode:"HTML"});
+    });
 })
 bot.action('sendusertofollow', async (ctx) => {
   return ctx.self.sendUser()
