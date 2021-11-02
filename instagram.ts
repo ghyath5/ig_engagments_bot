@@ -4,25 +4,6 @@ import axios from 'axios';
 import * as Tunnel from 'tunnel';
 import { client } from './redis';
 import { adminId, bot } from './global';
-// import { bot } from './global';
-// const blockedIp = {
-//     async set(v:string){
-//         let ips = JSON.parse(await  client.get('blockedIps')||"[]");
-//         ips.push(v);
-//         client.set('blockedIps',JSON.stringify(ips));
-//     },
-//     async get(){
-//         return JSON.parse(await  client.get('blockedIps')||"[]");
-//     }
-// }
-// const tunnel = Tunnel.httpsOverHttp({
-//     proxy: {
-    
-//         host: '190.85.115.78',
-//         port: 3128,
-//     },
-// });
-// axios('https://instagram.com/graphql',{proxy:false,httpAgent:tunnel,httpsAgent:tunnel}).then(res=>console.log(res.data)).catch((e)=>console.log(e.message));
 
 const proxies = {
     async get(){
@@ -35,9 +16,7 @@ const proxies = {
     }
     
 }
-let gettingNewProxies = true;
 let proxyIndex = -1;
-let prxiesUsed = 0;
 const getProxy = async ()=>{
     proxyIndex++
     let poxis = await proxies.get();
@@ -141,17 +120,6 @@ class IG {
     //     })
     // }
     async checkProfile(username: any){
-        // let agent;
-        // let prxis = await proxies.get();
-        // if(!prxis?.length || prxis.length <= 15){
-        //     this.proxy = await this.getProxy()
-        //     agent = new SocksProxyAgent(this.proxy);
-        //     console.log('New proxy',this.proxy);
-        // }else{
-        //     this.proxy = await getProxy();
-        //     agent = new SocksProxyAgent(this.proxy);
-        //     console.log('saved proxy ',this.proxy);
-        // }
         this.fetchSession()
         return new Promise((resolve)=>{
             axios(`https://www.instagram.com/${username}/?__a=1`,{withCredentials:true
@@ -293,12 +261,8 @@ class IG {
     //     return await func();
     // }
 }
-// addQueue.process(function (job, done) {
-//     console.log(`Processing job ${job.id}`);
-//     return done(null, job.data.id);
-// });
+
 const igInstance = new IG(process.env.IG_USERNAME!,process.env.IG_PASSWORD!);
 igInstance.login()
-// igInstance.checkIfollowed('me','2342342342')
 export {igInstance}
 export default IG;
