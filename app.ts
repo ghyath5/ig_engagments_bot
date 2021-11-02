@@ -152,12 +152,10 @@ bot.on('text', async (ctx) => {
       let prxis = JSON.parse(await ctx.self.redis.client.get('proxies')||"[]");
       let ips = prxis.map((p)=>p.ip);
       proxies = proxies.map((proxy)=>{
-        if(!proxy || ips.includes(proxy.ip))return;
         let host = proxy.split(':')
+        if(!proxy || ips.includes(host[0]))return;
         if (host[0].match(/^\d/)) {
           return {ip:host[0],port:host[1]}
-        }else{
-          return {ip:host[1],port:host[2],type:host[0]}
         }
       }).filter((p)=>p)
       prxis = [...prxis,...proxies];

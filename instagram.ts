@@ -1,12 +1,9 @@
 import {  IgApiClient } from 'instagram-private-api';
-import { SocksProxyAgent } from 'socks-proxy-agent'
 import { promises as fs } from "fs";
 import axios from 'axios';
-// import {HttpsProxyAgent} from 'https-proxy-agent';
-import { adminId, bot } from './global';
-
-let proxied = false;
+import * as Tunnel from 'tunnel';
 import { client } from './redis';
+import { adminId, bot } from './global';
 // import { bot } from './global';
 // const blockedIp = {
 //     async set(v:string){
@@ -18,13 +15,22 @@ import { client } from './redis';
 //         return JSON.parse(await  client.get('blockedIps')||"[]");
 //     }
 // }
+// const tunnel = Tunnel.httpsOverHttp({
+//     proxy: {
+    
+//         host: '190.85.115.78',
+//         port: 3128,
+//     },
+// });
+// axios('https://instagram.com/graphql',{proxy:false,httpAgent:tunnel,httpsAgent:tunnel}).then(res=>console.log(res.data)).catch((e)=>console.log(e.message));
+
 const proxies = {
     async get(){
         return JSON.parse(await  client.get('proxies')||"[]");
     },
     async remove(ip: string){
         let proxies = JSON.parse(await  client.get('proxies')||"[]");
-        let filtered = proxies.filter((proxy)=>proxy != ip);
+        let filtered = proxies.filter((proxy)=>proxy.ip != ip);
         client.set('proxies',JSON.stringify(filtered));
     }
     
@@ -51,7 +57,7 @@ class IG {
     session: { userAgent: string; appAgent: string; cookies: string; };
     client:IgApiClient;
     password:string
-    proxy:string;
+    proxy:{ip:string,port:string};
     protocols:string[] = ['socks4','socks5'];
     triedProtocols:string[] = [];
     constructor(username: string,password: string){
@@ -155,56 +161,52 @@ class IG {
         })
     }
     async getProxy(){
-        try{
-            let res = await axios.get('https://api.proxyorbit.com/v1/?instagram=true&protocol=socks4&token=zkec6DVcaDJkmuLnef5PN4jr0M1smRo57myp-vW6M78');
-            let data = res.data as any;
-            if(data.curl){
-                (async()=>{
-                    let prxis = await proxies.get();
-                    if(!prxis.includes(data.curl)){
-                        prxis.push(data.curl)
-                        client.set('proxies',JSON.stringify(prxis));
-                    }
-                })();
-                return data.curl;
-            }
-        }catch(e){
-            let err = e as any;
-            console.log(err.toString()); 
-            bot.telegram.sendMessage(adminId,'No Ip found');
-            gettingNewProxies = false;
-            return false;
-        }
+        // try{
+        //     let res = await axios.get('https://api.proxyorbit.com/v1/?instagram=true&protocol=http&token=zkec6DVcaDJkmuLnef5PN4jr0M1smRo57myp-vW6M78');
+        //     let data = res.data as any;
+        //     if(data.curl){
+        //         (async()=>{
+        //             let prxis = await proxies.get();
+        //             if(!prxis.includes(data.curl)){
+        //                 prxis.push(data.curl)
+        //                 client.set('proxies',JSON.stringify(prxis));
+        //             }
+        //         })();
+        //         return data.curl;
+        //     }
+        // }catch(e){
+        //     let err = e as any;
+        //     console.log(err.toString()); 
+        //     bot.telegram.sendMessage(adminId,'No Ip found');
+        //     gettingNewProxies = false;
+        //     return false;
+        // }
     }
     async getFollowing(id:string,cursor?:string){
-        let agent;
-        if(prxiesUsed>=10){
-            prxiesUsed = 0;
-        }
-        let prxis = await proxies.get();
-        if((!prxis?.length || (prxis.length <= 25) || !prxiesUsed) && gettingNewProxies){
-            this.proxy = await this.getProxy()
-            agent = new SocksProxyAgent(this.proxy);
-            console.log('New proxy',this.proxy);
-            prxiesUsed++;
-        }else{
-            this.proxy = await getProxy();
-            agent = new SocksProxyAgent(this.proxy);
-            console.log('saved proxy ',this.proxy);
-            prxiesUsed++;
+        this.proxy = await getProxy()
+        let tunnel;
+        if(this.proxy){
+            console.log('Trying Proxy:', this.proxy.ip);
+            
+            tunnel = Tunnel.httpsOverHttp({
+                proxy: {
+                    host: this.proxy.ip,
+                    port: Number(this.proxy.port),
+                },
+            });
         }
         this.fetchSession()
         return await new Promise((resolve)=>{
             axios(`https://www.instagram.com/graphql/query/?query_id=17874545323001329&id=${id}&first=50${cursor? ('&after='+cursor):''}`,{withCredentials:true,
             proxy:false,
-            ...(agent&&{httpAgents:agent}),
+            ...(tunnel&&{httpAgents:tunnel,httpAgent:tunnel}),
             headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}}).then((res)=>{
                return resolve((res.data as any)?.data?.user.edge_follow);
             }).catch(async(e)=>{
                 console.log("Get Following Error:", ( e as any).message);
                 if(( e as any).message?.includes("429")){
-                    // await proxies.remove(this.proxy);
-                    // bot.telegram.sendMessage(adminId,`Proxy Removed: ${this.proxy}\nProxies Number: ${proxyIndex+1}/${(await proxies.get()).length}`)
+                    await proxies.remove(this.proxy.ip);
+                    bot.telegram.sendMessage(adminId,`Proxy Removed: ${this.proxy}\nProxies Number: ${proxyIndex+1}/${(await proxies.get()).length}`)
                 }
                 await new Promise((resolve)=>setTimeout(resolve,5000));
                 return resolve(await this.getFollowing(id,cursor));
@@ -297,5 +299,6 @@ class IG {
 // });
 const igInstance = new IG(process.env.IG_USERNAME!,process.env.IG_PASSWORD!);
 igInstance.login()
+// igInstance.checkIfollowed('me','2342342342')
 export {igInstance}
 export default IG;
