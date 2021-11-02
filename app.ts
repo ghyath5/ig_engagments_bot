@@ -97,7 +97,7 @@ bot.action(/followed-(.+)/, async (ctx) => {
     return ctx.self.translate('youspamfollow').send()
   }
   let todayfollowed = parseInt(await ctx.self.redis.get('todayfollowed')||"0")
-  if(todayfollowed >= 15 || isPausedWorker){
+  if(todayfollowed >= 25 || isPausedWorker){
     return ctx.self.translate('followedexcedded').send();
   }
   if(!todayfollowed){
