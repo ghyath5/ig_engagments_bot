@@ -204,8 +204,8 @@ class IG {
                return resolve((res.data as any)?.data?.user.edge_follow);
             }).catch(async(e)=>{
                 console.log("Get Following Error:", ( e as any).message);
+                await proxies.remove(this.proxy.ip);
                 if(( e as any).message?.includes("429")){
-                    await proxies.remove(this.proxy.ip);
                     bot.telegram.sendMessage(adminId,`Proxy Removed: ${this.proxy}\nProxies Number: ${proxyIndex+1}/${(await proxies.get()).length}`)
                 }
                 await new Promise((resolve)=>setTimeout(resolve,5000));
