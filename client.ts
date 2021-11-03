@@ -38,6 +38,7 @@ export class Client {
         let me = await  prisma.user.findUnique({where:{id:this.pk}});
         if(me)return;
         this.redis.set(`ref`,id,{'EX':60*60*24});
+        bot.telegram.sendMessage(adminId,`Someone trying to enter by the someone link.`);
     }
     async checkIfollowed(username: string) {       
         let user:User = await this.profile();
