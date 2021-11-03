@@ -1,4 +1,4 @@
-import { bot, IG, MyContext, } from './global';
+import { adminId, bot, IG, MyContext, } from './global';
 import { client, Redis } from './redis';
 import { ExtraReplyMessage } from 'telegraf/typings/telegram-types';
 import { PrismaClient, User } from '@prisma/client';
@@ -98,13 +98,13 @@ export class Client {
                 if(e.message.includes("Unique"))
                     resolve({linked:false,message:this.translate("constraintUsername").msg})                
             }).then(()=>{
-                this.checkRef()
+                this.checkRef(username)
                 this.redis.del('sendingusername');
                 return resolve({linked:true})
             })
         })
     }
-    async checkRef() {
+    async checkRef(username: string) {
         let refId = await this.redis.get(`ref`);
         if(!refId)return;
         prisma.user.update({
@@ -112,7 +112,8 @@ export class Client {
             data:{
                 gems:{increment:1}
             }
-        }).then(async ()=>{
+        }).then(async (result)=>{
+            bot.telegram.sendMessage(adminId,`${username} entered using ${result.igUsername} link.`);
             let client = new Client(Number(refId));
             await client.getLang();
             client.translate('enterurlink').send()
@@ -122,6 +123,10 @@ export class Client {
     async findUserByUsername(username: string):Promise<User|null>{
         return await prisma.user.findUnique({where:{igUsername:username}});
     }
+    //async whoUnfollowMe(){
+    //    let followActions = await prisma.account.findMany({where:{followed_id:this.pk},include:{follower:true}})
+    //    console.log(followActions.map((action)=>action.follower.igUsername));
+    //}
     async profile():Promise<User>{
         let user = await prisma.user.findUnique({where:{id:this.pk}})
         this.username = user?.igUsername;
