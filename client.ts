@@ -37,7 +37,7 @@ export class Client {
         if(id == this.pk)return;  
         let me = await  prisma.user.findUnique({where:{id:this.pk}});
         if(me)return;
-        this.redis.set(`ref`,id,{'EX':60*10});
+        this.redis.set(`ref`,id,{'EX':60*60*2});
     }
     async checkIfollowed(username: string) {       
         let user:User = await this.profile();
