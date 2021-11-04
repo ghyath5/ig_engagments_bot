@@ -91,9 +91,13 @@ bot.action(/report-(.+)/, async (ctx) => {
   return ctx.editMessageText(ctx.self.translate('reportdesc').msg,ctx.self.keyboard.reportBtns(username))
 
 })
+let followAction = {};
 bot.action(/followed-(.+)/, async (ctx) => {
   let username = ctx.match['input'].split('-')[1];
-
+  if(followAction[ctx.from!.id] && followAction[ctx.from!.id] == username){  
+    return;
+  }
+  followAction[ctx.from!.id] = username;
   let fakefollows = parseInt(await ctx.self.redis.get(`fakefollows`)||"0")
   if(fakefollows>=4){
     return ctx.self.translate('youspamfollow').send()
