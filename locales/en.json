@@ -46,5 +46,6 @@
 	"detectUnfollow": "We have detect that you have unfollowed {{name}}, we have deducted one gem from your balance... if this action repeated many times your account will be banned.",
 	"noenoughgems": "Not enough gems.",
 	"startProccess":"Start now ➡️.",
+	"followOurIg":"Follow the Instagram bot account: <a href='https://instagram.com/super_ig_engagement'>super_ig_engagement</a>",
 	"younotreceivefollows":"You are not receiving followers because you don't have enough gems, start following the other to earn more gems."
 }
