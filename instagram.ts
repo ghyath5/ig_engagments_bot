@@ -131,7 +131,7 @@ class IG {
             if(!result?.count || !result.edges?.length)return [];
             usernames = [...usernames,...result.edges.map((edge)=>edge.node.username)];
             if(!result?.page_info?.end_cursor)return usernames;
-            await this.sleep(500);
+            await this.sleep(900);
             return await more(result?.page_info?.end_cursor);
         }
         usernames = await more();
