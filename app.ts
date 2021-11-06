@@ -5,6 +5,7 @@ import './middlewares/onStart'
 import fastify from 'fastify';
 import telegrafPlugin from 'fastify-telegraf'
 import { igInstance } from './instagram';
+import { multipleNotification } from './utls';
 const app = fastify({ logger: false, });
 const isPausedWorker = parseInt(process.env.PAUSE_WORKER||"0")
 const WEBHOOK_URL = process.env.WEBHOOK_URL!;
@@ -159,6 +160,18 @@ bot.action(/skip-(.+)/,async (ctx)=>{
   return ctx.self.sendUser()
 })
 
+bot.command('s_g_m',async (ctx)=>{
+  if(ctx.from.id.toString() !=  adminId)return;
+  let allUsers = await ctx.prisma.user.findMany({
+    where:{
+      gems:{
+        lte:2
+      }
+    }
+  });
+  let ids = allUsers.map((u)=>u.id);
+  multipleNotification('younotreceivefollows',ids)
+})
 bot.command('start_following',(ctx)=>{
   return ctx.self.sendUser();
 })
