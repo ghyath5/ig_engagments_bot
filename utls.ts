@@ -8,14 +8,12 @@ export const notifyUnfollowers = async (pk:number,users:(Account & {follower: Us
     function sendNotification(){
         let timeoutcounter = setTimeout(async ()=>{
             if(i >= users.length){
-                user.addGems(users.length-2);
+                user.addGems(users.length);
                 clearTimeout(timeoutcounter);
-                return user.translate('yougotgems',{gems:users.length-2}).send()
+                return user.translate('yougotgems',{gems:users.length}).send()
             }
             let active = users[i];
             let client = new Client(active.follower.id);
-            // await client.getLang();
-            // await client.translate('detectUnfollow',{name:username}).send()
             console.log(`Sending ${i+1}/${users.length}`);
             prisma.account.delete({
                 where:{
@@ -24,14 +22,11 @@ export const notifyUnfollowers = async (pk:number,users:(Account & {follower: Us
                         follower_id:active.follower_id,
                     }
                 }
-            }).catch((e)=>{
-                console.log(e);
-                
-            }).then((a)=>{
-                console.log('Deleted ', i);
-                
+            }).then(async(a)=>{
+                await client.getLang();
+                await client.translate('detectUnfollow',{name:username}).send()
+                client.deductGems(1);
             })
-            // client.deductGems(1);
             i++;
             sendNotification();
         },500)
