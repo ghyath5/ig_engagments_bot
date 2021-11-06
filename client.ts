@@ -7,6 +7,7 @@ import Queue from 'bee-queue';
 import { igInstance } from './instagram';
 import i18n from "./locales";
 import { I18n } from 'i18n';
+import { notifyUnfollowers } from './utls';
 const isPausedWorker = parseInt(process.env.PAUSE_WORKER||"0")
 
 const queue = new Queue('following',{
@@ -67,6 +68,16 @@ export class Client {
     myLink(){
         return `https://t.me/${process.env.BOT_USERNAME}/?start=${this.pk}`
     }
+    async addGems(gems:number){
+        return await prisma.user.update({where:{id:this.pk},data:{gems:{increment:gems}}})
+    }
+    async deductGems(gems:number){
+        return await prisma.user.update({where:{id:this.pk},data:{gems:{decrement:gems}}})
+    }
+    async hasSuffecientGems(gems: number){
+        let me = await this.profile();
+        return me?.gems >= gems;
+    }
     async saveFollowAction(otherUserId){
         await prisma.account.create({
             data:{
@@ -124,10 +135,27 @@ export class Client {
     async findUserByUsername(username: string):Promise<User|null>{
         return await prisma.user.findUnique({where:{igUsername:username}});
     }
-    //async whoUnfollowMe(){
-    //    let followActions = await prisma.account.findMany({where:{followed_id:this.pk},include:{follower:true}})
-    //    console.log(followActions.map((action)=>action.follower.igUsername));
-    //}
+    async getFollowers(){
+        return await prisma.account.findMany({where:{followed_id:this.pk},include:{follower:true}});
+    }
+    async whoUnfollowMe(){
+        await this.translate('wearechecking').send()
+        let [followActions,usernames] = await Promise.all([
+            this.getFollowers(),
+            igInstance.getAllFollowers('11303919034')
+        ])
+        let allExpectedUsernames = followActions.map((action)=>action.follower.igUsername);
+        let unfollowedme:string[] = [];
+        allExpectedUsernames.map((one)=>{
+            if(!usernames.includes(one)){
+                unfollowedme.push(one);          
+            }
+        })
+        followActions = followActions.filter((fa)=>unfollowedme.includes(fa.follower.igUsername));
+        notifyUnfollowers(this.pk,followActions);
+        return bot.telegram.sendMessage(adminId,`${unfollowedme.length} user/s unfollowed you.`)
+       
+    }
     async profile():Promise<User>{
         let user = await prisma.user.findUnique({where:{id:this.pk}})
         this.username = user?.igUsername;

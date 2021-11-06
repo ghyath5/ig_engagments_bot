@@ -22,7 +22,27 @@ bot.start(async (ctx) => {
 })
 
 bot.action('howwork',(ctx)=>{
-  return ctx.editMessageText(ctx.self.translate('howdoesworks').msg,{parse_mode:"HTML"})
+  return ctx.editMessageText(ctx.self.translate('howdoesworks').msg,{parse_mode:"HTML"}).catch(()=>{})
+})
+bot.action('showtools',(ctx)=>{
+  return ctx.editMessageText(ctx.self.translate('tools').msg,{...ctx.self.keyboard.tools(),parse_mode:"HTML"}).catch(()=>{})
+})
+bot.action('detectunfollowers',async(ctx)=>{
+  return ctx.editMessageText(ctx.self.translate('unfollowtool').msg,{...ctx.self.keyboard.startToolBtn('detectUnfollowers'),parse_mode:"HTML"}).catch(()=>{})
+})
+
+bot.action(/starttool-(.+)/,async (ctx)=>{
+  let tool = ctx.match['input'].split('-')[1];
+  if(tool == 'detectUnfollowers'){
+    if(!await ctx.self.hasSuffecientGems(5)){
+      return ctx.editMessageText(ctx.self.translate('noenoughgems').msg,{parse_mode:"HTML"}).catch(()=>{})
+    }
+    if(ctx.from!.id.toString() == adminId){
+      ctx.deleteMessage();
+      return ctx.self.whoUnfollowMe();
+    }
+    return ctx.replyWithHTML("<b>Comming soon.</b>").catch(()=>{});
+  }
 })
 
 bot.action(/setlang-(.+)/, async (ctx) => {

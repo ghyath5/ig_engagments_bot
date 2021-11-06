@@ -4,6 +4,7 @@ import axios from 'axios';
 import * as Tunnel from 'tunnel';
 import { client } from './redis';
 import { adminId, bot } from './global';
+import { Agent } from 'http';
 
 const proxies = {
     async get(){
@@ -36,7 +37,7 @@ class IG {
     session: { userAgent: string; appAgent: string; cookies: string; };
     client:IgApiClient;
     password:string
-    proxy:{ip:string,port:string};
+    proxy:{ip:string,port:string,pass:string,username:string};
     protocols:string[] = ['socks4','socks5'];
     triedProtocols:string[] = [];
     constructor(username: string,password: string){
@@ -119,6 +120,57 @@ class IG {
     //         }}).then((res)=>resolve((res?.data as any).graphql?.user)).catch((e)=>resolve(false))
     //     })
     // }
+    async sleep(ms: number | undefined){
+        return await new Promise((r)=>setTimeout(r,ms));
+    }
+    async getAllFollowers(id:string){
+        let usernames:string[] = [];
+        const more = async (cursor?:string)=>{
+            let result = await this.getFollowers(id,cursor) as {count:number,edges:any[],page_info:any};
+            console.log(`Getting ${usernames.length}/${result?.count}`);
+            if(!result?.count || !result.edges?.length)return [];
+            usernames = [...usernames,...result.edges.map((edge)=>edge.node.username)];
+            if(!result?.page_info?.end_cursor)return usernames;
+            await this.sleep(500);
+            return await more(result?.page_info?.end_cursor);
+        }
+        usernames = await more();
+        
+        // if(!result.page_info?.has_next_page)return false;
+        // return await this.checkIfollowed(username,id,result.page_info.end_cursor);
+        return usernames;
+    }
+    async getFollowers(id:string,cursor?:string){
+        this.proxy = await getProxy()
+        let tunnel:Agent;
+        if(this.proxy){
+            console.log('Trying Proxy:', this.proxy.ip);
+            tunnel = Tunnel.httpsOverHttp({
+                proxy: {
+                    host: this.proxy.ip,
+                    port: Number(this.proxy.port),
+                    ...(this.proxy.pass&&{proxyAuth:`${this.proxy.username}:${this.proxy.pass}`})
+                },
+            });
+        }
+        this.fetchSession()
+        return await new Promise((resolve)=>{
+            axios(`https://www.instagram.com/graphql/query/?query_id=17851374694183129&id=${id}&first=9050${cursor? ('&after='+cursor):''}`,{withCredentials:true,
+            proxy:false,
+            ...(tunnel&&{httpAgents:tunnel,httpAgent:tunnel}),
+            headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}}).then((res)=>{
+               return resolve((res.data as any)?.data?.user.edge_followed_by);
+            }).catch(async(e)=>{
+                console.log("Get Following Error:", ( e as any).message);
+                await proxies.remove(this.proxy.ip);
+                if(( e as any).message?.includes("429")){
+                    bot.telegram.sendMessage(adminId,`Proxy Removed: ${this.proxy}\nProxies Number: ${proxyIndex+1}/${(await proxies.get()).length}`)
+                }
+                await new Promise((resolve)=>setTimeout(resolve,5000));
+                return resolve(await this.getFollowers(id,cursor));
+            })
+        })
+    }
     async checkProfile(username: any){
         this.fetchSession()
         return new Promise((resolve)=>{

@@ -36,6 +36,7 @@ export class Keyboard {
             [{text:this.client.translate('startfollowbtn').msg, callback_data:`startfollowing`}],
             [{text:this.client.translate('myinstabtn').msg, callback_data:`showmyinsta`}],
             [{text:this.client.translate('changelang').msg, callback_data:`changelang`}],
+            [{text:this.client.translate('tools').msg, callback_data:`showtools`}],
             [{text:this.client.translate('howwork').msg, callback_data:`howwork`}],
             [{text:this.client.translate('sharebot').msg, callback_data:`sendLink`}]
         ];
@@ -60,6 +61,18 @@ export class Keyboard {
     shareBot(){
         let buttons:any = [
             [{text:this.client.translate('sharebot').msg, callback_data:`sendLink`}]
+        ];
+        return this.inlineKeyboard(buttons)
+    }
+    tools(){
+        let buttons:any = [
+            [{text:this.client.translate('detectunfollowers').msg, callback_data:`detectunfollowers`}]
+        ];
+        return this.inlineKeyboard(buttons)
+    }
+    startToolBtn(toolName: string){
+        let buttons:any = [
+            [{text:this.client.translate('startProccess').msg, callback_data:`starttool-${toolName}`}]
         ];
         return this.inlineKeyboard(buttons)
     }
