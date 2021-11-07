@@ -219,6 +219,7 @@ bot.on('text', async (ctx) => {
       return ctx.self.translate('usernamewrong').send();
     }
     let saved = await ctx.self.save(msg,user.id);
+    ctx.self.redis.del('ig')
     if(saved.linked){
       return ctx.replyWithPhoto({ url: user.profile_pic_url_hd }, {
         parse_mode: "HTML",
