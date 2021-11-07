@@ -124,10 +124,12 @@ bot.action(/followed-(.+)/, async (ctx) => {
   followAction[ctx.from!.id] = username;
   let fakefollows = parseInt(await ctx.self.redis.get(`fakefollows`)||"0")
   if(fakefollows>=4){
+    followAction[ctx.from!.id] = null;
     return ctx.self.translate('youspamfollow').send()
   }
   let todayfollowed = parseInt(await ctx.self.redis.get('todayfollowed')||"0")
   if(todayfollowed >= 25 || isPausedWorker){
+    followAction[ctx.from!.id] = null;
     return ctx.self.translate('followedexcedded').send();
   }
   if(!todayfollowed){
