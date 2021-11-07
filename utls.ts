@@ -3,7 +3,10 @@ import { Client } from "./client";
 const prisma = new PrismaClient()
 export const notifyUnfollowers = async (pk:number,users:(Account & {follower: User})[])=>{
     let user = new Client(pk);
-    let username = await user.getUsername()
+    let [username,lang] = await Promise.all([
+        user.getUsername(),
+        user.getLang()
+    ])
     let i = 0;
     function sendNotification(){
         let timeoutcounter = setTimeout(async ()=>{
