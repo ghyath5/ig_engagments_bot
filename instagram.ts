@@ -30,7 +30,7 @@ const getProxy = async ()=>{
         }
         return host
     }catch(e){
-        proxyIndex = 0;
+        proxyIndex = -1;
         return null;
     }
 }
