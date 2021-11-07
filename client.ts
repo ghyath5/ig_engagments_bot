@@ -7,7 +7,7 @@ import Queue from 'bee-queue';
 import { igInstance } from './instagram';
 import i18n from "./locales";
 import { I18n } from 'i18n';
-import { notifyUnfollowers } from './utls';
+// import { notifyUnfollowers } from './utls';
 const isPausedWorker = parseInt(process.env.PAUSE_WORKER||"0")
 
 const queue = new Queue('following',{
@@ -148,16 +148,16 @@ export class Client {
             this.getFollowers(me.igId),
             igInstance.getAllFollowers(me.igId)
         ])
-        if(!usernames)return;
-        let allExpectedUsernames = followActions.map((action)=>action.follower.igUsername);
+        if(!usernames || !followActions.length)return;
+        let allExpectedUsernames = followActions.map((action)=>action.follower?.igUsername).filter((a)=>a);
         let unfollowedme:string[] = [];
         allExpectedUsernames.map((one)=>{
-            if(!usernames!.includes(one)){
-                unfollowedme.push(one);          
+            if(!usernames!.includes(one!)){
+                unfollowedme.push(one!);          
             }
         })
-        followActions = followActions.filter((fa)=>unfollowedme.includes(fa.follower.igUsername));
-        return notifyUnfollowers(this.pk,followActions);       
+        followActions = followActions.filter((fa)=>fa.follower && unfollowedme.includes(fa.follower?.igUsername));
+        // return notifyUnfollowers(this.pk,followActions);
     }
     async profile():Promise<User>{
         let user = await prisma.user.findUnique({where:{id:this.pk}})
