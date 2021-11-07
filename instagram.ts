@@ -126,18 +126,27 @@ class IG {
         return null;
     }
     async getFollowers(id:string){
-        this.proxy = await getProxy()
         let tunnel:Agent;
-        if(this.proxy){
-            console.log('Trying Proxy to get followers:', this.proxy.ip);
-            tunnel = Tunnel.httpsOverHttp({
-                proxy: {
-                    host: this.proxy.ip,
-                    port: Number(this.proxy.port),
-                    ...(this.proxy.pass&&{proxyAuth:`${this.proxy.username}:${this.proxy.pass}`})
-                },
-            });
+        if(useProxy){
+            this.proxy = await getProxy()
+            if(this.proxy){
+                console.log('Trying Proxy to get followers:', this.proxy?.ip);
+                tunnel = Tunnel.httpsOverHttp({
+                    proxy: {
+                        host: this.proxy.ip,
+                        port: Number(this.proxy.port),
+                        ...(this.proxy.pass&&{proxyAuth:`${this.proxy.username}:${this.proxy.pass}`})
+                    },
+                });
+            }
+            useProxy = false;
+        }else{
+            useProxy = true;
         }
+        const source = axios.CancelToken.source();
+        const timeout = setTimeout(() => {
+          source.cancel('timeout');
+        }, 20000);
         let headers = this.client.request.getDefaultHeaders()
         this.fetchSession()
         return await new Promise((resolve)=>{
@@ -147,8 +156,9 @@ class IG {
                     query: '',
                     count: 999999
                 },
+            cancelToken:source.token,
             withCredentials:true,
-            timeout:25000,
+            timeout:20000,
             proxy:false,
             ...(tunnel&&{httpsAgent:tunnel,httpAgent:tunnel}),
             headers:{
@@ -159,13 +169,15 @@ class IG {
                 return resolve({status:true,users:(res.data as any)?.users});
             }).catch(async(e)=>{
                 console.log("Get Following Error:", ( e as any).message);
-                bot.telegram.sendMessage(adminId,`Error at Proxy: ${this.proxy}\nProxies Number: ${proxyIndex+1}/${(await proxies.get()).length} Error: ${( e as any).message}`)
+                bot.telegram.sendMessage(adminId,`Error at Proxy: ${this.proxy?.ip}\nProxies Number: ${proxyIndex+1}/${(await proxies.get()).length} Error: ${( e as any).message}`)
                 if(!e.response || ( e as any).message?.includes("429")){
                     await proxies.remove(this.proxy);
-                    await this.sleep(10000);
+                    await this.sleep(6000);
                     return resolve(await this.getFollowers(id));
                 }
                 return resolve({status:false});
+            }).finally(()=>{
+                clearTimeout(timeout);
             })
         })
     }
@@ -211,6 +223,7 @@ class IG {
                     proxy: {
                         host: this.proxy.ip,
                         port: Number(this.proxy.port),
+                        ...(this.proxy.pass&&{proxyAuth:`${this.proxy.username}:${this.proxy.pass}`})
                     },
                 });
             }
