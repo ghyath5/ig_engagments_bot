@@ -48,5 +48,5 @@
 	"startProccess":"Start now ➡️.",
 	"followOurIg":"Follow the Instagram bot account: <a href='https://instagram.com/super_ig_engagement'>super_ig_engagement</a>",
 	"younotreceivefollows":"You are not receiving followers because you don't have enough gems, start following the other to earn more gems.",
-	"getgemsczunfollower":"You have restored your gem💎 from {{username}} since they unfollowed you."
+	"getgemsczunfollower":"<b>You have restored your gem💎 from <i>{{username}}</i> since they unfollowed you.</b>"
 }
