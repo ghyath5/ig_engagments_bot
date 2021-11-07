@@ -11,8 +11,9 @@ const proxies = {
         return JSON.parse(await  client.get('proxies')||"[]");
     },
     async remove(pr){
+        if(!pr)return;
         let proxies = JSON.parse(await  client.get('proxies')||"[]");
-        let filtered = proxies.filter((proxy)=>proxy.ip != pr.ip);
+        let filtered = proxies.filter((proxy)=>proxy.ip != pr?.ip);
         // filtered = [pr,...filtered];
         client.set('proxies',JSON.stringify(filtered));
     }
