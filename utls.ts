@@ -1,7 +1,7 @@
-import { Account, PrismaClient, User } from ".prisma/client";
+import {  Follow, PrismaClient, User } from ".prisma/client";
 import { Client } from "./client";
 const prisma = new PrismaClient()
-export const notifyUnfollowers = async (pk:number,users:(Account & {follower: User})[])=>{
+export const notifyUnfollowers = async (pk:number,users:(Follow & {follower: User})[])=>{
     let user = new Client(pk);
     let [username,lang] = await Promise.all([
         user.getUsername(),
@@ -18,7 +18,7 @@ export const notifyUnfollowers = async (pk:number,users:(Account & {follower: Us
             let active = users[i];
             let client = new Client(active.follower.id);
             console.log(`Sending ${i+1}/${users.length}`);
-            prisma.account.delete({
+            prisma.follow.delete({
                 where:{
                     followed_id_follower_id:{
                         followed_id:active.followed_id,
