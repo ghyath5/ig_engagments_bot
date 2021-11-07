@@ -40,8 +40,8 @@ model Follow {
   follower_id String?
   followed_id String?
 
-  follower User? @relation("follows", fields: [follower_id], references: [igId])
-  followed User? @relation("followings", fields: [followed_id], references: [igId])
+  follower User? @relation("follows", fields: [follower_id], references: [igId], onUpdate: Cascade)
+  followed User? @relation("followings", fields: [followed_id], references: [igId], onUpdate: Cascade)
 
   createdAt DateTime @default(now())
   @@unique([followed_id, follower_id])
