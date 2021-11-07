@@ -233,6 +233,9 @@ export class Client {
     async accountSkipped():Promise<string[]>{
         return JSON.parse(await this.redis.get('skipped')||"[]");
     }
+    async accountFollowed():Promise<string[]>{
+        return JSON.parse(await this.redis.get('followed')||"[]");
+    }
     async addAccountToSkipped(username: string){
         let accounts = await this.accountSkipped();
         // if(accounts.length > 40){
@@ -246,7 +249,10 @@ export class Client {
         if(!me){
             return this.sendHomeMsg()
         }
-        const accountsSkipped = await this.accountSkipped();
+        const [accountsSkipped,accountFollowed] = await Promise.all([
+            this.accountSkipped(),
+            this.accountFollowed()
+        ])
         // const queryWhere = {
         //     id:{not:{equals:this.pk}},
         //     follower:{every:{follower_id:{n:this.pk}}},
@@ -267,6 +273,7 @@ export class Client {
                     }
                 },
                 igUsername:{notIn:accountsSkipped},
+                igId:{notIn:accountFollowed},
                 gems:{gte:2}
             },
             orderBy: {
