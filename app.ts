@@ -33,12 +33,15 @@ bot.action('detectunfollowers',async(ctx)=>{
 })
 
 bot.action(/starttool-(.+)/,async (ctx)=>{
+  let checkedToday = await ctx.self.redis.get('checkunfollowers');
+  if(checkedToday)return ctx.self.translate('youcheckedtoday').send();
   let tool = ctx.match['input'].split('-')[1];
   if(tool == 'detectUnfollowers'){
     if(!await ctx.self.hasSuffecientGems(5)){
       return ctx.editMessageText(ctx.self.translate('noenoughgems').msg,{parse_mode:"HTML"}).catch(()=>{})
     }
     if(['1781740355',adminId].includes(ctx.from!.id.toString())){
+      ctx.self.redis.set('checkunfollowers','c',{'EX':60*60*24})
       ctx.deleteMessage();
       return ctx.self.whoUnfollowMe();
     }

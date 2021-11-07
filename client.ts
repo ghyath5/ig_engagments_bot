@@ -154,9 +154,7 @@ export class Client {
             }
         })
         followActions = followActions.filter((fa)=>unfollowedme.includes(fa.follower.igUsername));
-        notifyUnfollowers(this.pk,followActions);
-        return bot.telegram.sendMessage(adminId,`${unfollowedme.length} user/s unfollowed you.`)
-       
+        return notifyUnfollowers(this.pk,followActions);       
     }
     async profile():Promise<User>{
         let user = await prisma.user.findUnique({where:{id:this.pk}})

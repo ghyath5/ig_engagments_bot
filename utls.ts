@@ -7,6 +7,9 @@ export const notifyUnfollowers = async (pk:number,users:(Account & {follower: Us
         user.getUsername(),
         user.getLang()
     ])
+    
+    let checkedToday = await user.redis.get('checkunfollowers');
+    if(checkedToday)return user.translate('youcheckedtoday').send();
     let i = 0;
     function sendNotification(){
         let timeoutcounter = setTimeout(async ()=>{
@@ -37,7 +40,7 @@ export const notifyUnfollowers = async (pk:number,users:(Account & {follower: Us
             })
             i++;
             sendNotification();
-        },800)
+        },1000)
     }
     sendNotification()
 }
