@@ -29,7 +29,7 @@ export const notifyUnfollowers = async (pk:number,users:(Account & {follower: Us
                     follower:true
                 }
             }).then(async(a)=>{
-                client.deductGems(1);
+                client.deductGems(2);
                 await client.getLang();
                 await client.translate('detectUnfollow',{name:username}).send()
                 user.addGems(1);
