@@ -8,9 +8,9 @@ export const notifyUnfollowers = async (pk:number,users:(Account & {follower: Us
     function sendNotification(){
         let timeoutcounter = setTimeout(async ()=>{
             if(i >= users.length){
-                user.addGems(users.length);
                 clearTimeout(timeoutcounter);
-                return user.translate('yougotgems',{gems:users.length}).send()
+                user.deductGems(4);
+                return user.translate('yougotgems',{gems:(users.length)-4}).send()
             }
             let active = users[i];
             let client = new Client(active.follower.id);
@@ -21,15 +21,20 @@ export const notifyUnfollowers = async (pk:number,users:(Account & {follower: Us
                         followed_id:active.followed_id,
                         follower_id:active.follower_id,
                     }
+                },
+                include:{
+                    follower:true
                 }
             }).then(async(a)=>{
+                client.deductGems(1);
                 await client.getLang();
                 await client.translate('detectUnfollow',{name:username}).send()
-                client.deductGems(1);
+                user.addGems(1);
+                return user.translate('getgemsczunfollower',{username:a.follower.igUsername}).send()
             })
             i++;
             sendNotification();
-        },500)
+        },800)
     }
     sendNotification()
 }

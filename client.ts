@@ -139,15 +139,17 @@ export class Client {
         return await prisma.account.findMany({where:{followed_id:this.pk},include:{follower:true}});
     }
     async whoUnfollowMe(){
+        let me = await this.profile();
         await this.translate('wearechecking').send()
         let [followActions,usernames] = await Promise.all([
             this.getFollowers(),
-            igInstance.getAllFollowers('11303919034')
+            igInstance.getAllFollowers(me.igId)
         ])
+        if(!usernames)return;
         let allExpectedUsernames = followActions.map((action)=>action.follower.igUsername);
         let unfollowedme:string[] = [];
         allExpectedUsernames.map((one)=>{
-            if(!usernames.includes(one)){
+            if(!usernames!.includes(one)){
                 unfollowedme.push(one);          
             }
         })

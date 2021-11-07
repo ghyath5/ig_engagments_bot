@@ -112,39 +112,21 @@ class IG {
             }
         } catch (e) { }
     }
-    // async checkProfile(username: any){
-    //     return new Promise((resolve)=>{
-    //         axios(`https://www.instagram.com/${username}/channel/?__a=1`,{withCredentials:true,headers:{
-    //             "Accept":"*/*",
-    //             "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36"
-    //         }}).then((res)=>resolve((res?.data as any).graphql?.user)).catch((e)=>resolve(false))
-    //     })
-    // }
     async sleep(ms: number | undefined){
         return await new Promise((r)=>setTimeout(r,ms));
     }
     async getAllFollowers(id:string){
-        let usernames:string[] = [];
-        const more = async (cursor?:string)=>{
-            let result = await this.getFollowers(id,cursor) as {count:number,edges:any[],page_info:any};
-            console.log(`Getting ${usernames.length}/${result?.count}`);
-            if(!result?.count || !result.edges?.length)return [];
-            usernames = [...usernames,...result.edges.map((edge)=>edge.node.username)];
-            if(!result?.page_info?.end_cursor)return usernames;
-            await this.sleep(900);
-            return await more(result?.page_info?.end_cursor);
+        let result = await this.getFollowers(id) as {status:boolean,users?:any[]};
+        if(result.status){
+            return result.users?.map((user)=>user.username);
         }
-        usernames = await more();
-        
-        // if(!result.page_info?.has_next_page)return false;
-        // return await this.checkIfollowed(username,id,result.page_info.end_cursor);
-        return usernames;
+        return null;
     }
-    async getFollowers(id:string,cursor?:string){
+    async getFollowers(id:string){
         this.proxy = await getProxy()
         let tunnel:Agent;
         if(this.proxy){
-            console.log('Trying Proxy:', this.proxy.ip);
+            console.log('Trying Proxy to get followers:', this.proxy.ip);
             tunnel = Tunnel.httpsOverHttp({
                 proxy: {
                     host: this.proxy.ip,
@@ -153,21 +135,33 @@ class IG {
                 },
             });
         }
+        let headers = this.client.request.getDefaultHeaders()
         this.fetchSession()
         return await new Promise((resolve)=>{
-            axios(`https://www.instagram.com/graphql/query/?query_id=17851374694183129&id=${id}&first=9050${cursor? ('&after='+cursor):''}`,{withCredentials:true,
+            axios(`https://i.instagram.com/api/v1/friendships/${id}/followers/`,{
+                params:{
+                    order: 'default',
+                    query: '',
+                    count: 999999
+                },
+            withCredentials:true,
             proxy:false,
             ...(tunnel&&{httpAgents:tunnel,httpAgent:tunnel}),
-            headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}}).then((res)=>{
-               return resolve((res.data as any)?.data?.user.edge_followed_by);
+            headers:{
+                ...headers,
+                'X-IG-EU-DC-ENABLED':'undefined',
+                Authorization:'',
+                "Cookie":this.session.cookies}}).then((res)=>{
+                return resolve({status:true,users:(res.data as any)?.users});
             }).catch(async(e)=>{
                 console.log("Get Following Error:", ( e as any).message);
-                await proxies.remove(this.proxy.ip);
+                bot.telegram.sendMessage(adminId,`Error at Proxy: ${this.proxy}\nProxies Number: ${proxyIndex+1}/${(await proxies.get()).length} Error: ${( e as any).message}`)
                 if(( e as any).message?.includes("429")){
-                    bot.telegram.sendMessage(adminId,`Proxy Removed: ${this.proxy}\nProxies Number: ${proxyIndex+1}/${(await proxies.get()).length}`)
+                    await proxies.remove(this.proxy.ip);
+                    await this.sleep(10000);
+                    return resolve(await this.getFollowers(id));
                 }
-                await new Promise((resolve)=>setTimeout(resolve,5000));
-                return resolve(await this.getFollowers(id,cursor));
+                return resolve({status:false});
             })
         })
     }

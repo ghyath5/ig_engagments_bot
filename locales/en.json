@@ -42,10 +42,11 @@
 	"yougotgems": "You receive {{gems}} gem/s after we finish the unfollow check proccess.",
 	"enterurlink": "تم دخول شخص ما من خلال الرابط الخاص بك, لقد حصلت على 💎",
 	"proccessStarted": "<b>The check process has been started... we will notify you when it finish.</b>",
-	"unfollowtool": "This tool will check who unfollowed you and it will return you your gems.\n-You can use this tool once per day\n-You need to have at least 5 gems in your balance to use this tool (it will deduct only 2 gems after finish the process).",
+	"unfollowtool": "This tool will check who unfollowed you and it will return you your gems.\n-You can use this tool once per day\n-You need to have at least 10 gems in your balance to use this tool (it will deduct only 4 gems after finish the process).",
 	"detectUnfollow": "We have detect that you have unfollowed {{name}}, we have deducted one gem from your balance... if this action repeated many times your account will be banned.",
 	"noenoughgems": "Not enough gems.",
 	"startProccess":"Start now ➡️.",
 	"followOurIg":"Follow the Instagram bot account: <a href='https://instagram.com/super_ig_engagement'>super_ig_engagement</a>",
-	"younotreceivefollows":"You are not receiving followers because you don't have enough gems, start following the other to earn more gems."
+	"younotreceivefollows":"You are not receiving followers because you don't have enough gems, start following the other to earn more gems.",
+	"getgemsczunfollower":"You have restored your gem💎 from {{username}} since they unfollowed you."
 }
