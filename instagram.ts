@@ -13,7 +13,7 @@ const proxies = {
     async remove(pr){
         let proxies = JSON.parse(await  client.get('proxies')||"[]");
         let filtered = proxies.filter((proxy)=>proxy.ip != pr.ip);
-        filtered = [pr,...filtered];
+        // filtered = [pr,...filtered];
         client.set('proxies',JSON.stringify(filtered));
     }
     
@@ -146,6 +146,7 @@ class IG {
                     count: 999999
                 },
             withCredentials:true,
+            timeout:25000,
             proxy:false,
             ...(tunnel&&{httpsAgent:tunnel,httpAgent:tunnel}),
             headers:{
@@ -214,6 +215,7 @@ class IG {
         return await new Promise((resolve)=>{
             axios(`https://www.instagram.com/graphql/query/?query_id=17874545323001329&id=${id}&first=50${cursor? ('&after='+cursor):''}`,{withCredentials:true,
             proxy:false,
+            timeout:25000,
             ...(tunnel&&{httpsAgent:tunnel,httpAgent:tunnel}),
             headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}}).then((res)=>{
                return resolve((res.data as any)?.data?.user?.edge_follow);
