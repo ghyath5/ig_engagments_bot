@@ -78,7 +78,10 @@ export class Client {
         let me = await this.profile();
         return me?.gems >= gems;
     }
-    async saveFollowAction(otherUserId){
+    async saveFollowAction(otherUserId,otherUserIgId?:string){
+        if(otherUserIgId){
+            this.redis.addFollowed(otherUserIgId)
+        }
         await prisma.account.create({
             data:{
                 followed_id:otherUserId,
@@ -192,7 +195,7 @@ export class Client {
     }
     async getIGProfile(username = this.username){
         let user = JSON.parse(await this.redis.get('ig')||"{}")
-        if(!user.id){
+        if(!user?.id){
             user = await igInstance.checkProfile(username) as any
             if(user){
                 this.redis.set('ig',JSON.stringify({
@@ -205,7 +208,7 @@ export class Client {
             }
         }
         let me = await this.profile()
-        if(!user.id){
+        if(!user?.id){
             console.log("No uUSER");
             return this.translate('notuserfound').send();
         }
@@ -317,7 +320,7 @@ if(!isPausedWorker){
             
             let otherUser = await follower.findUserByUsername(usernameToFollow);
             if(!otherUser)return;
-            let oClient = await follower.saveFollowAction(otherUser.id)
+            let oClient = await follower.saveFollowAction(otherUser.id,otherUser.igId)
             let otherClient = new Client(otherUser.id);
             let userLang = await otherClient.getLang();
             bot.telegram.sendMessage(otherUser.id,`<b>${followerUsername}</b> ${otherClient.translate('followedyou',{gems:oClient.gems},userLang).msg}`,{

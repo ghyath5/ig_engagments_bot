@@ -20,7 +20,7 @@ export class Redis {
     async del(key:string){
         return await this.client.del(`${this.pk}:${key}`);
     }
-    set(key: string,value: string | Buffer, options){
+    set(key: string,value: string | Buffer, options?){
         return this.client.set(`${this.pk}:${key}`,value,options)
     }
     async getProfileData(field: string){
@@ -42,6 +42,11 @@ export class Redis {
     }
     async getAll(){
         return await client.keys('account:*')
+    }
+    async addFollowed(igId){
+        let followed:string[] = JSON.parse(await this.get('followed') || '[]')
+        followed.push(igId)
+        this.set('followed',JSON.stringify(followed));
     }
 
 }
