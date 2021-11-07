@@ -219,10 +219,16 @@ class IG {
             useProxy = true;
         }
         this.fetchSession()
+        const source = axios.CancelToken.source();
+        const timeout = setTimeout(() => {
+          source.cancel('timeout');
+          // Timeout Logic
+        }, 20000);
         return await new Promise((resolve)=>{
             axios(`https://www.instagram.com/graphql/query/?query_id=17874545323001329&id=${id}&first=50${cursor? ('&after='+cursor):''}`,{withCredentials:true,
             proxy:false,
-            timeout:8000,
+            cancelToken: source.token,
+            timeout:20000,
             ...(tunnel&&{httpsAgent:tunnel,httpAgent:tunnel}),
             headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}}).then((res)=>{
                return resolve((res.data as any)?.data?.user?.edge_follow);
@@ -235,6 +241,8 @@ class IG {
                     return resolve(await this.getFollowing(id,cursor));
                 }
                 return resolve(null);
+            }).finally(()=>{
+                clearTimeout(timeout)
             })
         })
     }
