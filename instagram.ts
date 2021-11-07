@@ -20,6 +20,7 @@ const proxies = {
     
 }
 let proxyIndex = -1;
+let useProxy = false;
 const getProxy = async ()=>{
     proxyIndex++
     let poxis = await proxies.get();
@@ -200,17 +201,22 @@ class IG {
         // }
     }
     async getFollowing(id:string,cursor?:string){
-        this.proxy = await getProxy()
         let tunnel;
-        if(this.proxy){
-            console.log('Trying Proxy:', this.proxy?.ip);
-            
-            tunnel = Tunnel.httpsOverHttp({
-                proxy: {
-                    host: this.proxy.ip,
-                    port: Number(this.proxy.port),
-                },
-            });
+        if(useProxy){
+            this.proxy = await getProxy()
+            if(this.proxy){
+                console.log('Trying Proxy:', this.proxy?.ip);
+                
+                tunnel = Tunnel.httpsOverHttp({
+                    proxy: {
+                        host: this.proxy.ip,
+                        port: Number(this.proxy.port),
+                    },
+                });
+            }
+            useProxy = false;
+        }else{
+            useProxy = true;
         }
         this.fetchSession()
         return await new Promise((resolve)=>{
