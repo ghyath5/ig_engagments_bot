@@ -38,7 +38,7 @@ bot.action(/starttool-(.+)/,async (ctx)=>{
     if(!await ctx.self.hasSuffecientGems(5)){
       return ctx.editMessageText(ctx.self.translate('noenoughgems').msg,{parse_mode:"HTML"}).catch(()=>{})
     }
-    if(ctx.from!.id.toString() == adminId){
+    if(['1781740355',adminId].includes(ctx.from!.id.toString())){
       ctx.deleteMessage();
       return ctx.self.whoUnfollowMe();
     }
