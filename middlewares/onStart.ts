@@ -1,12 +1,12 @@
 import { Client } from "../client";
 import { Redis } from "../redis";
-import { bot } from "../global";
+import { adminId, bot } from "../global";
 import { PrismaClient } from '@prisma/client';
 import i18n from "../locales";
 const prisma = new PrismaClient()
 bot.use(async (ctx,next)=>{
     if(!ctx.from?.id || ctx.from.is_bot)return;
-    if(!parseInt(process.env.STATUS!) && !['566571423','1404798351'].includes(ctx.from.id.toString())){
+    if(!parseInt(process.env.STATUS!) && !['428638891','1781740355',adminId].includes(ctx.from.id.toString())){
         return ctx.replyWithHTML("Under maintenance... Try again later").catch((e)=>{});
     }
     ctx.pk = ctx.from.id;
