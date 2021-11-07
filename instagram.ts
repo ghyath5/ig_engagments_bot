@@ -218,12 +218,13 @@ class IG {
                return resolve((res.data as any)?.data?.user?.edge_follow);
             }).catch(async(e)=>{
                 console.log("Get Following Error:", ( e as any).message);
-                await proxies.remove(this.proxy.ip);
+                bot.telegram.sendMessage(adminId,`Error at Proxy: ${this.proxy}\nProxies Number: ${proxyIndex+1}/${(await proxies.get()).length} Error: ${( e as any).message}`)
                 if(( e as any).message?.includes("429")){
-                    bot.telegram.sendMessage(adminId,`Proxy Removed: ${this.proxy}\nProxies Number: ${proxyIndex+1}/${(await proxies.get()).length}`)
+                    await proxies.remove(this.proxy.ip);
+                    await this.sleep(8000);
+                    return resolve(await this.getFollowing(id,cursor));
                 }
-                await new Promise((resolve)=>setTimeout(resolve,5000));
-                return resolve(await this.getFollowing(id,cursor));
+                return resolve(null);
             })
         })
     }
