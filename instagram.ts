@@ -10,9 +10,10 @@ const proxies = {
     async get(){
         return JSON.parse(await  client.get('proxies')||"[]");
     },
-    async remove(ip: string){
+    async remove(pr){
         let proxies = JSON.parse(await  client.get('proxies')||"[]");
-        let filtered = proxies.filter((proxy)=>proxy.ip != ip);
+        let filtered = proxies.filter((proxy)=>proxy.ip != pr.ip);
+        filtered = [pr,...filtered];
         client.set('proxies',JSON.stringify(filtered));
     }
     
@@ -146,7 +147,7 @@ class IG {
                 },
             withCredentials:true,
             proxy:false,
-            ...(tunnel&&{httpAgents:tunnel,httpAgent:tunnel}),
+            ...(tunnel&&{httpsAgent:tunnel,httpAgent:tunnel}),
             headers:{
                 ...headers,
                 'X-IG-EU-DC-ENABLED':'undefined',
@@ -156,8 +157,8 @@ class IG {
             }).catch(async(e)=>{
                 console.log("Get Following Error:", ( e as any).message);
                 bot.telegram.sendMessage(adminId,`Error at Proxy: ${this.proxy}\nProxies Number: ${proxyIndex+1}/${(await proxies.get()).length} Error: ${( e as any).message}`)
-                if(( e as any).message?.includes("429")){
-                    await proxies.remove(this.proxy.ip);
+                if(!e.response || ( e as any).message?.includes("429")){
+                    await proxies.remove(this.proxy);
                     await this.sleep(10000);
                     return resolve(await this.getFollowers(id));
                 }
@@ -213,14 +214,14 @@ class IG {
         return await new Promise((resolve)=>{
             axios(`https://www.instagram.com/graphql/query/?query_id=17874545323001329&id=${id}&first=50${cursor? ('&after='+cursor):''}`,{withCredentials:true,
             proxy:false,
-            ...(tunnel&&{httpAgents:tunnel,httpAgent:tunnel}),
+            ...(tunnel&&{httpsAgent:tunnel,httpAgent:tunnel}),
             headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}}).then((res)=>{
                return resolve((res.data as any)?.data?.user?.edge_follow);
             }).catch(async(e)=>{
                 console.log("Get Following Error:", ( e as any).message);
-                bot.telegram.sendMessage(adminId,`Error at Proxy: ${this.proxy}\nProxies Number: ${proxyIndex+1}/${(await proxies.get()).length} Error: ${( e as any).message}`)
-                if(( e as any).message?.includes("429")){
-                    await proxies.remove(this.proxy.ip);
+                bot.telegram.sendMessage(adminId,`Error at Proxy: ${this.proxy.ip}\nProxies Number: ${proxyIndex+1}/${(await proxies.get()).length} Error: ${( e as any).message}`)
+                if(!e.response || ( e as any).message?.includes("429")){
+                    await proxies.remove(this.proxy);
                     await this.sleep(8000);
                     return resolve(await this.getFollowing(id,cursor));
                 }
