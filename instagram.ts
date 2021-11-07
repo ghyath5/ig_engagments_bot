@@ -203,7 +203,7 @@ class IG {
         this.proxy = await getProxy()
         let tunnel;
         if(this.proxy){
-            console.log('Trying Proxy:', this.proxy.ip);
+            console.log('Trying Proxy:', this.proxy?.ip);
             
             tunnel = Tunnel.httpsOverHttp({
                 proxy: {
@@ -216,13 +216,13 @@ class IG {
         return await new Promise((resolve)=>{
             axios(`https://www.instagram.com/graphql/query/?query_id=17874545323001329&id=${id}&first=50${cursor? ('&after='+cursor):''}`,{withCredentials:true,
             proxy:false,
-            timeout:10000,
+            timeout:8000,
             ...(tunnel&&{httpsAgent:tunnel,httpAgent:tunnel}),
             headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}}).then((res)=>{
                return resolve((res.data as any)?.data?.user?.edge_follow);
             }).catch(async(e)=>{
                 console.log("Get Following Error:", ( e as any).message);
-                bot.telegram.sendMessage(adminId,`Error at Proxy: ${this.proxy.ip}\nProxies Number: ${proxyIndex+1}/${(await proxies.get()).length} Error: ${( e as any).message}`)
+                bot.telegram.sendMessage(adminId,`Error at Proxy: ${this.proxy?.ip}\nProxies Number: ${proxyIndex+1}/${(await proxies.get()).length} Error: ${( e as any).message}`)
                 if(!e.response || ( e as any).message?.includes("429")){
                     await proxies.remove(this.proxy);
                     await this.sleep(2000);
