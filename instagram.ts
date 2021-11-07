@@ -215,7 +215,7 @@ class IG {
             proxy:false,
             ...(tunnel&&{httpAgents:tunnel,httpAgent:tunnel}),
             headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}}).then((res)=>{
-               return resolve((res.data as any)?.data?.user.edge_follow);
+               return resolve((res.data as any)?.data?.user?.edge_follow);
             }).catch(async(e)=>{
                 console.log("Get Following Error:", ( e as any).message);
                 await proxies.remove(this.proxy.ip);
