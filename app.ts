@@ -40,7 +40,7 @@ bot.action(/starttool-(.+)/,async (ctx)=>{
     if(!await ctx.self.hasSuffecientGems(5)){
       return ctx.editMessageText(ctx.self.translate('noenoughgems').msg,{parse_mode:"HTML"}).catch(()=>{})
     }
-    if(['428638891','1781740355',adminId].includes(ctx.from!.id.toString())){
+    if(['428638891','1781740355','607072328',adminId].includes(ctx.from!.id.toString())){
       ctx.self.redis.set('checkunfollowers','c',{'EX':60*60*24})
       ctx.deleteMessage();
       return ctx.self.whoUnfollowMe();
