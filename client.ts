@@ -7,7 +7,7 @@ import Queue from 'bee-queue';
 import { igInstance } from './instagram';
 import i18n from "./locales";
 import { I18n } from 'i18n';
-// import { notifyUnfollowers } from './utls';
+import { notifyUnfollowers } from './utls';
 const isPausedWorker = parseInt(process.env.PAUSE_WORKER||"0")
 
 const queue = new Queue('following',{
@@ -195,6 +195,9 @@ export class Client {
     }
     async whoUnfollowMe(){
         let me = await this.account();
+        if(!me.active || !me.owner.active)return;
+        let profile:any = await igInstance.checkProfile(me.username)
+        if(!profile || profile.is_private)return;
         await this.translate('wearechecking').send()
         let [followActions,usernames] = await Promise.all([
             this.getFollowers(me.igId),
@@ -209,7 +212,7 @@ export class Client {
             }
         })
         followActions = followActions.filter((fa)=>fa.follower && unfollowedme.includes(fa.follower.username));
-        // return notifyUnfollowers(this.pk,followActions);
+        return notifyUnfollowers(this.pk,followActions);
     }
     async profile():Promise<User&{accounts:Account[]}>{
         let user = await prisma.user.findUnique({where:{id:this.pk},include:{accounts:{where:{main:true}}}})
@@ -217,8 +220,8 @@ export class Client {
         
         return user!;
     }
-    async account():Promise<Account>{
-        let account = await prisma.account.findFirst({where:{user_id:this.pk,main:true}})
+    async account():Promise<Account&{owner:User}>{
+        let account = await prisma.account.findFirst({where:{user_id:this.pk,main:true},include:{owner:true}})
         return account!;
     }
     async getUsername(){
