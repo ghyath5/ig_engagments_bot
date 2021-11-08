@@ -1,7 +1,7 @@
 import { adminId, bot, IG, MyContext, } from './global';
-import { client, Redis } from './redis';
+import {  Redis } from './redis';
 import { ExtraReplyMessage } from 'telegraf/typings/telegram-types';
-import { PrismaClient, User } from '@prisma/client';
+import { Account, PrismaClient, User } from '@prisma/client';
 import { Keyboard } from './keyboard';
 import Queue from 'bee-queue';
 import { igInstance } from './instagram';
@@ -42,9 +42,9 @@ export class Client {
         bot.telegram.sendMessage(adminId,`Someone trying to enter by the someone link.`);
     }
     async checkIfollowed(username: string) {       
-        let user:User = await this.profile();
-        const myUsername = user.igUsername;
-        const job = queue.createJob({usernameToFollow:username,followerIGId:user.igId,followerUsername:myUsername,followerPk:this.pk,followerLang:this.lang});
+        let account = await this.account();
+        const myUsername = account.username;
+        const job = queue.createJob({usernameToFollow:username,followerIGId:account.igId,followerUsername:myUsername,followerPk:this.pk,followerLang:this.lang});
         job.save();
         this.translate('wearechecking').send();
         await this.addAccountToSkipped(username);
@@ -79,36 +79,74 @@ export class Client {
         return me?.gems >= gems;
     }
     async saveFollowAction(otherUserId:string){
-        let myProfile = await this.profile()
+        let account = await this.account()
         await prisma.follow.create({
             data:{
                 followed_id:otherUserId,
-                follower_id:myProfile.igId
+                follower_id:account.igId
             }
         })
         await prisma.user.update({
             where:{id:this.pk},
             data:{gems:{increment:1}}
         })
-        return await prisma.user.update({
+        return await prisma.account.update({
             where:{
                 igId:otherUserId
             },
-            data:{gems:{decrement:1}}
+            data:{
+                owner:{
+                    update:{
+                        gems:{decrement:1}
+                    }
+                }
+            },
+            include:{owner:true}
         })
     }
     async followedAccounts(){
-        let me = await this.profile();
-        let followed = await prisma.follow.findMany({where:{follower_id:{equals:me.igId}},select:{followed:{select:{igUsername:true}}}})
-        return followed.map((follow)=>follow?.followed?.igUsername)
+        let account = await this.account();
+        let followed = await prisma.follow.findMany({where:{follower_id:{equals:account.igId}},select:{followed:{select:{username:true}}}})
+        return followed.map((follow)=>follow.followed.username)
     }
-    async save(username: string,userId):Promise<{linked:boolean,message?:string}>{
-        this.username = username;
+    async save(username: string,userId: string):Promise<{linked:boolean,message?:string}>{
+        this.username = username.toLowerCase();
         return await new Promise((resolve)=>{
             prisma.user.upsert({
                 where:{id:this.pk},
-                create:{id:this.pk,igUsername:username.toLowerCase(),igId:userId},
-                update:{igUsername:username.toLowerCase(),active:true,igId:userId}
+                create:{
+                    id:this.pk,
+                    accounts:{
+                        create:{
+                            igId:userId,
+                            username:this.username!,
+                            active:true,
+                            main:true,
+                        }
+                    }
+                },
+                update:{
+                    active:true,
+                    accounts:{
+                        upsert:{
+                            where:{
+                                igId:userId
+                            },
+                            update:{
+                                igId:userId,
+                                username:this.username!,
+                                main:true,
+                                active:true,
+                            },
+                            create:{
+                                igId:userId,
+                                username:this.username!,
+                                main:true,
+                                active:true,
+                            }
+                        }
+                    }
+                }
             }).catch(e=>{
                 if(e.message.includes("Unique"))
                     resolve({linked:false,message:this.translate("constraintUsername").msg})                
@@ -126,47 +164,65 @@ export class Client {
             where:{id:Number(refId)},
             data:{
                 gems:{increment:1}
+            },
+            include:{
+                accounts:{
+                    where:{
+                        main:true
+                    }
+                }
             }
         }).then(async (result)=>{
-            bot.telegram.sendMessage(adminId,`${username} entered using ${result.igUsername} link.`);
+            bot.telegram.sendMessage(adminId,`${username} entered using ${result.accounts[0].username} link.`);
             let client = new Client(Number(refId));
             await client.getLang();
             client.translate('enterurlink').send()
         }).catch(()=>{})
         this.redis.del(`ref`);
     }
-    async findUserByUsername(username: string):Promise<User|null>{
-        return await prisma.user.findUnique({where:{igUsername:username}});
+    async findUserByUsername(username: string):Promise<Account&{owner:User}|null>{
+        return await prisma.account.findUnique({
+            where:{
+                username,
+            },
+            include:{
+                owner:true
+            }
+        });
     }
     async getFollowers(igId: string){
         return await prisma.follow.findMany({where:{followed_id:igId},include:{follower:true}});
     }
     async whoUnfollowMe(){
-        let me = await this.profile();
+        let me = await this.account();
         await this.translate('wearechecking').send()
         let [followActions,usernames] = await Promise.all([
             this.getFollowers(me.igId),
             igInstance.getAllFollowers(me.igId)
         ])
         if(!usernames || !followActions.length)return;
-        let allExpectedUsernames = followActions.map((action)=>action.follower?.igUsername).filter((a)=>a);
+        let allExpectedUsernames = followActions.map((action)=>action.follower.username).filter((a)=>a);
         let unfollowedme:string[] = [];
         allExpectedUsernames.map((one)=>{
             if(!usernames!.includes(one!)){
                 unfollowedme.push(one!);          
             }
         })
-        followActions = followActions.filter((fa)=>fa.follower && unfollowedme.includes(fa.follower?.igUsername));
+        followActions = followActions.filter((fa)=>fa.follower && unfollowedme.includes(fa.follower.username));
         // return notifyUnfollowers(this.pk,followActions);
     }
-    async profile():Promise<User>{
-        let user = await prisma.user.findUnique({where:{id:this.pk}})
-        this.username = user?.igUsername;
+    async profile():Promise<User&{accounts:Account[]}>{
+        let user = await prisma.user.findUnique({where:{id:this.pk},include:{accounts:{where:{main:true}}}})
+        this.username = user?.accounts.length ? user?.accounts[0].username:undefined;
+        
         return user!;
     }
+    async account():Promise<Account>{
+        let account = await prisma.account.findFirst({where:{user_id:this.pk,main:true}})
+        return account!;
+    }
     async getUsername(){
-        return this.username || (await this.profile())?.igUsername || "ghyathdarwish"
-
+        return this.username || (await this.account())?.username || "ghyathdarwish"
     }
     setLang(lang:string){
         this.lang = lang;
@@ -204,7 +260,7 @@ export class Client {
                     profile_pic_url_hd:user?.profile_pic_url_hd,
                     edge_follow:{count:user?.edge_follow?.count},
                     edge_followed_by:{count:user?.edge_followed_by?.count},
-                }),{'EX':60*60})
+                }),{'EX':60*30})
             }
         }
         let me = await this.profile()
@@ -223,7 +279,7 @@ export class Client {
         ).catch((e)=>{})
     }
     async sendHomeMsg(){
-        let username =(await this.profile())?.igUsername
+        let username = await this.getUsername()
         if(username){
             return this.translate(`startfollow`).send(this.keyboard.home());
         }
@@ -234,7 +290,7 @@ export class Client {
         return JSON.parse(await this.redis.get('skipped')||"[]");
     }
     async accountFollowed():Promise<string[]>{
-        let profile = await this.profile();
+        let profile = await this.account();
         return JSON.parse(await this.redis.get(`${profile.igId}:followed`)||"[]");
     }
     async addAccountToSkipped(username: string){
@@ -246,7 +302,7 @@ export class Client {
         this.redis.set('skipped',JSON.stringify(accounts),{"EX":60*60*24*1});
     }
     async sendUser(){
-        let me = await this.profile();
+        let me = await this.account();
         if(!me){
             return this.sendHomeMsg()
         }
@@ -254,33 +310,37 @@ export class Client {
             this.accountSkipped(),
             // this.accountFollowed()
         ])
-        let account = await this.ctx?.prisma.user.findFirst({
-            take: 1,
+        let account = await prisma.account.findFirst({
             where:{
-                id:{not:{equals:this.pk}},
-                active:{equals:true},
+                main:true,
+                owner:{
+                    id:{not:this.pk},
+                    gems:{gte:2},
+                    active:true
+                },                
+                username:{notIn:accountsSkipped},
+                active:true,
                 followings:{
                     none:{
                         follower_id:{equals:me.igId}
                     }
                 },
-                igUsername:{notIn:accountsSkipped},
-                gems:{gte:2}
             },
-            orderBy: {
-                gems:"desc"
-            },
-        });
+            orderBy:{
+                owner:{
+                    gems:'desc'
+                }
+            }
+        })
         if(!account)return this.translate('notusertofolw').send();
         // const user = await igInstance.checkProfile(account.igUsername) as any;
         // if(!user)return;
-        bot.telegram.sendMessage(this.pk,`${this.translate('dofollow',{username:account.igUsername}).msg}\n${this.translate('moregemsmorefollowers').msg}`,
+        bot.telegram.sendMessage(this.pk,`${this.translate('dofollow',{username:account.username}).msg}\n${this.translate('moregemsmorefollowers').msg}`,
         {
-            ...this.keyboard.panel(account.igUsername),
+            ...this.keyboard.panel(account.username),
             parse_mode:"HTML",
         }
-        ).catch((e)=>{console.log(e);
-        })
+        ).catch((e)=>{})
     }
 }
 if(!isPausedWorker){
@@ -319,9 +379,9 @@ if(!isPausedWorker){
             let otherUser = await follower.findUserByUsername(usernameToFollow);
             if(!otherUser)return;
             let oClient = await follower.saveFollowAction(otherUser.igId)
-            let otherClient = new Client(otherUser.id);
+            let otherClient = new Client(otherUser.owner.id);
             let userLang = await otherClient.getLang();
-            bot.telegram.sendMessage(otherUser.id,`<b>${followerUsername}</b> ${otherClient.translate('followedyou',{gems:oClient.gems},userLang).msg}`,{
+            bot.telegram.sendMessage(otherUser.owner.id,`<b>${followerUsername}</b> ${otherClient.translate('followedyou',{gems:oClient.owner.gems},userLang).msg}`,{
                 ...otherClient.keyboard.inlineKeyboard([{text:otherClient.translate('startfollowbtn').msg,callback_data:"sendusertofollow"}]),
                 parse_mode:"HTML"}).catch((e)=>{});
         } 

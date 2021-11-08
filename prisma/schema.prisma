@@ -11,38 +11,37 @@ datasource db {
 }
 
 model User {
-  id         Int      @id
-  igUsername String   @unique
-  igId       String   @unique
-  gems       Int      @default(1)
-  active     Boolean  @default(true)
-  // followers  Account[] @relation("follower")
-  // followed   Account[] @relation("followed")
-  follows    Follow[] @relation("follows")
-  followings Follow[] @relation("followings")
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @default(now()) @updatedAt
+  id        Int       @id
+  // igUsername String    @unique
+  // igId       String    @unique
+  gems      Int       @default(1)
+  active    Boolean   @default(true)
+  accounts  Account[] @relation("ownership")
+  // follows    Follow[]  @relation("follows")
+  // followings Follow[]  @relation("followings")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
 }
 
-// model Account {
-//   follower_id Int
-//   followed_id Int
-
-//   followed User @relation("followed", fields: [followed_id], references: [id])
-//   follower User @relation("follower", fields: [follower_id], references: [id])
-
-//   createdAt DateTime @default(now())
-//   @@id([followed_id, follower_id])
-// }
+model Account {
+  igId       String   @id
+  username   String   @unique
+  user_id    Int
+  owner      User     @relation("ownership", fields: [user_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  follows    Follow[] @relation("follows")
+  followings Follow[] @relation("followings")
+  active     Boolean  @default(true)
+  main       Boolean  @default(true)
+  createdAt  DateTime @default(now())
+}
 
 model Follow {
-  id          Int     @id @default(autoincrement())
-  follower_id String?
-  followed_id String?
+  follower_id String
+  followed_id String
 
-  follower User? @relation("follows", fields: [follower_id], references: [igId], onUpdate: Cascade)
-  followed User? @relation("followings", fields: [followed_id], references: [igId], onUpdate: Cascade)
+  follower Account @relation("follows", fields: [follower_id], references: [igId], onUpdate: Cascade)
+  followed Account @relation("followings", fields: [followed_id], references: [igId], onUpdate: Cascade)
 
   createdAt DateTime @default(now())
-  @@unique([followed_id, follower_id])
+  @@id([followed_id, follower_id])
 }
