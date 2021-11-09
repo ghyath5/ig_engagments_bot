@@ -20,6 +20,10 @@ const queue = new Queue('following',{
 const prisma = new PrismaClient()
 const credentials = [
     {
+        username:'tist_acco',
+        password:'tIsT-AcCo'
+    },
+    {
         username:process.env.IG_USERNAME!,
         password:process.env.IG_PASSWORD!,
     },
