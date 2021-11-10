@@ -275,7 +275,6 @@ export class Client {
         }
         let me = await this.profile()
         if(!user?.id){
-            console.log("No uUSER");
             return this.translate('notuserfound').send();
         }
         bot.telegram.sendPhoto(this.pk,{
@@ -389,13 +388,12 @@ if(!isPausedWorker){
         const followerLang = job.data.followerLang;
         const follower = new Client(followerPk,followerLang);
         let fakefollows = parseInt(await follower.redis.get(`fakefollows`)||"0")
-        follower.memory.shift('execludes',usernameToFollow);
         if(!result){
             if(!fakefollows){
                 await follower.redis.set('fakefollows',"0",{"EX":60*10})
             }
             follower.translate('notfollowed',{username:usernameToFollow}).send()
-            return follower.redis.client.incr(`${followerPk}:fakefollows`);
+            follower.redis.client.incr(`${followerPk}:fakefollows`);
         }
         if(result){
             if(fakefollows>0){
@@ -413,6 +411,8 @@ if(!isPausedWorker){
             bot.telegram.sendMessage(otherUser.owner.id,`<b>${followerUsername}</b> ${otherClient.translate('followedyou',{gems:oClient.owner.gems},userLang).msg}`,{
                 ...otherClient.keyboard.inlineKeyboard([{text:otherClient.translate('startfollowbtn').msg,callback_data:"sendusertofollow"}]),
                 parse_mode:"HTML"}).catch((e)=>{});
-        } 
+        }
+        
+        follower.memory.shift('execludes',usernameToFollow);
     })
 }
