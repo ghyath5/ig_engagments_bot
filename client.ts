@@ -1,7 +1,7 @@
 import { adminId, bot, IG, MyContext, } from './global';
 import {  Redis } from './redis';
 import { ExtraReplyMessage } from 'telegraf/typings/telegram-types';
-import { Account, PrismaClient, User } from '@prisma/client';
+import { Account, PrismaClient, User } from '.prisma/client';
 import { Keyboard } from './keyboard';
 import Queue from 'bee-queue';
 import { igInstance } from './instagram';
