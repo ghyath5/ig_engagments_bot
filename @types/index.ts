@@ -8,6 +8,8 @@ import { Client } from '../client';
 import {  Redis } from '../redis';
 import { Keyboard } from '../keyboard';
 import { I18n } from 'i18n';
+import { Memory } from '../memory';
+
 export interface MyContext extends TelegrafContext {
   session:MemoSession
   self:Client;
@@ -16,5 +18,6 @@ export interface MyContext extends TelegrafContext {
   db:Redis
   prisma: PrismaClient
   pk:number|string
-  i18n:I18n
+  i18n:I18n,
+  memory:Memory
 }

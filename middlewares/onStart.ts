@@ -3,6 +3,7 @@ import { Redis } from "../redis";
 import { adminId, bot } from "../global";
 import { PrismaClient } from '@prisma/client';
 import i18n from "../locales";
+// import { Memory } from "../memory";
 const prisma = new PrismaClient()
 bot.use(async (ctx,next)=>{
     if(!ctx.from?.id || ctx.from.is_bot)return;
@@ -16,5 +17,6 @@ bot.use(async (ctx,next)=>{
     ctx.i18n.setLocale(ctx.lang||'en');
     ctx.self = new Client(ctx.pk,ctx.lang,ctx);
     ctx.prisma = prisma;
+    // ctx.memory = new Memory(ctx.from!.id);
     next();
 })

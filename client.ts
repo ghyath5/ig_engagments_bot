@@ -9,6 +9,7 @@ import i18n from "./locales";
 import { I18n } from 'i18n';
 import { notifyUnfollowers } from './utls';
 import { Context } from 'telegraf';
+import { Memory } from './memory';
 const isPausedWorker = parseInt(process.env.PAUSE_WORKER||"0")
 
 const queue = new Queue('following',{
@@ -52,7 +53,6 @@ export class Client {
         const job = queue.createJob({usernameToFollow:username,followerIGId:account.igId,followerUsername:myUsername,followerPk:this.pk,followerLang:this.lang});
         job.save();
         this.translate('wearechecking').send();
-        await this.addAccountToSkipped(username);
     }
     ctx?:MyContext;
     lang: string;
@@ -61,6 +61,7 @@ export class Client {
     keyboard:Keyboard
     username:string|undefined
     i18n:I18n;
+    memory:Memory;
     constructor(pk:number,lang:string='en',ctx?:MyContext){
         this.ctx = ctx;
         this.lang = lang;
@@ -69,6 +70,7 @@ export class Client {
         this.keyboard = new Keyboard(this);
         this.i18n = i18n;
         this.i18n.setLocale(this.lang);
+        this.memory = new Memory(this.pk);
     }
     myLink(){
         return `https://t.me/${process.env.BOT_USERNAME}/?start=${this.pk}`
@@ -326,6 +328,7 @@ export class Client {
         this.redis.set('skipped',JSON.stringify(accounts),{"EX":60*60*24*1});
     }
     async sendUser(){
+        let execludes = this.memory.get<string[]>('execludes') || [];
         let me = await this.account();
         if(!me){
             return this.sendHomeMsg()
@@ -342,7 +345,7 @@ export class Client {
                     gems:{gte:2},
                     active:true
                 },                
-                username:{notIn:accountsSkipped},
+                username:{notIn:[...execludes,...accountsSkipped]},
                 active:true,
                 followings:{
                     none:{
@@ -386,10 +389,12 @@ if(!isPausedWorker){
         const followerLang = job.data.followerLang;
         const follower = new Client(followerPk,followerLang);
         let fakefollows = parseInt(await follower.redis.get(`fakefollows`)||"0")
+        follower.memory.shift('execludes',usernameToFollow);
         if(!result){
             if(!fakefollows){
                 await follower.redis.set('fakefollows',"0",{"EX":60*10})
             }
+            follower.translate('notfollowed',{username:usernameToFollow}).send()
             return follower.redis.client.incr(`${followerPk}:fakefollows`);
         }
         if(result){

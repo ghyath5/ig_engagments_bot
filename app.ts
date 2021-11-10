@@ -118,18 +118,18 @@ bot.action(/report-(.+)/, async (ctx) => {
 let followAction = {};
 bot.action(/followed-(.+)/, async (ctx) => {
   let username = ctx.match['input'].split('-')[1];
-  if(followAction[ctx.from!.id] && followAction[ctx.from!.id] == username){  
+  if(ctx.self.memory.get('followedUsername') && ctx.self.memory.get('followed') == username){  
     return;
   }
-  followAction[ctx.from!.id] = username;
+  ctx.self.memory.set('followedUsername',username);
   let fakefollows = parseInt(await ctx.self.redis.get(`fakefollows`)||"0")
   if(fakefollows>=4){
-    followAction[ctx.from!.id] = null;
+    ctx.self.memory.set('followedUsername',null);
     return ctx.self.translate('youspamfollow').send()
   }
   let todayfollowed = parseInt(await ctx.self.redis.get('todayfollowed')||"0")
   if(todayfollowed >= 25 || isPausedWorker){
-    followAction[ctx.from!.id] = null;
+    ctx.self.memory.set('followedUsername',null);
     return ctx.self.translate('followedexcedded').send();
   }
   if(!todayfollowed){
@@ -148,14 +148,12 @@ bot.action(/followed-(.+)/, async (ctx) => {
     ctx.deleteMessage();
     return ctx.self.sendUser();
   }
-  // const user = await igInstance.checkProfile(myUsername) as any;
-  // if (!user) {
-  //   return ;
-  // }
+  ctx.self.memory.push('execludes',username);
   await ctx.self.checkIfollowed(username)
   ctx.deleteMessage();
   await IG.sleep(1000,2000);
-  return ctx.self.sendUser();
+  await ctx.self.sendUser();
+  ctx.self.memory.set('followedUsername',null);
 })
 
 bot.action(/skip-(.+)/,async (ctx)=>{
@@ -233,6 +231,6 @@ app.register(telegrafPlugin, { bot, path: WEBHOOK_PATH })
 bot.telegram.setWebhook(WEBHOOK_URL + WEBHOOK_PATH).then(() => {
     console.log('Webhook is set on', WEBHOOK_URL)
 })
-// bot.launch()
+bot.launch()
 
 app.listen(process.env.PORT!, '0.0.0.0')
