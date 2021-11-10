@@ -231,6 +231,6 @@ app.register(telegrafPlugin, { bot, path: WEBHOOK_PATH })
 bot.telegram.setWebhook(WEBHOOK_URL + WEBHOOK_PATH).then(() => {
     console.log('Webhook is set on', WEBHOOK_URL)
 })
-bot.launch()
+// bot.launch()
 
 app.listen(process.env.PORT!, '0.0.0.0')
