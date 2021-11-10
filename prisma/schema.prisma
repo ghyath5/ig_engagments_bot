@@ -39,8 +39,8 @@ model Follow {
   follower_id String
   followed_id String
 
-  follower Account @relation("follows", fields: [follower_id], references: [igId], onUpdate: Cascade)
-  followed Account @relation("followings", fields: [followed_id], references: [igId], onUpdate: Cascade)
+  follower Account @relation("follows", fields: [follower_id], references: [igId], onUpdate: Cascade, onDelete:Cascade)
+  followed Account @relation("followings", fields: [followed_id], references: [igId], onUpdate: Cascade, onDelete:Cascade)
 
   createdAt DateTime @default(now())
   @@id([followed_id, follower_id])
