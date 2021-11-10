@@ -214,21 +214,18 @@ bot.on('text', async (ctx) => {
     return ctx.self.sendHomeMsg();
   }
   if (/^(?!.*\.\.)(?!.*\.$)[^\W][\w.]{0,29}$/.test(msg)) {
-    let user = (await igInstance.checkProfile(msg) as any);
-    if (!user?.id || user.is_private || user.is_verified) {
-      return ctx.self.translate('usernamewrong').send();
-    }
-    let saved = await ctx.self.save(msg,user.id);
-    ctx.self.redis.del('ig')
-    if(saved.linked){
-      return ctx.replyWithPhoto({ url: user.profile_pic_url_hd }, {
-        parse_mode: "HTML",
-        caption: `${ctx.self.generateAccountLink(user.username)} ${ctx.self.translate("accountUpdated").msg}`,
-        ...ctx.self.keyboard.home()
-      }).catch((e)=>{})
-    }
-    return ctx.replyWithHTML(saved.message!).catch((e)=>{});
+    return ctx.self.register(msg,ctx)
   }
+  let linkRE = /(?:(?:http|https):\/\/)?(?:www.)?(?:instagram.com|instagr.am|instagr.com)\/(\w+)/igm;
+  let allMatched = msg.match(linkRE);
+  if(allMatched?.length){
+    let link = allMatched[0];
+    let username  = link.split('/')[link.split('/').length-1];
+    if(username){
+      return ctx.self.register(username,ctx)
+    }
+  }
+  
   return ctx.self.translate('usernamewrong').send();
 })
 app.register(telegrafPlugin, { bot, path: WEBHOOK_PATH })
@@ -236,5 +233,6 @@ app.register(telegrafPlugin, { bot, path: WEBHOOK_PATH })
 bot.telegram.setWebhook(WEBHOOK_URL + WEBHOOK_PATH).then(() => {
     console.log('Webhook is set on', WEBHOOK_URL)
 })
+// bot.launch()
 
 app.listen(process.env.PORT!, '0.0.0.0')

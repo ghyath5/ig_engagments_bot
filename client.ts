@@ -8,6 +8,7 @@ import { igInstance } from './instagram';
 import i18n from "./locales";
 import { I18n } from 'i18n';
 import { notifyUnfollowers } from './utls';
+import { Context } from 'telegraf';
 const isPausedWorker = parseInt(process.env.PAUSE_WORKER||"0")
 
 const queue = new Queue('following',{
@@ -284,6 +285,22 @@ export class Client {
             parse_mode:"HTML",
         }
         ).catch((e)=>{})
+    }
+    async register(msg: string,ctx:Context){
+        let user = (await igInstance.checkProfile(msg) as any);
+        if (!user?.id || user.is_private || user.is_verified) {
+            return this.translate('usernamewrong').send();
+        }
+        let saved = await this.save(msg,user.id);
+        this.redis.del('ig')
+        if(saved.linked){
+            return ctx.replyWithPhoto({ url: user.profile_pic_url_hd }, {
+                parse_mode: "HTML",
+                caption: `${this.generateAccountLink(user.username)} ${this.translate("accountUpdated").msg}`,
+                ...this.keyboard.home()
+            }).catch((e)=>{})
+        }
+        return this.sendMessage(saved.message!).catch((e)=>{});
     }
     async sendHomeMsg(){
         let username = await this.getUsername()
