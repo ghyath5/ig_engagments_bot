@@ -1,7 +1,7 @@
 import { Client } from "../client";
 import { Redis } from "../redis";
 import { adminId, bot } from "../global";
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '.prisma/client';
 import i18n from "../locales";
 // import { Memory } from "../memory";
 const prisma = new PrismaClient()
