@@ -177,6 +177,14 @@ bot.command('s_g_m',async (ctx)=>{
     client.translate('younotreceivefollows').send({...client.keyboard.earnGemsBtn()});
   })
 })
+bot.command('notify',async (ctx)=>{
+  if(ctx.from.id.toString() !=  adminId)return;
+  let allUsers = await ctx.prisma.user.findMany();
+  let ids = allUsers.map((u)=>u.id);
+  multipleNotification(ids,(client)=>{
+    client.translate('notificationIssueMsg').send()
+  })
+})
 // bot.command('f_ig',async (ctx)=>{
 //   if(ctx.from.id.toString() != adminId)return;
 //   let allUsers = await ctx.prisma.user.findMany();
