@@ -62,10 +62,10 @@ export class Client {
     username:string|undefined
     i18n:I18n;
     memory:Memory;
-    constructor(pk:number,lang:string='en',ctx?:MyContext){
+    constructor(pk:number|string,lang:string='en',ctx?:MyContext){
         this.ctx = ctx;
         this.lang = lang;
-        this.pk = pk;
+        this.pk = Number(pk);
         this.redis = new Redis(this.pk);
         this.keyboard = new Keyboard(this);
         this.i18n = i18n;
