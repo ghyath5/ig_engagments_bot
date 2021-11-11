@@ -173,14 +173,16 @@ bot.command('s_g_m',async (ctx)=>{
     }
   });
   let ids = allUsers.map((u)=>u.id);
-  multipleNotification('younotreceivefollows',ids)
+  multipleNotification(ids,(client)=>{
+    client.translate('younotreceivefollows').send({...client.keyboard.earnGemsBtn()});
+  })
 })
-bot.command('f_ig',async (ctx)=>{
-  if(ctx.from.id.toString() != adminId)return;
-  let allUsers = await ctx.prisma.user.findMany();
-  let ids = allUsers.map((u)=>u.id);
-  multipleNotification('followOurIg',ids)
-})
+// bot.command('f_ig',async (ctx)=>{
+//   if(ctx.from.id.toString() != adminId)return;
+//   let allUsers = await ctx.prisma.user.findMany();
+//   let ids = allUsers.map((u)=>u.id);
+//   multipleNotification(ids,(client)=>{})
+// })
 bot.command('start_following',(ctx)=>{
   return ctx.self.sendUser();
 })

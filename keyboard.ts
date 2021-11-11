@@ -76,4 +76,11 @@ export class Keyboard {
         ];
         return this.inlineKeyboard(buttons)
     }
+    earnGemsBtn(){
+        let buttons:any = [
+            [{text:this.client.translate('startfollowbtn').msg,callback_data:"sendusertofollow"}],
+            [{text:this.client.translate('sharebot').msg, callback_data:`sendLink`}],
+        ];
+        return this.inlineKeyboard(buttons)
+    }
 }

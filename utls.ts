@@ -40,7 +40,7 @@ export const notifyUnfollowers = async (pk:number,users:(Follow & {follower: Acc
     sendNotification()
 }
 
-export const multipleNotification = async (msgKey:string,ids:number[]|string[])=>{
+export const multipleNotification = async (ids:number[]|string[],callback:(client:Client)=>void)=>{
     let i = 0;
     function sendNotification(){
         let timeoutcounter = setTimeout(async ()=>{
@@ -51,7 +51,7 @@ export const multipleNotification = async (msgKey:string,ids:number[]|string[])=
             let client = new Client(Number(active));
             console.log(`Sending ${i+1}/${ids.length}`);
             await client.getLang()
-            await client.translate(msgKey).send();
+            callback(client)
             i++;
             sendNotification();
         },500)
