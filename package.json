@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "ts-node-dev --files ./app.ts",
     "start": "ts-node dist/app.js",
-    "build": "tsc -p . && copyfiles -u 1 ./locales/*.json dist/locales && pnpm run generate",
+    "build": "tsc -p . && copyfiles -u 1 ./locales/*.json dist/locales && yarn generate",
     "generate": "prisma generate"
   },
   "devDependencies": {
@@ -29,10 +29,9 @@
     "fastify": "^3.22.1",
     "fastify-telegraf": "^1.0.2",
     "i18n": "^0.13.3",
+    "instagram_mqtt": "^1.2.2",
     "instagram-id-to-url-segment": "^0.0.0",
     "instagram-private-api": "https://github.com/ghyath5/instagram-private-api",
-    "instagram_mqtt": "^1.2.2",
-    "pnpm": "^6.21.0",
     "redis": "^4.0.0-rc.3",
     "telegraf": "^4.4.2",
     "ts-node": "^10.2.0",
