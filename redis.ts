@@ -4,10 +4,10 @@ export const client = createClient({url:process.env.DB_REDIS_URL});
 client.connect();
 
 export class Redis {
-    pk:number;
+    pk:number|string;
     profileKey:string;
     client:RedisClientType=client;
-    constructor(pk: number){
+    constructor(pk: number|string){
         this.pk = pk;
         this.profileKey = `${this.pk}:profile`;
     }
