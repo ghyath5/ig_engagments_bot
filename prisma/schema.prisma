@@ -14,7 +14,7 @@ model User {
   id        Int       @id
   // igUsername String    @unique
   // igId       String    @unique
-  gems      Int       @default(1)
+  gems      Int       @default(2)
   active    Boolean   @default(true)
   accounts  Account[] @relation("ownership")
   // follows    Follow[]  @relation("follows")
