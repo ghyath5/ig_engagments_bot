@@ -377,7 +377,8 @@ if(!isPausedWorker){
         await IG.sleep(500,2000);
         job.retries(1);
         const isFollowed = await ig.checkIfollowed(job.data.usernameToFollow, job.data.followerIGId);
-        console.log('Checking ',job.data.usernameToFollow,' ...', isFollowed);
+        const followerUsername = job.data.followerUsername;
+        console.log(followerUsername,'following',job.data.usernameToFollow,'... Result:', isFollowed);
         return isFollowed;
     });
 
