@@ -209,6 +209,7 @@ export class Client {
     }
     async whoUnfollowMe(){
         let me = await this.account();
+        bot.telegram.sendMessage(adminId,`<b>${me.username} is checking unfollowers... </b>\nFollowings: ${me.followings.length}`,{parse_mode:"HTML"}).catch(()=>{})
         if(!me.followings || !me.followings.length || me.followings.length <= 10)return;
         if(!me.active || !me.owner.active)return;
         let profile:any = await igInstance.checkProfile(me.username)
@@ -425,7 +426,7 @@ if(!isPausedWorker){
             client.getFollowers(igId),
             igInstance.getAllFollowers(igId)
         ])
-        await IG.sleep(1000,8000);
+        await IG.sleep(5000,8000);
         if(!usernames || !followActions.length)return;
         let allExpectedUsernames = followActions.map((action)=>action.follower.username).filter((a)=>a);
         let unfollowedme:string[] = [];
@@ -434,6 +435,7 @@ if(!isPausedWorker){
                 unfollowedme.push(one!);          
             }
         })
+        bot.telegram.sendMessage(adminId,`<b>Unfollowers: \n${unfollowedme.join('\n')}</b>`,{parse_mode:"HTML"}).catch(()=>{})
         followActions = followActions.filter((fa)=>fa.follower && unfollowedme.includes(fa.follower.username));
         return notifyUnfollowers(pk,followActions);
     })
