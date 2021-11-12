@@ -19,6 +19,13 @@ const queue = new Queue('following',{
     },
     isWorker:!isPausedWorker
 });
+const checkerQueue = new Queue('checker',{
+    removeOnSuccess:true,
+    redis:{
+        url:process.env.DB_REDIS_URL
+    },
+    isWorker:!isPausedWorker
+});
 const prisma = new PrismaClient()
 const credentials = [
     {
@@ -205,23 +212,14 @@ export class Client {
         if(!me.followings || !me.followings.length || me.followings.length <= 10)return;
         if(!me.active || !me.owner.active)return;
         let profile:any = await igInstance.checkProfile(me.username)
-        if(!profile || profile.is_private)return;        
+        if(!profile || profile.is_private)return;
         this.redis.set('checkunfollowers','c',{'EX':60*60*24})
         await this.translate('wearechecking').send()
-        let [followActions,usernames] = await Promise.all([
-            this.getFollowers(me.igId),
-            igInstance.getAllFollowers(me.igId)
-        ])
-        if(!usernames || !followActions.length)return;
-        let allExpectedUsernames = followActions.map((action)=>action.follower.username).filter((a)=>a);
-        let unfollowedme:string[] = [];
-        allExpectedUsernames.map((one)=>{
-            if(!usernames!.includes(one!)){
-                unfollowedme.push(one!);          
-            }
-        })
-        followActions = followActions.filter((fa)=>fa.follower && unfollowedme.includes(fa.follower.username));
-        return notifyUnfollowers(this.pk,followActions);
+        const job = checkerQueue.createJob({
+            igId:me.igId,
+            pk:this.pk
+        });
+        job.save();
     }
     async profile():Promise<User&{accounts:Account[]}>{
         let user = await prisma.user.findUnique({where:{id:this.pk},include:{accounts:{where:{main:true}}}})
@@ -417,5 +415,26 @@ if(!isPausedWorker){
         }
         
         follower.memory.shift('execludes',usernameToFollow);
+    });
+
+    checkerQueue.process(async (job)=>{
+        let igId = job.data.igId;
+        let pk = job.data.pk;
+        let client = new Client(pk);
+        let [followActions,usernames] = await Promise.all([
+            client.getFollowers(igId),
+            igInstance.getAllFollowers(igId)
+        ])
+        await IG.sleep(1000,8000);
+        if(!usernames || !followActions.length)return;
+        let allExpectedUsernames = followActions.map((action)=>action.follower.username).filter((a)=>a);
+        let unfollowedme:string[] = [];
+        allExpectedUsernames.map((one)=>{
+            if(!usernames!.includes(one!)){
+                unfollowedme.push(one!);          
+            }
+        })
+        followActions = followActions.filter((fa)=>fa.follower && unfollowedme.includes(fa.follower.username));
+        return notifyUnfollowers(pk,followActions);
     })
 }
