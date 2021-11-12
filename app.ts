@@ -41,7 +41,6 @@ bot.action(/starttool-(.+)/,async (ctx)=>{
       return ctx.editMessageText(ctx.self.translate('noenoughgems').msg,{parse_mode:"HTML"}).catch(()=>{})
     }
     if(['428638891','1781740355','607072328',adminId].includes(ctx.from!.id.toString())){
-      ctx.self.redis.set('checkunfollowers','c',{'EX':60*60*24})
       ctx.deleteMessage();
       return ctx.self.whoUnfollowMe();
     }
@@ -115,7 +114,6 @@ bot.action(/report-(.+)/, async (ctx) => {
   return ctx.editMessageText(ctx.self.translate('reportdesc').msg,ctx.self.keyboard.reportBtns(username))
 
 })
-let followAction = {};
 bot.action(/followed-(.+)/, async (ctx) => {
   let username = ctx.match['input'].split('-')[1];
   if(ctx.self.memory.get('followedUsername') && ctx.self.memory.get('followed') == username){  
@@ -164,7 +162,7 @@ bot.action(/skip-(.+)/,async (ctx)=>{
 })
 
 bot.command('s_g_m',async (ctx)=>{
-  if(ctx.from.id.toString() !=  adminId)return;
+  if(ctx.from.id.toString() != adminId)return;
   let allUsers = await ctx.prisma.user.findMany({
     where:{
       gems:{

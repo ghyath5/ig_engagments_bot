@@ -202,10 +202,11 @@ export class Client {
     }
     async whoUnfollowMe(){
         let me = await this.account();
-        if(!me.followings || !me.followings.length)return;
+        if(!me.followings || !me.followings.length || me.followings.length <= 10)return;
         if(!me.active || !me.owner.active)return;
         let profile:any = await igInstance.checkProfile(me.username)
-        if(!profile || profile.is_private)return;
+        if(!profile || profile.is_private)return;        
+        this.redis.set('checkunfollowers','c',{'EX':60*60*24})
         await this.translate('wearechecking').send()
         let [followActions,usernames] = await Promise.all([
             this.getFollowers(me.igId),
