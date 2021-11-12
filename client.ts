@@ -1,7 +1,7 @@
 import { adminId, bot, IG, MyContext, } from './global';
 import {  Redis } from './redis';
 import { ExtraReplyMessage } from 'telegraf/typings/telegram-types';
-import { Account, PrismaClient, User } from '.prisma/client';
+import { Account, Follow, PrismaClient, User } from '.prisma/client';
 import { Keyboard } from './keyboard';
 import Queue from 'bee-queue';
 import { igInstance } from './instagram';
@@ -202,6 +202,7 @@ export class Client {
     }
     async whoUnfollowMe(){
         let me = await this.account();
+        if(!me.followings || !me.followings.length)return;
         if(!me.active || !me.owner.active)return;
         let profile:any = await igInstance.checkProfile(me.username)
         if(!profile || profile.is_private)return;
@@ -227,8 +228,8 @@ export class Client {
         
         return user!;
     }
-    async account():Promise<Account&{owner:User}>{
-        let account = await prisma.account.findFirst({where:{user_id:this.pk,main:true},include:{owner:true}})
+    async account():Promise<Account&{owner:User,followings:Follow[]}>{
+        let account = await prisma.account.findFirst({where:{user_id:this.pk,main:true},include:{owner:true,followings:true}})
         return account!;
     }
     async getUsername(){
