@@ -52,5 +52,6 @@
 	"youcheckedtoday":"<b>لا يمكنك استخدام هذه الأداة إلا مرة واحدة في اليوم</b>",
 	"notfollowed":"<b>لم يتم التحقق من متابعتك ل {{username}} تأكد من انك دخلت على صفحته وضغطت متابعة قبل ان تضغط هنا على تمت المتابعة.</b>",
 	"notificationIssueMsg":"<b>اذا واجهتك اي مشكلة او لم تتمكن من استخدام البوت بشكل جيد ولديك استفسارات, راسلني هنا: <a href='https://instagram.com/super_ig_engagement'>super_ig_engagement</a></b>",
-	"nooneunfollowedyou":"<b>لا يوجد إلغاء متابعات لحسابك لحد الان</b>"
+	"nooneunfollowedyou":"<b>لا يوجد إلغاء متابعات لحسابك لحد الان</b>",
+	"showthisaccount":"<b>شاهد الحالات على هذا الحساب<a href='https://instagram.com/super_ig_engagement'>super_ig_engagement</a>، من الممكن ان تجد حسابك منشور هناك.</b>"
 }
