@@ -43,7 +43,7 @@
 	"enterurlink": "Someone entered by your link you have got 💎 a gem",
 	"proccessStarted": "<b>The check process has been started... we will notify you when it finish.</b>",
 	"unfollowtool": "This tool will check who unfollowed you and it will return you your gems.\n<b>- You can use this tool once per day.</b>\n<b>- You need to have at least 10 gems in your balance to use this tool (it will deduct only 4 gems after finish the process).</b>",
-	"detectUnfollow": "We have detect that you have unfollowed {{name}}, we have deducted 2 gems from your balance... if this action repeated many times your account will be banned.",
+	"detectUnfollow": "We have detected that you have unfollowed <b>{{name}}</b>, we have deducted <b>2 gems</b> from your balance... if this action repeated many times your account will be banned.",
 	"noenoughgems": "Not enough gems.",
 	"startProccess":"Start now ➡️.",
 	"followOurIg":"Follow the Instagram bot account: <a href='https://instagram.com/super_ig_engagement'>super_ig_engagement</a>",
