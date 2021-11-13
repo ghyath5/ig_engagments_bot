@@ -17,7 +17,7 @@
 	"followedyou": "has just followed you!\nYour gems left: {{gems}} 💎",
 	"constraintUsername": "This account is already registered by someone.",
 	"wearechecking": "We are checking your follow, don't worry you will get your gem when we finish this process.",
-	"youvfollowed": "You got a 💎 since you have followed <b>{{username}}</b>",
+	"youvfollowed": "You got a 💎 since you have followed <b>{{username}}</b>\n❗️If we detect that you removed your follow, we will deduct 2 gems from your balance.❗️",
 	"moregemsmorefollowers": "<i>Remember: More gems that's mean more followers 😃</i>",
 	"change": "Change my account",
 	"notusertofolw": "🥺 There are no more accounts to follow right now, try again after a while. 🥺",
