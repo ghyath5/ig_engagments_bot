@@ -42,7 +42,7 @@
 	"yougotgems": "We have finish unfollow checking process, we detected that there are {{gems}} person have unfollowed you.\nYou have received {{gems}} gem/s.",
 	"enterurlink": "Someone entered by your link you have got 💎 a gem",
 	"proccessStarted": "<b>The check process has been started... we will notify you when it finish.</b>",
-	"unfollowtool": "This tool will check who unfollowed you and it will return you your gems.\n-You can use this tool once per day\n-You need to have at least 10 gems in your balance to use this tool (it will deduct only 4 gems after finish the process).",
+	"unfollowtool": "This tool will check who unfollowed you and it will return you your gems.\n<b>- You can use this tool once per day.</b>\n<b>- You need to have at least 10 gems in your balance to use this tool (it will deduct only 4 gems after finish the process).</b>",
 	"detectUnfollow": "We have detect that you have unfollowed {{name}}, we have deducted 2 gems from your balance... if this action repeated many times your account will be banned.",
 	"noenoughgems": "Not enough gems.",
 	"startProccess":"Start now ➡️.",
