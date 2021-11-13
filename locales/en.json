@@ -53,5 +53,5 @@
 	"notfollowed":"<b>We couldn't detect your follow to {{username}} account, make sure you entered their page and clicked follow before you press (Followed) button here.</b>",
 	"notificationIssueMsg":"<b>If you are facing an issue or you couldn't use this bot well, feel free to contect us on <a href='https://instagram.com/super_ig_engagement'>super_ig_engagement</a></b>",
 	"nooneunfollowedyou":"<b>There are no unfollowers to your account until now.</b>",
-	"showthisaccount":"<b>Watch this account stories <a href='https://instagram.com/super_ig_engagement'>super_ig_engagement</a>, possibly your account was shared there.</b>"
+	"showthisaccount":"<b>Follow this account and watch the stories <a href='https://instagram.com/super_ig_engagement'>super_ig_engagement</a>, possibly your account was shared there.</b>"
 }

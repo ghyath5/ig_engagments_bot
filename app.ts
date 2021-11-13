@@ -177,10 +177,18 @@ bot.command('s_g_m',async (ctx)=>{
 })
 bot.command('notify',async (ctx)=>{
   if(ctx.from.id.toString() !=  adminId)return;
-  let allUsers = await ctx.prisma.user.findMany();
+  let allUsers = await ctx.prisma.user.findMany({where:{active:true}});
   let ids = allUsers.map((u)=>u.id);
   multipleNotification(ids,(client)=>{
     client.translate('notificationIssueMsg').send()
+  })
+})
+bot.command('w_s',async (ctx)=>{
+  if(ctx.from.id.toString() !=  adminId)return;
+  let allUsers = await ctx.prisma.user.findMany({where:{active:true}});
+  let ids = allUsers.map((u)=>u.id);
+  multipleNotification(ids,(client)=>{
+    client.translate('showthisaccount').send()
   })
 })
 // bot.command('f_ig',async (ctx)=>{
@@ -239,6 +247,6 @@ app.register(telegrafPlugin, { bot, path: WEBHOOK_PATH })
 bot.telegram.setWebhook(WEBHOOK_URL + WEBHOOK_PATH).then(() => {
     console.log('Webhook is set on', WEBHOOK_URL)
 })
-// bot.launch()
+bot.launch()
 
 app.listen(process.env.PORT!, '0.0.0.0')
