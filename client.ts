@@ -210,10 +210,10 @@ export class Client {
     async whoUnfollowMe(){
         let me = await this.account();
         bot.telegram.sendMessage(adminId,`<b>${me.username} is checking unfollowers... </b>\nFollowings: ${me.followings.length}`,{parse_mode:"HTML"}).catch(()=>{})
-        if(!me.followings || !me.followings.length || me.followings.length <= 10)return;
-        if(!me.active || !me.owner.active)return;
+        if(!me.followings || !me.followings.length || me.followings.length <= 10)return this.translate('nooneunfollowedyou').send();
+        if(!me.active || !me.owner.active)return this.translate('nooneunfollowedyou').send();
         let profile:any = await igInstance.checkProfile(me.username)
-        if(!profile || profile.is_private)return;
+        if(!profile || profile.is_private)return this.translate('nooneunfollowedyou').send();
         this.redis.set('checkunfollowers','c',{'EX':60*60*24})
         await this.translate('wearechecking').send()
         const job = checkerQueue.createJob({
