@@ -230,7 +230,7 @@ bot.on('text', async (ctx) => {
   if (/^(?!.*\.\.)(?!.*\.$)[^\W][\w.]{0,29}$/.test(msg)) {
     return ctx.self.register(msg,ctx)
   }
-  let linkRE = /(?:(?:http|https):\/\/)?(?:www.)?(?:instagram.com|instagr.am|instagr.com)\/(\w+)/igm;
+  let linkRE = /(?:(?:http|https):\/\/)?(?:www\.)?(?:instagram\.com|instagr\.am)\/([A-Za-z0-9-_\.]+)/igm;
   let allMatched = msg.match(linkRE);
   if(allMatched?.length){
     let link = allMatched[0];
