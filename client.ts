@@ -233,7 +233,7 @@ export class Client {
         return account!;
     }
     async getUsername(){
-        return this.username || (await this.account())?.username || "ghyathdarwish"
+        return this.username || (await this.account())?.username
     }
     setLang(lang:string){
         this.lang = lang;
