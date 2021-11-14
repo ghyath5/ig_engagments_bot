@@ -126,7 +126,7 @@ bot.action(/followed-(.+)/, async (ctx) => {
     return ctx.self.translate('youspamfollow').send()
   }
   let todayfollowed = parseInt(await ctx.self.redis.get('todayfollowed')||"0")
-  if(todayfollowed >= 25 || isPausedWorker){
+  if((todayfollowed >= 25 || isPausedWorker) && adminId != ctx.from!.id.toString()){
     ctx.self.memory.set('followedUsername',null);
     return ctx.self.translate('followedexcedded').send();
   }
