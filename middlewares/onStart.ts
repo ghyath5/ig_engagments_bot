@@ -7,7 +7,7 @@ import i18n from "../locales";
 const prisma = new PrismaClient()
 bot.use(async (ctx,next)=>{
     if(!ctx.from?.id || ctx.from.is_bot)return;
-    if(!parseInt(process.env.STATUS!) && !['428638891','1781740355',adminId].includes(ctx.from.id.toString())){
+    if(!parseInt(process.env.STATUS!) && !['1781740355',adminId].includes(ctx.from.id.toString())){
         return ctx.replyWithHTML("Under maintenance... Try again later").catch((e)=>{});
     }
     ctx.pk = ctx.from.id;
