@@ -126,23 +126,7 @@ class IG {
         return null;
     }
     async getFollowers(id:string){
-        let tunnel:Agent;
-        if(useProxy){
-            this.proxy = await getProxy()
-            if(this.proxy){
-                console.log('Trying Proxy to get followers:', this.proxy?.ip);
-                tunnel = Tunnel.httpsOverHttp({
-                    proxy: {
-                        host: this.proxy.ip,
-                        port: Number(this.proxy.port),
-                        ...(this.proxy.pass&&{proxyAuth:`${this.proxy.username}:${this.proxy.pass}`})
-                    },
-                });
-            }
-            useProxy = false;
-        }else{
-            useProxy = true;
-        }
+        let tunnel = await this.getTunnel();
         const source = axios.CancelToken.source();
         const timeout = setTimeout(() => {
           source.cancel('timeout');
@@ -182,11 +166,31 @@ class IG {
         })
     }
     async checkProfile(username: any){
+        let tunnel = await this.getTunnel();
+        const source = axios.CancelToken.source();
+        const timeout = setTimeout(() => {
+          source.cancel('timeout');
+          // Timeout Logic
+        }, 30000);
         this.fetchSession()
         return new Promise((resolve)=>{
-            axios(`https://www.instagram.com/${username}/?__a=1`,{withCredentials:true
-            ,headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}}).then((res)=>resolve((res?.data as any).graphql?.user)).catch((e)=>{
-                resolve(false)
+            axios(`https://www.instagram.com/${username}/?__a=1`,{withCredentials:true,
+            proxy:false,
+            cancelToken: source.token,
+            timeout:30000,
+            ...(tunnel&&{httpsAgent:tunnel,httpAgent:tunnel}),
+            headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}}).then((res)=>resolve((res?.data as any).graphql?.user))
+            .catch(async(e)=>{
+                console.log("Get Following Error:", ( e as any).message);
+                bot.telegram.sendMessage(adminId,`Error at Proxy: ${this.proxy?.ip}\nProxies Number: ${proxyIndex+1}/${(await proxies.get()).length} Error: ${( e as any).message}`)
+                if(!e.response || ( e as any).message?.includes("429")){
+                    await proxies.remove(this.proxy);
+                    await this.sleep(2000);
+                    return resolve(await this.checkProfile(username));
+                }
+                return resolve(null);
+            }).finally(()=>{
+                clearTimeout(timeout)
             })
         })
     }
@@ -212,25 +216,25 @@ class IG {
         //     return false;
         // }
     }
-    async getFollowing(id:string,cursor?:string){
+    async getTunnel(){
         let tunnel;
-        if(useProxy){
-            this.proxy = await getProxy()
-            if(this.proxy){
-                console.log('Trying Proxy:', this.proxy?.ip);
-                
-                tunnel = Tunnel.httpsOverHttp({
-                    proxy: {
-                        host: this.proxy.ip,
-                        port: Number(this.proxy.port),
-                        ...(this.proxy.pass&&{proxyAuth:`${this.proxy.username}:${this.proxy.pass}`})
-                    },
-                });
-            }
-            useProxy = false;
-        }else{
-            useProxy = true;
+        // if(useProxy){
+        this.proxy = await getProxy()
+        if(this.proxy){
+            console.log('Trying Proxy:', this.proxy?.ip);
+            
+            tunnel = Tunnel.httpsOverHttp({
+                proxy: {
+                    host: this.proxy.ip,
+                    port: Number(this.proxy.port),
+                    ...(this.proxy.pass&&{proxyAuth:`${this.proxy.username}:${this.proxy.pass}`})
+                },
+            });
         }
+        return tunnel
+    }
+    async getFollowing(id:string,cursor?:string){
+        let tunnel = await this.getTunnel();
         this.fetchSession()
         const source = axios.CancelToken.source();
         const timeout = setTimeout(() => {

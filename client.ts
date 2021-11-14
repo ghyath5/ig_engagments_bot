@@ -59,7 +59,7 @@ export class Client {
         const myUsername = account.username;
         const job = queue.createJob({usernameToFollow:username,followerIGId:account.igId,followerUsername:myUsername,followerPk:this.pk,followerLang:this.lang});
         job.save();
-        // this.translate('wearechecking').send();
+        this.translate('wearechecking').send();
     }
     ctx?:MyContext;
     lang: string;
@@ -371,11 +371,11 @@ export class Client {
     }
 }
 if(!isPausedWorker){
-    queue.process(3,async (job)=> {
+    queue.process(1,async (job)=> {
         const {username,password} = getCredentials();
         const ig = new IG(username,password);
         await ig.login()
-        await IG.sleep(500,2000);
+        await IG.sleep(4000,8000);
         job.retries(1);
         const isFollowed = await ig.checkIfollowed(job.data.usernameToFollow, job.data.followerIGId);
         const followerUsername = job.data.followerUsername;
