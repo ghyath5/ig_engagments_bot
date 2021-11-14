@@ -296,6 +296,7 @@ export class Client {
         let saved = await this.save(msg,user.id);
         this.redis.del('ig')
         if(saved.linked){
+            this.redis.set('recentlyadded','a',{'EX':60*60*24})
             return ctx.replyWithPhoto({ url: user.profile_pic_url_hd }, {
                 parse_mode: "HTML",
                 caption: `${this.generateAccountLink(user.username)} ${this.translate("accountUpdated").msg}`,

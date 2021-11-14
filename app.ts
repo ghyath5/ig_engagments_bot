@@ -227,6 +227,8 @@ bot.on('text', async (ctx) => {
     }
     return ctx.self.sendHomeMsg();
   }
+  let changed = await ctx.self.redis.get('recentlyadded');
+  if(changed) return ctx.self.sendMessage("لا يمكنك تغيير الحساب اليوم",{...ctx.self.keyboard.home()});
   if (/^(?!.*\.\.)(?!.*\.$)[^\W][\w.]{0,29}$/.test(msg)) {
     return ctx.self.register(msg,ctx)
   }
