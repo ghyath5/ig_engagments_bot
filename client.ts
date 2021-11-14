@@ -371,11 +371,11 @@ export class Client {
     }
 }
 if(!isPausedWorker){
-    queue.process(1,async (job)=> {
+    queue.process(2,async (job)=> {
         const {username,password} = getCredentials();
         const ig = new IG(username,password);
         await ig.login()
-        await IG.sleep(4000,8000);
+        await IG.sleep(1000,4000);
         job.retries(1);
         const isFollowed = await ig.checkIfollowed(job.data.usernameToFollow, job.data.followerIGId);
         const followerUsername = job.data.followerUsername;
