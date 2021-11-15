@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "ts-node-dev --files ./app.ts",
     "start": "ts-node dist/app.js",
-    "build": "tsc -p . && copyfiles -u 1 ./locales/*.json dist/locales && yarn generate",
+    "heroku-postbuild": "tsc -p . && copyfiles -u 1 ./locales/*.json dist/locales && yarn generate",
     "generate": "prisma generate"
   },
   "devDependencies": {
