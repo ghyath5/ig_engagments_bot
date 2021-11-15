@@ -1,1 +1,0 @@
-web: ./tor/bin/run_tor yarn start
