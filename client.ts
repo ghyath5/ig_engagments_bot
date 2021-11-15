@@ -402,6 +402,7 @@ if(!isPausedWorker){
             if(fakefollows>0){
                 follower.redis.client.decr(`${followerPk}:fakefollows`);
             }
+            follower.redis.client.incr(`${followerPk}:todayfollowed`);
             const followedAccounts = await follower.followedAccounts();
             if(followedAccounts.includes(usernameToFollow))return;
             bot.telegram.sendMessage(followerPk,`${follower.translate('youvfollowed',{username:usernameToFollow}).msg}`,{...follower.keyboard.shareBot(),parse_mode:"HTML"}).catch((e)=>{})
