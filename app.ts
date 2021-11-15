@@ -6,11 +6,32 @@ import fastify from 'fastify';
 import telegrafPlugin from 'fastify-telegraf'
 import { igInstance } from './instagram';
 import { multipleNotification } from './utls';
+import axios from 'axios';
+import { SocksProxyAgent } from 'socks-proxy-agent';
 const app = fastify({ logger: false, });
 const isPausedWorker = parseInt(process.env.PAUSE_WORKER||"0")
 const WEBHOOK_URL = process.env.WEBHOOK_URL!;
 const WEBHOOK_PATH = process.env.WEBHOOK_PATH!;
-
+app.get('/',(req,reply)=>{
+  axios.get('https://api.myip.com/',{}).then(res=>{
+    reply.send(res.data)
+  }).catch((e)=>{
+    reply.send(e.toString())
+  })
+})
+app.get('/proxy',(req,reply)=>{
+  let httpsAgent =  new SocksProxyAgent('socks5h://127.0.0.1:9050')
+  let httpAgent = httpsAgent
+  axios.get('https://api.myip.com/',{
+    proxy:false,
+    httpAgent,
+    httpsAgent,
+  }).then(res=>{
+    reply.send(res.data)
+  }).catch((e)=>{
+    reply.send(e.toString())
+  })
+})
 bot.start(async (ctx) => {
   let splited = ctx.message?.text?.split(' ');
   if(splited.length==2 && !isNaN(Number(splited[1]))){
