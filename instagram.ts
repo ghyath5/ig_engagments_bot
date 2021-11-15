@@ -5,6 +5,7 @@ import * as Tunnel from 'tunnel';
 import { client } from './redis';
 import { adminId, bot } from './global';
 import { Agent } from 'http';
+import { SocksProxyAgent } from 'socks-proxy-agent';
 
 const proxies = {
     async get(){
@@ -152,7 +153,7 @@ class IG {
                 "Cookie":this.session.cookies}}).then((res)=>{
                 return resolve({status:true,users:(res.data as any)?.users});
             }).catch(async(e)=>{
-                console.log("Get Following Error:", ( e as any).message);
+                console.log("Get Followers Error:", ( e as any).message);
                 bot.telegram.sendMessage(adminId,`Error at Proxy: ${this.proxy?.ip}\nProxies Number: ${proxyIndex+1}/${(await proxies.get()).length} Error: ${( e as any).message}`)
                 if(!e.response || ( e as any).message?.includes("429")){
                     await proxies.remove(this.proxy);
@@ -181,14 +182,14 @@ class IG {
             ...(tunnel&&{httpsAgent:tunnel,httpAgent:tunnel}),
             headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}}).then((res)=>resolve((res?.data as any).graphql?.user))
             .catch(async(e)=>{
-                console.log("Get Following Error:", ( e as any).message);
+                console.log("Profile Error:", ( e as any).message);
                 bot.telegram.sendMessage(adminId,`Error at Proxy: ${this.proxy?.ip}\nProxies Number: ${proxyIndex+1}/${(await proxies.get()).length} Error: ${( e as any).message}`)
-                if(!e.response || ( e as any).message?.includes("429")){
+                // if(!e.response || ( e as any).message?.includes("429")){
                     await proxies.remove(this.proxy);
                     await this.sleep(2000);
                     return resolve(await this.checkProfile(username));
-                }
-                return resolve(null);
+                // }
+                // return resolve(null);
             }).finally(()=>{
                 clearTimeout(timeout)
             })
@@ -217,20 +218,21 @@ class IG {
         // }
     }
     async getTunnel(){
-        let tunnel;
-        // if(useProxy){
-        this.proxy = await getProxy()
-        if(this.proxy){
-            console.log('Trying Proxy:', this.proxy?.ip);
+        // let tunnel;
+        // // if(useProxy){
+        // this.proxy = await getProxy()
+        // if(this.proxy){
+        //     console.log('Trying Proxy:', this.proxy?.ip);
             
-            tunnel = Tunnel.httpsOverHttp({
-                proxy: {
-                    host: this.proxy.ip,
-                    port: Number(this.proxy.port),
-                    ...(this.proxy.pass&&{proxyAuth:`${this.proxy.username}:${this.proxy.pass}`})
-                },
-            });
-        }
+        //     tunnel = Tunnel.httpsOverHttp({
+        //         proxy: {
+        //             host: this.proxy.ip,
+        //             port: Number(this.proxy.port),
+        //             ...(this.proxy.pass&&{proxyAuth:`${this.proxy.username}:${this.proxy.pass}`})
+        //         },
+        //     });
+        // }
+        let tunnel =  new SocksProxyAgent('socks5h://127.0.0.1:9050')
         return tunnel
     }
     async getFollowing(id:string,cursor?:string){
@@ -252,12 +254,12 @@ class IG {
             }).catch(async(e)=>{
                 console.log("Get Following Error:", ( e as any).message);
                 bot.telegram.sendMessage(adminId,`Error at Proxy: ${this.proxy?.ip}\nProxies Number: ${proxyIndex+1}/${(await proxies.get()).length} Error: ${( e as any).message}`)
-                if(!e.response || ( e as any).message?.includes("429")){
+                // if(!e.response || ( e as any).message?.includes("429")){
                     await proxies.remove(this.proxy);
                     await this.sleep(2000);
                     return resolve(await this.getFollowing(id,cursor));
-                }
-                return resolve(null);
+                // }
+                // return resolve(null);
             }).finally(()=>{
                 clearTimeout(timeout)
             })
