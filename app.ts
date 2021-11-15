@@ -65,7 +65,7 @@ bot.action(/starttool-(.+)/,async (ctx)=>{
       ctx.deleteMessage();
       // return ctx.self.whoUnfollowMe();
     // }
-    // return ctx.replyWithHTML("<b>Comming soon.</b>").catch(()=>{});
+    return ctx.replyWithHTML("<b>Comming soon.</b>").catch(()=>{});
   }
 })
 
