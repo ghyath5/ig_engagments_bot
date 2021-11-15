@@ -184,12 +184,12 @@ class IG {
             .catch(async(e)=>{
                 console.log("Profile Error:", ( e as any).message);
                 bot.telegram.sendMessage(adminId,`Error at Proxy: ${this.proxy?.ip}\nProxies Number: ${proxyIndex+1}/${(await proxies.get()).length} Error: ${( e as any).message}`)
-                // if(!e.response || ( e as any).message?.includes("429")){
+                if(!e.response || ( e as any).message?.includes("429")){
                     await proxies.remove(this.proxy);
                     await this.sleep(2000);
                     return resolve(await this.checkProfile(username));
-                // }
-                // return resolve(null);
+                }
+                return resolve(null);
             }).finally(()=>{
                 clearTimeout(timeout)
             })
