@@ -147,7 +147,7 @@ bot.action(/followed-(.+)/, async (ctx) => {
     return ctx.self.translate('youspamfollow').send()
   }
   let todayfollowed = parseInt(await ctx.self.redis.get('todayfollowed')||"0")
-  if((todayfollowed >= 15 || isPausedWorker) && adminId != ctx.from!.id.toString()){
+  if((todayfollowed >= 10 || isPausedWorker) && adminId != ctx.from!.id.toString()){
     ctx.self.memory.set('followedUsername',null);
     return ctx.self.translate('followedexcedded').send();
   }
@@ -169,7 +169,7 @@ bot.action(/followed-(.+)/, async (ctx) => {
   ctx.self.memory.push('execludes',username);
   await ctx.self.checkIfollowed(username)
   ctx.deleteMessage();
-  await IG.sleep(1000,2000);
+  await IG.sleep(4000,8000);
   await ctx.self.sendUser();
   ctx.self.memory.set('followedUsername',null);
 })

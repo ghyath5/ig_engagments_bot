@@ -217,21 +217,20 @@ class IG {
         // }
     }
     async getTunnel(){
-        // let tunnel;
-        // // if(useProxy){
-        // this.proxy = await getProxy()
-        // if(this.proxy){
-        //     console.log('Trying Proxy:', this.proxy?.ip);
+        let tunnel;
+        // if(useProxy){
+        this.proxy = await getProxy()
+        if(this.proxy){
+            console.log('Trying Proxy:', this.proxy?.ip);
             
-        //     tunnel = Tunnel.httpsOverHttp({
-        //         proxy: {
-        //             host: this.proxy.ip,
-        //             port: Number(this.proxy.port),
-        //             ...(this.proxy.pass&&{proxyAuth:`${this.proxy.username}:${this.proxy.pass}`})
-        //         },
-        //     });
-        // }
-        let tunnel =  new SocksProxyAgent('socks5h://127.0.0.1:9050')
+            tunnel = Tunnel.httpsOverHttp({
+                proxy: {
+                    host: this.proxy.ip,
+                    port: Number(this.proxy.port),
+                    ...(this.proxy.pass&&{proxyAuth:`${this.proxy.username}:${this.proxy.pass}`})
+                },
+            });
+        }
         return tunnel
     }
     async getFollowing(id:string,cursor?:string){
@@ -255,7 +254,7 @@ class IG {
                 bot.telegram.sendMessage(adminId,`Error at Proxy: ${this.proxy?.ip}\nProxies Number: ${proxyIndex+1}/${(await proxies.get()).length} Error: ${( e as any).message}`)
                 // if(!e.response || ( e as any).message?.includes("429")){
                     await proxies.remove(this.proxy);
-                    await this.sleep(10000);
+                    await this.sleep(20000);
                     return resolve(await this.getFollowing(id,cursor));
                 // }
                 // return resolve(null);
