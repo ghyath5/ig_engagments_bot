@@ -21,14 +21,13 @@ const proxies = {
     
 }
 let proxyIndex = -1;
-let useProxy = false;
 const getProxy = async ()=>{
     proxyIndex++
     let poxis = await proxies.get();
     try{
         let host = poxis[proxyIndex]
         if(proxyIndex >= poxis.length){
-            proxyIndex = 0;
+            proxyIndex = -1;
         }
         return host
     }catch(e){
