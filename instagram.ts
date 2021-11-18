@@ -183,7 +183,7 @@ class IG {
             .catch(async(e)=>{
                 console.log("Profile Error:", ( e as any).message);
                 if(!e.response || ( e as any).message?.includes("429")){
-                    await proxies.remove(this.proxy);
+                    // await proxies.remove(this.proxy);
                     await this.sleep(5000);
                     return resolve(await this.checkProfile(username));
                 }
@@ -252,8 +252,8 @@ class IG {
                 console.log("Get Following Error:", ( e as any).message);
                 bot.telegram.sendMessage(adminId,`Error at Proxy: ${this.proxy?.ip}\nProxies Number: ${proxyIndex+1}/${(await proxies.get()).length} Error: ${( e as any).message}`)
                 // if(!e.response || ( e as any).message?.includes("429")){
-                    await proxies.remove(this.proxy);
-                    await this.sleep(5000);
+                    // await proxies.remove(this.proxy);
+                    await this.sleep(8000);
                     return resolve(await this.getFollowing(id,cursor));
                 // }
                 // return resolve(null);
