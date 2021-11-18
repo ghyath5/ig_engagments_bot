@@ -270,7 +270,7 @@ class IG {
         }
         all = all.filter((one)=>one.ip != proxy.ip && one.port != proxy.port)
 
-        all.push(found)
+        all.unshift(found)
         client.set('statis-proxy',JSON.stringify(all));
     }
 }
