@@ -289,6 +289,7 @@ export class Client {
         ).catch((e)=>{})
     }
     async register(msg: string,ctx:Context){
+        this.translate('waitplease').send();
         let user = (await igInstance.checkProfile(msg) as any);
         if (!user?.id || user.is_private || user.is_verified) {
             return this.translate('usernamewrong').send();
