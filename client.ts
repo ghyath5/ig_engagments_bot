@@ -271,7 +271,7 @@ export class Client {
                     profile_pic_url_hd:user?.profile_pic_url_hd,
                     edge_follow:{count:user?.edge_follow?.count},
                     edge_followed_by:{count:user?.edge_followed_by?.count},
-                }),{'EX':60*30})
+                }),{'EX':60*60*24})
             }
         }
         let me = await this.profile()
