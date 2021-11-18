@@ -193,28 +193,6 @@ class IG {
             })
         })
     }
-    async getProxy(){
-        // try{
-        //     let res = await axios.get('https://api.proxyorbit.com/v1/?instagram=true&protocol=http&token=zkec6DVcaDJkmuLnef5PN4jr0M1smRo57myp-vW6M78');
-        //     let data = res.data as any;
-        //     if(data.curl){
-        //         (async()=>{
-        //             let prxis = await proxies.get();
-        //             if(!prxis.includes(data.curl)){
-        //                 prxis.push(data.curl)
-        //                 client.set('proxies',JSON.stringify(prxis));
-        //             }
-        //         })();
-        //         return data.curl;
-        //     }
-        // }catch(e){
-        //     let err = e as any;
-        //     console.log(err.toString()); 
-        //     bot.telegram.sendMessage(adminId,'No Ip found');
-        //     gettingNewProxies = false;
-        //     return false;
-        // }
-    }
     async getTunnel(){
         let tunnel;
         // if(useProxy){
@@ -274,76 +252,6 @@ class IG {
        // return await this.checkIfollowed(username,id,result.page_info.end_cursor);
          return false;
     }
-    // async checkIfollowed(username: string,id:string,protocolUsed?:string){
-    //     return await new Promise(async (resolve,reject)=>{
-    //         try{
-    //             username =  username.toLowerCase()
-    //             let feed = this.client.feed.accountFollowing(id);
-    //             async function getAllItemsFromFeed(feed: AccountFollowingFeed) {
-    //                 let items:any = [];
-    //                 do {
-    //                     items = items.concat(await feed.items());
-    //                     const time = Math.round(Math.random() * 5000) + 1000;
-    //                     await new Promise(resolve => setTimeout(resolve, time));
-    //                 } while (feed.isMoreAvailable());
-    //                 return items;
-    //             }
-    //             let items =  await getAllItemsFromFeed(feed)
-    //             protocolUsed && console.log('Succedded protocol: ',protocolUsed);
-    //             !protocolUsed && console.log('Succedded proxy: ',this.proxy.ip,this.proxy.port);
-    //             return resolve(items.some((item)=>(item as any).username == username))
-    //         }catch(e){
-    //             let removed = true;
-    //             if((e as any).message.includes('429')){
-    //                 bot.telegram.sendMessage('566571423',`Too many requests at ${JSON.stringify(this.proxy)}`)
-    //                 removed = false;
-    //             }
-    //             console.log("IG error checkIfollowed:", (e as any).message)
-    //             return resolve(await this.recallWithDifferentProtocol(async (protocoleUsed)=>{
-    //                 return await this.checkIfollowed(username,id,protocoleUsed)
-    //             },removed));
-    //         }
-    //     })
-    // }
-
-    // async recallWithDifferentProtocol(func,remove = true){
-    //     let setOfProtocols = this.protocols.filter((protocol)=>!this.triedProtocols.includes(protocol))
-    //     if(setOfProtocols.length > 0){
-    //         let protocol:string = setOfProtocols[0]
-    //         this.triedProtocols.push(protocol)
-    //         let proxy = `${protocol}://${this.proxy.ip}:${this.proxy.port}`
-    //         console.log('Trying another protocol ',proxy);
-    //         if(protocol == 'http'){
-    //             this.client.state.proxyUrl = proxy;
-    //         }else{
-    //             this.client.request.defaults.agent = new SocksProxyAgent(proxy);
-    //         }
-    //         return await func(protocol)
-    //     }
-    //     (async (ip)=>{
-    //         if(!remove){
-    //             return bot.telegram.sendMessage('566571423',`Proxy NOT Removed: ${ip}\nProxies Number: ${proxyIndex+1}/${(await proxies.get()).length}`)
-    //         }
-    //         await proxies.remove(ip)
-    //         bot.telegram.sendMessage('566571423',`Proxy Removed: ${ip}\nProxies Number: ${proxyIndex+1}/${(await proxies.get()).length}`)
-    //     })(this.proxy.ip);
-    //     this.triedProtocols = [];
-    //     this.proxy = await getProxy();
-    //     console.log('Trying another Proxy: ',this.proxy);
-    //     if(this.proxy){
-    //         if(this.proxy.type){
-    //             this.client.request.defaults.agent = new SocksProxyAgent(`${this.proxy.type}://${this.proxy.ip}:${this.proxy.port}`);
-    //         }else{
-    //             this.client.request.defaults.agent = new SocksProxyAgent({
-    //                 host:this.proxy.ip,
-    //                 port:this.proxy.port,
-    //                 ...(this.proxy.password&&{userId:this.proxy.username,password:this.proxy.password})
-    //             })
-    //         }
-            
-    //     }
-    //     return await func();
-    // }
 }
 
 const igInstance = new IG(process.env.IG_USERNAME!,process.env.IG_PASSWORD!);
