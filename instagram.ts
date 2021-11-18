@@ -171,13 +171,13 @@ class IG {
         const timeout = setTimeout(() => {
           source.cancel('timeout');
           // Timeout Logic
-        }, 30000);
+        }, 8000);
         this.fetchSession()
         return new Promise((resolve)=>{
             axios(`https://www.instagram.com/${username}/?__a=1`,{withCredentials:true,
             proxy:false,
             cancelToken: source.token,
-            timeout:30000,
+            timeout:8000,
             ...(tunnel&&{httpsAgent:tunnel,httpAgent:tunnel}),
             headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}}).then((res)=>{
                 this.statisProxy('work')
@@ -188,7 +188,7 @@ class IG {
                 this.statisProxy('dead')
                 if(!e.response || ( e as any).message?.includes("429")){
                     // e.response && proxies.remove(this.proxy);
-                    await this.sleep(5000);
+                    await this.sleep(500);
                     return resolve(await this.checkProfile(username));
                 }
                 return resolve(null);
