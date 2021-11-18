@@ -166,6 +166,8 @@ bot.action(/followed-(.+)/, async (ctx) => {
     ctx.deleteMessage();
     return ctx.self.sendUser();
   }
+  let execludes = ctx.self.memory.get<string[]>('execludes') || [];
+  if(execludes.includes(username))return ctx.self.sendUser();
   ctx.self.memory.push('execludes',username);
   await ctx.self.checkIfollowed(username)
   ctx.deleteMessage();

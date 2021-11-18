@@ -373,10 +373,16 @@ export class Client {
 }
 if(!isPausedWorker){
     queue.process(1,async (job)=> {
+        const followerPk = job.data.followerPk;
+        const followerLang = job.data.followerLang;
+        const follower = new Client(followerPk,followerLang);
         const {username,password} = getCredentials();
         const ig = new IG(username,password);
         await ig.login()
-        await IG.sleep(5000,10000);
+        let execludes = follower.memory.get<string[]>('execludes') || [];
+        if(execludes.length >= 2){
+            await IG.sleep(5000,10000);
+        }
         const isFollowed = await ig.checkIfollowed(job.data.usernameToFollow, job.data.followerIGId);
         const followerUsername = job.data.followerUsername;
         console.log(followerUsername,'following',job.data.usernameToFollow,'... Result:', isFollowed);

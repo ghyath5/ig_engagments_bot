@@ -10,6 +10,9 @@ export class Memory  {
     get<T>(key: string | number):T{
         return data[`${this.pk}_${key}`] as T;
     }
+    delete(key: string){
+        return data[`${this.pk}_${key}`];
+    }
     push(key,value){
         let arr = data[`${this.pk}_${key}`] as Array<any> || [];
         arr.push(value)
