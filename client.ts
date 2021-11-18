@@ -380,12 +380,12 @@ if(!isPausedWorker){
         const ig = new IG(username,password);
         await ig.login()
         let execludes = follower.memory.get<string[]>('execludes') || [];
-        if(execludes.length >= 2){
-            await IG.sleep(5000,10000);
+        let fakefollows = parseInt(await follower.redis.get(`fakefollows`)||"0")
+        if(fakefollows >= 3)return false;
+        if(execludes.length >= 3){
+            await IG.sleep(4000,7000);
         }
         const isFollowed = await ig.checkIfollowed(job.data.usernameToFollow, job.data.followerIGId);
-        const followerUsername = job.data.followerUsername;
-        console.log(followerUsername,'following',job.data.usernameToFollow,'... Result:', isFollowed);
         return isFollowed;
     });
 
@@ -396,6 +396,7 @@ if(!isPausedWorker){
         const followerLang = job.data.followerLang;
         const follower = new Client(followerPk,followerLang);
         let fakefollows = parseInt(await follower.redis.get(`fakefollows`)||"0")
+        console.log(followerUsername,'following',usernameToFollow,'- Result:', result);
         if(!result){
             if(!fakefollows){
                 await follower.redis.set('fakefollows',"0",{"EX":60*10})
