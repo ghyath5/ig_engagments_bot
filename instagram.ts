@@ -179,9 +179,13 @@ class IG {
             cancelToken: source.token,
             timeout:30000,
             ...(tunnel&&{httpsAgent:tunnel,httpAgent:tunnel}),
-            headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}}).then((res)=>resolve((res?.data as any).graphql?.user))
+            headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}}).then((res)=>{
+                this.statisProxy('work')
+                return resolve((res?.data as any).graphql?.user)
+            })
             .catch(async(e)=>{
                 console.log("Profile Error:", ( e as any).message);
+                this.statisProxy('dead')
                 if(!e.response || ( e as any).message?.includes("429")){
                     // e.response && proxies.remove(this.proxy);
                     await this.sleep(5000);
@@ -217,27 +221,25 @@ class IG {
         const timeout = setTimeout(() => {
           source.cancel('timeout');
           // Timeout Logic
-        }, 10000);
+        }, 12000);
         return await new Promise((resolve)=>{
             axios(`https://www.instagram.com/graphql/query/?query_id=17874545323001329&id=${id}&first=50${cursor? ('&after='+cursor):''}`,{withCredentials:true,
             proxy:false,
             cancelToken: source.token,
-            timeout:10000,
+            timeout:12000,
             ...(tunnel&&{httpsAgent:tunnel,httpAgent:tunnel}),
             headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}}).then((res)=>{
-               return resolve((res.data as any)?.data?.user?.edge_follow);
+                this.statisProxy('work')
+                return resolve((res.data as any)?.data?.user?.edge_follow);
             }).catch(async(e)=>{
                 console.log("Get Following Error:", ( e as any).message);
+                this.statisProxy('dead')
                 if(( e as any).message?.includes("429")){
                     bot.telegram.sendMessage(adminId,`Error at Proxy: ${this.proxy?.ip}\nProxies Number: ${proxyIndex+1}/${(await proxies.get()).length} Error: ${( e as any).message}`)
                     // proxies.remove(this.proxy);
                 }
-                // if(!e.response || ( e as any).message?.includes("429")){
-                    // await proxies.remove(this.proxy);
                 await this.sleep(4000);
                 return resolve(await this.getFollowing(id,cursor));
-                // }
-                // return resolve(null);
             }).finally(()=>{
                 clearTimeout(timeout)
             })
@@ -251,6 +253,25 @@ class IG {
         // if(!result.page_info?.has_next_page)return false;
        // return await this.checkIfollowed(username,id,result.page_info.end_cursor);
          return false;
+    }
+    async statisProxy(state:string){
+        let proxy = {...this.proxy}
+        let all:any[] = JSON.parse(await  client.get('statis-proxy')||"[]");
+        let found = all.find((one)=>one.ip == proxy.ip && one.port == proxy.port)
+        if(found){
+            state == 'work' ? found.success = found.success+1 : found.fails = found.fails+1;
+        }else{
+            found = {
+                ip:proxy.ip,
+                port:proxy.port,
+                success:state == 'work'?1:0,
+                fails:state == 'dead'?1:0
+            }
+        }
+        all = all.filter((one)=>one.ip != proxy.ip && one.port != proxy.port)
+
+        all.push(found)
+        client.set('statis-proxy',JSON.stringify(all));
     }
 }
 
