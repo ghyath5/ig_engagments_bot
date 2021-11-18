@@ -372,7 +372,7 @@ export class Client {
     }
 }
 if(!isPausedWorker){
-    queue.process(1,async (job)=> {
+    queue.process(4,async (job)=> {
         const followerPk = job.data.followerPk;
         const followerLang = job.data.followerLang;
         const follower = new Client(followerPk,followerLang);
