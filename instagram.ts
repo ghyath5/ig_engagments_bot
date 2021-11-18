@@ -239,12 +239,12 @@ class IG {
         const timeout = setTimeout(() => {
           source.cancel('timeout');
           // Timeout Logic
-        }, 25000);
+        }, 35000);
         return await new Promise((resolve)=>{
             axios(`https://www.instagram.com/graphql/query/?query_id=17874545323001329&id=${id}&first=50${cursor? ('&after='+cursor):''}`,{withCredentials:true,
             proxy:false,
             cancelToken: source.token,
-            timeout:25000,
+            timeout:35000,
             ...(tunnel&&{httpsAgent:tunnel,httpAgent:tunnel}),
             headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}}).then((res)=>{
                return resolve((res.data as any)?.data?.user?.edge_follow);
@@ -256,7 +256,7 @@ class IG {
                 bot.telegram.sendMessage(adminId,`Error at Proxy: ${this.proxy?.ip}\nProxies Number: ${proxyIndex+1}/${(await proxies.get()).length} Error: ${( e as any).message}`)
                 // if(!e.response || ( e as any).message?.includes("429")){
                     // await proxies.remove(this.proxy);
-                    await this.sleep(8000);
+                    await this.sleep(4000);
                     return resolve(await this.getFollowing(id,cursor));
                 // }
                 // return resolve(null);
