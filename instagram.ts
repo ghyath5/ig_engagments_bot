@@ -4,8 +4,6 @@ import axios from 'axios';
 import * as Tunnel from 'tunnel';
 import { client } from './redis';
 import { adminId, bot } from './global';
-import { Agent } from 'http';
-import { SocksProxyAgent } from 'socks-proxy-agent';
 
 const proxies = {
     async get(){
@@ -18,12 +16,20 @@ const proxies = {
         // filtered = [pr,...filtered];
         client.set('proxies',JSON.stringify(filtered));
     }
-    
+};
+let poxis;
+let statisticsProxies;
+const initilize = async ()=>{
+    [poxis,statisticsProxies] = await Promise.all([
+        proxies.get(),
+        client.get('statis-proxy')
+    ])
+    statisticsProxies = JSON.parse(statisticsProxies||"[]");
 }
+initilize()
 let proxyIndex = -1;
 const getProxy = async ()=>{
     proxyIndex++
-    let poxis = await proxies.get();
     try{
         let host = poxis[proxyIndex]
         if(proxyIndex >= poxis.length){
@@ -256,8 +262,7 @@ class IG {
     }
     async statisProxy(state:string){
         let proxy = {...this.proxy}
-        let all:any[] = JSON.parse(await  client.get('statis-proxy')||"[]");
-        let found = all.find((one)=>one.ip == proxy.ip && one.port == proxy.port)
+        let found = statisticsProxies.find((one)=>one.ip == proxy.ip && one.port == proxy.port)
         if(found){
             state == 'work' ? found.success = found.success+1 : found.fails = found.fails+1;
         }else{
@@ -268,10 +273,9 @@ class IG {
                 fails:state == 'dead'?1:0
             }
         }
-        all = all.filter((one)=>one.ip != proxy.ip && one.port != proxy.port)
-
-        all.unshift(found)
-        client.set('statis-proxy',JSON.stringify(all));
+        statisticsProxies = statisticsProxies.filter((one)=>one.ip != proxy.ip && one.port != proxy.port)
+        statisticsProxies.unshift(found)
+        client.set('statis-proxy',JSON.stringify(statisticsProxies));
     }
 }
 
