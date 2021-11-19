@@ -115,7 +115,7 @@ bot.action(/rep-(.+)/, async (ctx) => {
   ctx.deleteMessage();
   await ctx.self.addAccountToSkipped(username);
   ctx.self.sendUser();
-  if(profile && profile.is_private){
+  if(!profile || profile.is_private){
     bot.telegram.sendMessage(adminId,`Report about <a href="https://instagram.com/${username}">@${username}</a> ${reason}`,{parse_mode:"HTML"});
     return ctx.prisma.account.update({where:{username:username},data:{active:false}})
   }  
