@@ -136,7 +136,7 @@ class IG {
         const source = axios.CancelToken.source();
         const timeout = setTimeout(() => {
           source.cancel('timeout');
-        }, 35000);
+        }, 15000);
         let headers = this.client.request.getDefaultHeaders()
         this.fetchSession()
         return await new Promise((resolve)=>{
@@ -148,7 +148,7 @@ class IG {
                 },
             cancelToken:source.token,
             withCredentials:true,
-            timeout:40000,
+            timeout:20000,
             proxy:false,
             ...(tunnel&&{httpsAgent:tunnel,httpAgent:tunnel}),
             headers:{
@@ -161,10 +161,10 @@ class IG {
             }).catch(async(e)=>{
                 console.log("Get Followers Error:", ( e as any).message);
                 // this.statisProxy('dead')
-                bot.telegram.sendMessage(adminId,`Error at Proxy: ${this.proxy?.ip}\nProxies Number: ${proxyIndex+1}/${(await proxies.get()).length} Error: ${( e as any).message}`)
                 if(!e.response || ( e as any).message?.includes("429")){
                     // await proxies.remove(this.proxy);
-                    await this.sleep(8000);
+                    this.statisProxy('dead')
+                    await this.sleep(800);
                     return resolve(await this.getFollowers(id));
                 }
                 return resolve({status:false});
