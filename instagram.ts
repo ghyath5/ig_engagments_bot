@@ -156,9 +156,11 @@ class IG {
                 'X-IG-EU-DC-ENABLED':'undefined',
                 Authorization:'',
                 "Cookie":this.session.cookies}}).then((res)=>{
+                    this.statisProxy('work')
                 return resolve({status:true,users:(res.data as any)?.users});
             }).catch(async(e)=>{
                 console.log("Get Followers Error:", ( e as any).message);
+                // this.statisProxy('dead')
                 bot.telegram.sendMessage(adminId,`Error at Proxy: ${this.proxy?.ip}\nProxies Number: ${proxyIndex+1}/${(await proxies.get()).length} Error: ${( e as any).message}`)
                 if(!e.response || ( e as any).message?.includes("429")){
                     // await proxies.remove(this.proxy);
