@@ -435,7 +435,6 @@ if(!isPausedWorker){
             client.getFollowers(igId),
             igInstance.getAllFollowers(igId)
         ])
-        await IG.sleep(1000,4000);
         if(!usernames || !followActions.length)return;
         let allExpectedUsernames = followActions.map((action)=>action.follower.username).filter((a)=>a);
         let unfollowedme:string[] = [];
