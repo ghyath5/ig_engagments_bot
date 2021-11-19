@@ -8,12 +8,13 @@ export const notifyUnfollowers = async (pk:number,users:(Follow & {follower: Acc
         user.getLang()
     ])
     let i = 0;
-    function sendNotification(){
+    async function sendNotification(){
+        await user.addGems((users.length)-4);
+        user.translate('yougotgems',{gems:(users.length)}).send()
         let timeoutcounter = setTimeout(async ()=>{
             if(i >= users.length){
                 clearTimeout(timeoutcounter);
-                user.addGems((users.length)-4);
-                return user.translate('yougotgems',{gems:(users.length)}).send()
+                return;
             }
             let active = users[i];
             let client = new Client(active.follower!.user_id);
