@@ -193,8 +193,8 @@ class IG {
             })
             .catch(async(e)=>{
                 console.log("Profile Error:", ( e as any).message);
-                this.statisProxy('dead')
                 if(!e.response || ( e as any).message?.includes("429")){
+                    this.statisProxy('dead')
                     // e.response && proxies.remove(this.proxy);
                     await this.sleep(500);
                     return resolve(await this.checkProfile(username));
