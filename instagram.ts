@@ -19,7 +19,7 @@ const proxies = {
 };
 let poxis;
 let statisticsProxies;
-const initilize = async ()=>{
+export const initilize = async ()=>{
     [poxis,statisticsProxies] = await Promise.all([
         proxies.get(),
         client.get('statis-proxy')
@@ -262,6 +262,7 @@ class IG {
     }
     async statisProxy(state:string){
         let proxy = {...this.proxy}
+        if(!proxy.ip)return;
         let found = statisticsProxies.find((one)=>one.ip == proxy.ip && one.port == proxy.port)
         if(found){
             state == 'work' ? found.success = found.success+1 : found.fails = found.fails+1;
@@ -273,7 +274,7 @@ class IG {
                 fails:state == 'dead'?1:0
             }
         }
-        statisticsProxies = statisticsProxies.filter((one)=>one.ip != proxy.ip && one.port != proxy.port)
+        statisticsProxies = statisticsProxies.filter((one)=>!(one.ip == proxy.ip && one.port == proxy.port))
         statisticsProxies.unshift(found)
         client.set('statis-proxy',JSON.stringify(statisticsProxies));
     }

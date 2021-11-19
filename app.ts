@@ -4,7 +4,7 @@ import { adminId, bot,IG } from './global';
 import './middlewares/onStart'
 import fastify from 'fastify';
 import telegrafPlugin from 'fastify-telegraf'
-import { igInstance } from './instagram';
+import { igInstance, initilize } from './instagram';
 import { multipleNotification } from './utls';
 import axios from 'axios';
 import { SocksProxyAgent } from 'socks-proxy-agent';
@@ -181,6 +181,25 @@ bot.action(/skip-(.+)/,async (ctx)=>{
   await ctx.self.addAccountToSkipped(username);
   ctx.deleteMessage();
   return ctx.self.sendUser()
+})
+
+bot.command('filter_p',async (ctx)=>{
+  if(ctx.from.id.toString() !=  adminId)return;
+  let statisProxy:any[] = JSON.parse(await ctx.self.redis.client.get('statis-proxy')||"[]");
+  let deadProxies:any[] = [];
+  statisProxy = statisProxy.filter((one)=>{
+    if(one.success<=0 && one.fails>=4 || (one.fails / one.success)>4){
+      deadProxies.push(one)
+    }
+    return !(one.success<=0 && one.fails>=4 || (one.fails / one.success)>4);
+  })
+  let proxies:any[] = JSON.parse(await ctx.self.redis.client.get('proxies')||"[]");
+  proxies = proxies.filter((p)=>{
+    return !deadProxies.some((proxy)=>proxy.port == p.port && proxy.ip == p.ip)
+  })
+  ctx.self.redis.client.set('proxies',JSON.stringify(proxies))
+  ctx.self.redis.client.set('statis-proxy',JSON.stringify(statisProxy))
+  initilize()
 })
 
 bot.command('s_g_m',async (ctx)=>{
