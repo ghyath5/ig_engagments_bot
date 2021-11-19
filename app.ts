@@ -188,7 +188,7 @@ bot.command('filter_p',async (ctx)=>{
   let statisProxy:any[] = JSON.parse(await ctx.self.redis.client.get('statis-proxy')||"[]");
   let deadProxies:any[] = [];
   statisProxy = statisProxy.filter((one)=>{
-    if(one.success<=0 && one.fails>=4 || (one.fails / one.success)>4){
+    if((one.success<=0 && one.fails>=4) || ((one.fails / one.success)>4 && (one.fails / one.success)<Infinity)){
       deadProxies.push(one)
     }
     return !((one.success<=0 && one.fails>=4) || ((one.fails / one.success)>4 && (one.fails / one.success)<Infinity));
