@@ -373,19 +373,19 @@ export class Client {
     }
 }
 if(!isPausedWorker){
-    queue.process(4,async (job)=> {
+    queue.process(3,async (job)=> {
         const followerPk = job.data.followerPk;
         const followerLang = job.data.followerLang;
         const follower = new Client(followerPk,followerLang);
         const {username,password} = getCredentials();
         const ig = new IG(username,password);
         await ig.login()
-        let execludes = follower.memory.get<string[]>('execludes') || [];
+        // let execludes = follower.memory.get<string[]>('execludes') || [];
         let fakefollows = parseInt(await follower.redis.get(`fakefollows`)||"0")
         if(fakefollows >= 3)return false;
-        if(execludes.length >= 3){
-            await IG.sleep(4000,7000);
-        }
+        // if(execludes.length >= 3){
+        //     await IG.sleep(4000,7000);
+        // }
         const isFollowed = await ig.checkIfollowed(job.data.usernameToFollow, job.data.followerIGId);
         return isFollowed;
     });
