@@ -200,6 +200,7 @@ bot.command('filter_p',async (ctx)=>{
   ctx.self.redis.client.set('proxies',JSON.stringify(proxies))
   ctx.self.redis.client.set('statis-proxy',JSON.stringify(statisProxy))
   initilize()
+  return ctx.reply(`Proxies deleted: ${deadProxies.length}\nProxies left: ${proxies.length}`)
 })
 
 bot.command('s_g_m',async (ctx)=>{
