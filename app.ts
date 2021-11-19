@@ -191,7 +191,7 @@ bot.command('filter_p',async (ctx)=>{
     if(one.success<=0 && one.fails>=4 || (one.fails / one.success)>4){
       deadProxies.push(one)
     }
-    return !(one.success<=0 && one.fails>=4 || (one.fails / one.success)>4);
+    return !((one.success<=0 && one.fails>=4) || ((one.fails / one.success)>4 && (one.fails / one.success)<Infinity));
   })
   let proxies:any[] = JSON.parse(await ctx.self.redis.client.get('proxies')||"[]");
   proxies = proxies.filter((p)=>{
