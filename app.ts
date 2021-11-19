@@ -61,10 +61,14 @@ bot.action(/starttool-(.+)/,async (ctx)=>{
     if(!await ctx.self.hasSuffecientGems(5)){
       return ctx.editMessageText(ctx.self.translate('noenoughgems').msg,{parse_mode:"HTML"}).catch(()=>{})
     }
-    // if(['428638891','1781740355','607072328',adminId].includes(ctx.from!.id.toString())){
-      ctx.deleteMessage();
-      return ctx.self.whoUnfollowMe();
-    // }
+    if(ctx.self.memory.get('checking') ){  
+      return;
+    }
+    ctx.self.memory.set('checking',true);
+  // if(['428638891','1781740355','607072328',adminId].includes(ctx.from!.id.toString())){
+    ctx.deleteMessage();
+    return ctx.self.whoUnfollowMe();
+  // }
     return ctx.replyWithHTML("<b>Comming soon.</b>").catch(()=>{});
   }
 })

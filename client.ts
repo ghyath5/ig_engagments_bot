@@ -435,7 +435,7 @@ if(!isPausedWorker){
             client.getFollowers(igId),
             igInstance.getAllFollowers(igId)
         ])
-        await IG.sleep(5000,8000);
+        await IG.sleep(1000,4000);
         if(!usernames || !followActions.length)return;
         let allExpectedUsernames = followActions.map((action)=>action.follower.username).filter((a)=>a);
         let unfollowedme:string[] = [];
@@ -446,6 +446,7 @@ if(!isPausedWorker){
         })
         bot.telegram.sendMessage(adminId,`<b>Unfollowers: \n${unfollowedme.join('\n')}</b>`,{parse_mode:"HTML"}).catch(()=>{})
         followActions = followActions.filter((fa)=>fa.follower && unfollowedme.includes(fa.follower.username));
+        client.memory.set('checking',null);
         return notifyUnfollowers(pk,followActions);
     })
 }
