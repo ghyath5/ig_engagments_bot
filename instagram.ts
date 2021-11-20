@@ -47,8 +47,6 @@ class IG {
     client:IgApiClient;
     password:string
     proxy:{ip:string,port:string,pass:string,username:string};
-    protocols:string[] = ['socks4','socks5'];
-    triedProtocols:string[] = [];
     constructor(username: string,password: string){
         this.username = username;
         this.password = password
@@ -60,22 +58,6 @@ class IG {
         return await new Promise(r => setTimeout(() => r(true), ms))
     }
     async login(){
-        // this.proxy = await getProxy()
-        // if(this.proxy){
-        //     if(this.proxy.type){
-        //         let proxy = `${this.proxy.type}://${this.proxy.ip}:${this.proxy.port}`
-        //         console.log(`Im using ${proxy}`);
-        //         this.client.request.defaults.agent = new SocksProxyAgent(proxy);
-        //     }else{
-        //         this.client.request.defaults.agent = new SocksProxyAgent({
-        //             host:this.proxy.ip,
-        //             port:this.proxy.port,
-        //             ...(this.proxy.password&&{userId:this.proxy.username,password:this.proxy.password})
-        //         })
-        //         console.log('Im using '+ this.proxy.ip,this.proxy.port);
-        //     }
-        //     this.client.request.defaults.timeout = 25000;
-        // }
         const userId = await this.loadSession()
         if(!userId){
             try{
@@ -164,7 +146,7 @@ class IG {
                 if(!e.response || ( e as any).message?.includes("429")){
                     // await proxies.remove(this.proxy);
                     this.statisProxy('dead')
-                    await this.sleep(800);
+                    // await this.sleep(800);
                     return resolve(await this.getFollowers(id));
                 }
                 return resolve({status:false});
@@ -196,7 +178,7 @@ class IG {
                 if(!e.response || ( e as any).message?.includes("429")){
                     this.statisProxy('dead')
                     // e.response && proxies.remove(this.proxy);
-                    await this.sleep(500);
+                    // await this.sleep(500);
                     return resolve(await this.checkProfile(username));
                 }
                 return resolve(null);
@@ -246,7 +228,7 @@ class IG {
                     // bot.telegram.sendMessage(adminId,`Error at Proxy: ${this.proxy?.ip}\nProxies Number: ${proxyIndex+1}/${(await proxies.get()).length} Error: ${( e as any).message}`)
                     // proxies.remove(this.proxy);
                 }
-                await this.sleep(4000);
+                // await this.sleep(4000);
                 return resolve(await this.getFollowing(id,cursor));
             }).finally(()=>{
                 clearTimeout(timeout)
