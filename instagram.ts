@@ -250,6 +250,7 @@ class IG {
         let found = statisticsProxies.find((one)=>one.ip == proxy.ip && one.port == proxy.port)
         if(found){
             state == 'work' ? found.success = found.success+1 : found.fails = found.fails+1;
+            found.state = state
         }else{
             found = {
                 ip:proxy.ip,
