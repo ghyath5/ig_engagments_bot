@@ -211,12 +211,12 @@ class IG {
         const timeout = setTimeout(() => {
           source.cancel('timeout');
           // Timeout Logic
-        }, 12000);
+        }, 8000);
         return await new Promise((resolve)=>{
             axios(`https://www.instagram.com/graphql/query/?query_id=17874545323001329&id=${id}&first=50${cursor? ('&after='+cursor):''}`,{withCredentials:true,
             proxy:false,
             cancelToken: source.token,
-            timeout:12000,
+            timeout:8000,
             ...(tunnel&&{httpsAgent:tunnel,httpAgent:tunnel}),
             headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}}).then((res)=>{
                 this.statisProxy('work')
@@ -225,8 +225,8 @@ class IG {
                 console.log("Get Following Error:", ( e as any).message);
                 this.statisProxy('dead')
                 if(( e as any).message?.includes("429")){
-                    // bot.telegram.sendMessage(adminId,`Error at Proxy: ${this.proxy?.ip}\nProxies Number: ${proxyIndex+1}/${(await proxies.get()).length} Error: ${( e as any).message}`)
-                    // proxies.remove(this.proxy);
+                    bot.telegram.sendMessage(adminId,`Error at Proxy: ${this.proxy?.ip}\nProxies Number: ${proxyIndex+1}/${(await proxies.get()).length} Error: ${( e as any).message}`)
+                    proxies.remove(this.proxy);
                 }
                 // await this.sleep(4000);
                 return resolve(await this.getFollowing(id,cursor));
