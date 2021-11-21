@@ -255,7 +255,8 @@ class IG {
                 ip:proxy.ip,
                 port:proxy.port,
                 success:state == 'work'?1:0,
-                fails:state == 'dead'?1:0
+                fails:state == 'dead'?1:0,
+                state
             }
         }
         statisticsProxies = statisticsProxies.filter((one)=>!(one.ip == proxy.ip && one.port == proxy.port))
