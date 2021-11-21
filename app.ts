@@ -269,7 +269,8 @@ bot.on('text', async (ctx) => {
         }
       }).filter((p)=>p)
       prxis = [...prxis,...proxies];
-      ctx.self.redis.client.set('proxies',JSON.stringify(prxis));
+      ctx.self.redis.client.set('proxies', JSON.stringify(prxis));
+      return ctx.self.sendMessage(`All Proxies: ${prxis.length}\nNew Proxies: ${proxies.length}`)
     }
     return ctx.self.sendHomeMsg();
   }
