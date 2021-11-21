@@ -150,14 +150,14 @@ bot.action(/followed-(.+)/, async (ctx) => {
     ctx.self.memory.set('followedUsername',null);
     return ctx.self.translate('youspamfollow').send()
   }
-  let todayfollowed = parseInt(await ctx.self.redis.get('todayfollowed')||"0")
-  if((todayfollowed >= 15 || isPausedWorker) && adminId != ctx.from!.id.toString()){
-    ctx.self.memory.set('followedUsername',null);
-    return ctx.self.translate('followedexcedded').send();
-  }
-  if(!todayfollowed){
-    await ctx.self.redis.set('todayfollowed',"0",{"EX":60*60*1})
-  }
+  //let todayfollowed = parseInt(await ctx.self.redis.get('todayfollowed')||"0")
+  //if((todayfollowed >= 15 || isPausedWorker) && adminId != ctx.from!.id.toString()){
+  //  ctx.self.memory.set('followedUsername',null);
+   // return ctx.self.translate('followedexcedded').send();
+ // }
+ // if(!todayfollowed){
+  //  await ctx.self.redis.set('todayfollowed',"0",{"EX":60*60*1})
+  //}
   // if(ctx.session.wating)return;
   // if(ctx.session.recentlyFollowed == username)return;
   // ctx.session.wating = true;
@@ -192,10 +192,10 @@ bot.command('filter_p',async (ctx)=>{
   let statisProxy:any[] = JSON.parse(await ctx.self.redis.client.get('statis-proxy')||"[]");
   let deadProxies:any[] = [];
   statisProxy = statisProxy.filter((one)=>{
-    if((one.success<=0 && one.fails>=20) || ((one.fails / one.success)>15 && (one.fails / one.success)<Infinity)){
+    if((one.success<=0 && one.fails>=20) || ((one.fails / one.success)>50 && (one.fails / one.success)<Infinity)){
       deadProxies.push(one)
     }
-    return !((one.success<=0 && one.fails>=20) || ((one.fails / one.success)>15 && (one.fails / one.success)<Infinity));
+    return !((one.success<=0 && one.fails>=20) || ((one.fails / one.success)>50 && (one.fails / one.success)<Infinity));
   })
   let proxies:any[] = JSON.parse(await ctx.self.redis.client.get('proxies')||"[]");
   proxies = proxies.filter((p)=>{
