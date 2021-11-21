@@ -150,14 +150,14 @@ bot.action(/followed-(.+)/, async (ctx) => {
     ctx.self.memory.set('followedUsername',null);
     return ctx.self.translate('youspamfollow').send()
   }
-  let todayfollowed = parseInt(await ctx.self.redis.get('todayfollowed')||"0")
-  if((todayfollowed >= 15 || isPausedWorker) && adminId != ctx.from!.id.toString()){
-    ctx.self.memory.set('followedUsername',null);
-    return ctx.self.translate('followedexcedded').send();
-  }
-  if(!todayfollowed){
-    await ctx.self.redis.set('todayfollowed',"0",{"EX":60*60*1})
-  }
+  //let todayfollowed = parseInt(await ctx.self.redis.get('todayfollowed')||"0")
+  //if((todayfollowed >= 15 || isPausedWorker) && adminId != ctx.from!.id.toString()){
+  //  ctx.self.memory.set('followedUsername',null);
+   // return ctx.self.translate('followedexcedded').send();
+ // }
+ // if(!todayfollowed){
+  //  await ctx.self.redis.set('todayfollowed',"0",{"EX":60*60*1})
+  //}
   // if(ctx.session.wating)return;
   // if(ctx.session.recentlyFollowed == username)return;
   // ctx.session.wating = true;
