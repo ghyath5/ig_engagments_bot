@@ -156,7 +156,7 @@ class IG {
         })
     }
     async checkProfile(username: any){
-        let tunnel = await this.getTunnel();
+        let tunnel = await this.getTunnel('Profile');
         const source = axios.CancelToken.source();
         const timeout = setTimeout(() => {
           source.cancel('timeout');
@@ -187,12 +187,12 @@ class IG {
             })
         })
     }
-    async getTunnel(){
+    async getTunnel(func='Trying'){
         let tunnel;
         // if(useProxy){
         this.proxy = await getProxy()
         if(this.proxy){
-            console.log('Trying Proxy:', this.proxy?.ip);
+            console.log(func,'Proxy:', this.proxy?.ip);
             
             tunnel = Tunnel.httpsOverHttp({
                 proxy: {
@@ -205,7 +205,7 @@ class IG {
         return tunnel
     }
     async getFollowing(id:string,cursor?:string){
-        let tunnel = await this.getTunnel();
+        let tunnel = await this.getTunnel('Following');
         this.fetchSession()
         const source = axios.CancelToken.source();
         const timeout = setTimeout(() => {
