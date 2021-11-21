@@ -225,8 +225,8 @@ class IG {
                 console.log("Get Following Error:", ( e as any).message);
                 this.statisProxy('dead')
                 if(( e as any).message?.includes("429")){
-                    bot.telegram.sendMessage(adminId,`Error at Proxy: ${this.proxy?.ip}\nProxies Number: ${proxyIndex+1}/${(await proxies.get()).length} Error: ${( e as any).message}`)
-                    proxies.remove(this.proxy);
+                    // bot.telegram.sendMessage(adminId,`Error at Proxy: ${this.proxy?.ip}\nProxies Number: ${proxyIndex+1}/${(await proxies.get()).length} Error: ${( e as any).message}`)
+                    // proxies.remove(this.proxy);
                 }
                 // await this.sleep(4000);
                 return resolve(await this.getFollowing(id,cursor));
