@@ -264,7 +264,7 @@ class IG {
         if(found.success <= 0 && found.fails >= 30 || ((found.fails / found.success) >= 50 && (found.fails / found.success)<Infinity) && found.state == 'dead'){
             poxis = poxis.filter((p)=>!(p.ip == proxy.ip && p.port == proxy.port))
             client.set('proxies',JSON.stringify(poxis))
-            bot.telegram.sendMessage(adminId,`Proxy Deleted: ${found.ip}:${found.port}\nSuccess: ${found.success}\nFails: ${found.fails}`);
+            bot.telegram.sendMessage(adminId,`Proxy Deleted: ${found.ip}:${found.port}\nSuccess: ${found.success}\nFails: ${found.fails}\n\nProxies Left: ${poxis.length}`);
         }else{
             statisticsProxies.unshift(found)
         }
