@@ -33,17 +33,18 @@ const credentials = [
         password:'tIsT-AcCo'
     },
     {
-        username:process.env.IG2_USERNAME!,
-        password:process.env.IG2_PASSWORD!
-    },
-    {
         username:process.env.IG_USERNAME!,
         password:process.env.IG_PASSWORD!,
+    },
+    {
+        username:process.env.IG2_USERNAME!,
+        password:process.env.IG2_PASSWORD!
     }
 ]
-let index = 1;
+let index = -1;
 const getCredentials = ()=>{
-    index = index == 0?1:0;
+    index = index+1
+    if(index>=credentials.length)index = 0;
     return credentials[index]
 }
 export class Client {
