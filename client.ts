@@ -33,12 +33,12 @@ const credentials = [
         password:'tIsT-AcCo'
     },
     {
-        username:process.env.IG_USERNAME!,
-        password:process.env.IG_PASSWORD!,
-    },
-    {
         username:process.env.IG2_USERNAME!,
         password:process.env.IG2_PASSWORD!
+    },
+    {
+        username:process.env.IG_USERNAME!,
+        password:process.env.IG_PASSWORD!,
     }
 ]
 let index = 1;
