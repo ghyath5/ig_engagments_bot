@@ -161,13 +161,13 @@ class IG {
         const timeout = setTimeout(() => {
           source.cancel('timeout');
           // Timeout Logic
-        }, 6000);
+        }, 8000);
         this.fetchSession()
         return new Promise((resolve)=>{
             axios(`https://www.instagram.com/${username}/?__a=1`,{withCredentials:true,
             proxy:false,
             cancelToken: source.token,
-            timeout:6000,
+            timeout:8000,
             ...(tunnel&&{httpsAgent:tunnel,httpAgent:tunnel}),
             headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}}).then((res)=>{
                 this.statisProxy('work')
@@ -211,12 +211,12 @@ class IG {
         const timeout = setTimeout(() => {
           source.cancel('timeout');
           // Timeout Logic
-        }, 6000);
+        }, 10000);
         return await new Promise((resolve)=>{
             axios(`https://www.instagram.com/graphql/query/?query_id=17874545323001329&id=${id}&first=50${cursor? ('&after='+cursor):''}`,{withCredentials:true,
             proxy:false,
             cancelToken: source.token,
-            timeout:6000,
+            timeout:10000,
             ...(tunnel&&{httpsAgent:tunnel,httpAgent:tunnel}),
             headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}}).then((res)=>{
                 this.statisProxy('work')
