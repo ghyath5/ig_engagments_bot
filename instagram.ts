@@ -161,13 +161,13 @@ class IG {
         const timeout = setTimeout(() => {
           source.cancel('timeout');
           // Timeout Logic
-        }, 8000);
+        }, 6000);
         this.fetchSession()
         return new Promise((resolve)=>{
             axios(`https://www.instagram.com/${username}/?__a=1`,{withCredentials:true,
             proxy:false,
             cancelToken: source.token,
-            timeout:8000,
+            timeout:6000,
             ...(tunnel&&{httpsAgent:tunnel,httpAgent:tunnel}),
             headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}}).then((res)=>{
                 this.statisProxy('work')
@@ -211,12 +211,12 @@ class IG {
         const timeout = setTimeout(() => {
           source.cancel('timeout');
           // Timeout Logic
-        }, 8000);
+        }, 6000);
         return await new Promise((resolve)=>{
             axios(`https://www.instagram.com/graphql/query/?query_id=17874545323001329&id=${id}&first=50${cursor? ('&after='+cursor):''}`,{withCredentials:true,
             proxy:false,
             cancelToken: source.token,
-            timeout:8000,
+            timeout:6000,
             ...(tunnel&&{httpsAgent:tunnel,httpAgent:tunnel}),
             headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}}).then((res)=>{
                 this.statisProxy('work')
@@ -261,7 +261,7 @@ class IG {
             }
         }
         statisticsProxies = statisticsProxies.filter((one)=>!(one.ip == proxy.ip && one.port == proxy.port))
-        if(found.success <= 0 && found.fails >= 30 || ((found.fails / found.success) >= 50 && (found.fails / found.success)<Infinity) && found.state == 'dead'){
+        if(found.success <= 0 && found.fails >= 80 || ((found.fails / found.success) >= 60 && (found.fails / found.success)<Infinity) && found.state == 'dead'){
             poxis = poxis.filter((p)=>!(p.ip == proxy.ip && p.port == proxy.port))
             client.set('proxies',JSON.stringify(poxis))
             bot.telegram.sendMessage(adminId,`Proxy Deleted: ${found.ip}:${found.port}\nSuccess: ${found.success}\nFails: ${found.fails}\n\nProxies Left: ${poxis.length}`);
