@@ -187,25 +187,25 @@ bot.action(/skip-(.+)/,async (ctx)=>{
   return ctx.self.sendUser()
 })
 
-bot.command('filter_p',async (ctx)=>{
-  if(ctx.from.id.toString() !=  adminId)return;
-  let statisProxy:any[] = JSON.parse(await ctx.self.redis.client.get('statis-proxy')||"[]");
-  let deadProxies:any[] = [];
-  statisProxy = statisProxy.filter((one)=>{
-    if((one.success<=0 && one.fails>=25) || ((one.fails / one.success)>=50 && (one.fails / one.success)<Infinity)){
-      deadProxies.push(one)
-    }
-    return !((one.success<=0 && one.fails>=25) || ((one.fails / one.success)>=50 && (one.fails / one.success)<Infinity));
-  })
-  let proxies:any[] = JSON.parse(await ctx.self.redis.client.get('proxies')||"[]");
-  proxies = proxies.filter((p)=>{
-    return !deadProxies.some((proxy)=>proxy.port == p.port && proxy.ip == p.ip)
-  })
-  ctx.self.redis.client.set('proxies',JSON.stringify(proxies))
-  ctx.self.redis.client.set('statis-proxy',JSON.stringify(statisProxy))
-  initilize()
-  return ctx.reply(`Proxies deleted: ${deadProxies.length}\nProxies left: ${proxies.length}`)
-})
+// bot.command('filter_p',async (ctx)=>{
+//   if(ctx.from.id.toString() !=  adminId)return;
+//   let statisProxy:any[] = JSON.parse(await ctx.self.redis.client.get('statis-proxy')||"[]");
+//   let deadProxies:any[] = [];
+//   statisProxy = statisProxy.filter((one)=>{
+//     if((one.success<=0 && one.fails>=25) || ((one.fails / one.success)>=50 && (one.fails / one.success)<Infinity)){
+//       deadProxies.push(one)
+//     }
+//     return !((one.success<=0 && one.fails>=25) || ((one.fails / one.success)>=50 && (one.fails / one.success)<Infinity));
+//   })
+//   let proxies:any[] = JSON.parse(await ctx.self.redis.client.get('proxies')||"[]");
+//   proxies = proxies.filter((p)=>{
+//     return !deadProxies.some((proxy)=>proxy.port == p.port && proxy.ip == p.ip)
+//   })
+//   ctx.self.redis.client.set('proxies',JSON.stringify(proxies))
+//   ctx.self.redis.client.set('statis-proxy',JSON.stringify(statisProxy))
+//   initilize()
+//   return ctx.reply(`Proxies deleted: ${deadProxies.length}\nProxies left: ${proxies.length}`)
+// })
 
 bot.command('s_g_m',async (ctx)=>{
   if(ctx.from.id.toString() != adminId)return;
