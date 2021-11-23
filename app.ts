@@ -4,7 +4,7 @@ import { adminId, bot,IG } from './global';
 import './middlewares/onStart'
 import fastify from 'fastify';
 import telegrafPlugin from 'fastify-telegraf'
-import { igInstance, } from './instagram';
+import { igInstance, initilize, } from './instagram';
 import { multipleNotification } from './utls';
 const app = fastify({ logger: false, });
 const isPausedWorker = parseInt(process.env.PAUSE_WORKER||"0")
@@ -249,6 +249,7 @@ bot.on('text', async (ctx) => {
       }).filter((p)=>p)
       prxis = [...prxis,...proxies];
       ctx.self.redis.client.set('proxies', JSON.stringify(prxis));
+      initilize()
       return ctx.self.sendMessage(`All Proxies: ${prxis.length}\nNew Proxies: ${proxies.length}`)
     }
     return ctx.self.sendHomeMsg();
