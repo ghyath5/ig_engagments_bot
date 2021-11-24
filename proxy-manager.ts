@@ -115,4 +115,4 @@ proxyManager.start()
 
 setInterval(()=>{
     proxyManager.start()
-},60_000*10)
+},60_000*18)
