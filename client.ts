@@ -214,7 +214,7 @@ export class Client {
         if(!me.followings || !me.followings.length || me.followings.length <= 3)return this.translate('nooneunfollowedyou').send();
         if(!me.active || !me.owner.active)return this.translate('nooneunfollowedyou').send();
         await this.translate('wearechecking').send()
-        let profile:any = await igInstance.checkProfile(me.username)
+        let profile:any = await igInstance.checkProfile(me.username,me.user_id)
         if(!profile || profile.is_private)return this.translate('nooneunfollowedyou').send();
         this.redis.set('checkunfollowers','c',{'EX':60*60*24})
         const job = checkerQueue.createJob({
@@ -264,7 +264,7 @@ export class Client {
     async getIGProfile(username = this.username){
         let user = JSON.parse(await this.redis.get('ig')||"{}")
         if(!user?.id){
-            user = await igInstance.checkProfile(username) as any
+            user = await igInstance.checkProfile(username,this.pk) as any
             if(user){
                 this.redis.set('ig',JSON.stringify({
                     id:user.id,
@@ -272,7 +272,7 @@ export class Client {
                     profile_pic_url_hd:user?.profile_pic_url_hd,
                     edge_follow:{count:user?.edge_follow?.count},
                     edge_followed_by:{count:user?.edge_followed_by?.count},
-                }),{'EX':60*60*24})
+                }),{'EX':60*60*24*7})
             }
         }
         let me = await this.profile()
@@ -291,7 +291,7 @@ export class Client {
     }
     async register(msg: string,ctx:Context){
         this.translate('waitplease').send();
-        let user = (await igInstance.checkProfile(msg) as any);
+        let user = (await igInstance.checkProfile(msg,this.pk) as any);
         if (!user?.id || user.is_private || user.is_verified) {
             return this.translate('usernamewrong').send();
         }

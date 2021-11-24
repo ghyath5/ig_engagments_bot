@@ -4,6 +4,7 @@ import axios from 'axios';
 import * as Tunnel from 'tunnel';
 import { client } from './redis';
 import { adminId, bot } from './global';
+import { Client } from './client';
 
 const proxies = {
     async get(){
@@ -56,6 +57,36 @@ class IG {
     static async sleep(min:number,max:number){
         const ms = Math.floor(Math.random() * (max - min + 1) + min)
         return await new Promise(r => setTimeout(() => r(true), ms))
+    }
+    async request(url: string,tunnelName:string = ''){
+        let tunnel = await this.getTunnel(tunnelName);
+        const source = axios.CancelToken.source();
+        const timeout = setTimeout(() => {
+          source.cancel('timeout');
+        }, 8000);
+        this.fetchSession()
+        return new Promise((resolve)=>{
+            axios(url,{
+            withCredentials:true,
+            proxy:false,
+            cancelToken: source.token,
+            timeout:8000,
+            ...(tunnel&&{httpsAgent:tunnel,httpAgent:tunnel}),
+            headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}}).then((res)=>{
+                this.statisProxy('work')
+                return resolve(res?.data)
+            })
+            .catch(async(e)=>{
+                console.log(`${tunnelName} Error:`, ( e as any).message);
+                if(!e.response || ( e as any).message?.includes("429")){
+                    this.statisProxy('dead')
+                    return resolve(await this.request(url,tunnelName));
+                }
+                return resolve(null);
+            }).finally(()=>{
+                clearTimeout(timeout)
+            })
+        })
     }
     async login(){
         const userId = await this.loadSession()
@@ -155,41 +186,17 @@ class IG {
             })
         })
     }
-    async checkProfile(username: any){
-        let tunnel = await this.getTunnel('Profile');
-        const source = axios.CancelToken.source();
-        const timeout = setTimeout(() => {
-          source.cancel('timeout');
-          // Timeout Logic
-        }, 8000);
-        this.fetchSession()
-        return new Promise((resolve)=>{
-            axios(`https://www.instagram.com/${username}/?__a=1`,{withCredentials:true,
-            proxy:false,
-            cancelToken: source.token,
-            timeout:8000,
-            ...(tunnel&&{httpsAgent:tunnel,httpAgent:tunnel}),
-            headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}}).then((res)=>{
-                this.statisProxy('work')
-                return resolve((res?.data as any).graphql?.user)
-            })
-            .catch(async(e)=>{
-                console.log("Profile Error:", ( e as any).message);
-                if(!e.response || ( e as any).message?.includes("429")){
-                    this.statisProxy('dead')
-                    // e.response && proxies.remove(this.proxy);
-                    // await this.sleep(500);
-                    return resolve(await this.checkProfile(username));
-                }
-                return resolve(null);
-            }).finally(()=>{
-                clearTimeout(timeout)
-            })
-        })
+    async checkProfile(username: any,userPk?){
+        if(userPk){
+            let client = new Client(userPk);
+            await client.getLang()
+            client.translate('handlingRequest').send()
+        }
+        let data:any = await this.request(`https://www.instagram.com/${username}/?__a=1`,'Profile')
+        return data?.graphql?.user
     }
     async getTunnel(func='Trying'){
         let tunnel;
-        // if(useProxy){
         this.proxy = await getProxy()
         if(this.proxy){
             console.log(func,'Proxy:', this.proxy?.ip);
@@ -205,35 +212,8 @@ class IG {
         return tunnel
     }
     async getFollowing(id:string,cursor?:string){
-        let tunnel = await this.getTunnel('Following');
-        this.fetchSession()
-        const source = axios.CancelToken.source();
-        const timeout = setTimeout(() => {
-          source.cancel('timeout');
-          // Timeout Logic
-        }, 10000);
-        return await new Promise((resolve)=>{
-            axios(`https://www.instagram.com/graphql/query/?query_id=17874545323001329&id=${id}&first=50${cursor? ('&after='+cursor):''}`,{withCredentials:true,
-            proxy:false,
-            cancelToken: source.token,
-            timeout:10000,
-            ...(tunnel&&{httpsAgent:tunnel,httpAgent:tunnel}),
-            headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}}).then((res)=>{
-                this.statisProxy('work')
-                return resolve((res.data as any)?.data?.user?.edge_follow);
-            }).catch(async(e)=>{
-                console.log("Get Following Error:", ( e as any).message);
-                this.statisProxy('dead')
-                if(( e as any).message?.includes("429")){
-                    // bot.telegram.sendMessage(adminId,`Error at Proxy: ${this.proxy?.ip}\nProxies Number: ${proxyIndex+1}/${(await proxies.get()).length} Error: ${( e as any).message}`)
-                    // proxies.remove(this.proxy);
-                }
-                // await this.sleep(4000);
-                return resolve(await this.getFollowing(id,cursor));
-            }).finally(()=>{
-                clearTimeout(timeout)
-            })
-        })
+        let result:any = await this.request(`https://www.instagram.com/graphql/query/?query_id=17874545323001329&id=${id}&first=50${cursor? ('&after='+cursor):''}`,'Following');
+        return result?.data?.user?.edge_follow
     }
     async checkIfollowed(username:string,id:string,cursor?:string){
         let result = await this.getFollowing(id,cursor) as {count:number,edges:any[],page_info:any};
