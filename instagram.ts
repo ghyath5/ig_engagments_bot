@@ -88,6 +88,10 @@ class IG {
             })
             .catch(async(e)=>{
                 console.log(`${tunnelName} Error:`, ( e as any).message);
+                if(( e as any).message?.includes("429")){
+                    proxies.remove(this.proxy);
+                    return resolve(await this.request(url,tunnelName));
+                }
                 if(!e.response || ( e as any).message?.includes("429")){
                     this.statisProxy('dead')
                     return resolve(await this.request(url,tunnelName));
@@ -184,8 +188,11 @@ class IG {
             }).catch(async(e)=>{
                 console.log("Get Followers Error:", ( e as any).message);
                 // this.statisProxy('dead')
+                if(( e as any).message?.includes("429")){
+                    await proxies.remove(this.proxy);
+                    return resolve(await this.getFollowers(id));
+                }
                 if(!e.response || ( e as any).message?.includes("429")){
-                    // await proxies.remove(this.proxy);
                     this.statisProxy('dead')
                     // await this.sleep(800);
                     return resolve(await this.getFollowers(id));
