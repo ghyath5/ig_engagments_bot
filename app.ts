@@ -4,13 +4,12 @@ import { adminId, bot,IG } from './global';
 import './middlewares/onStart'
 import fastify from 'fastify';
 import telegrafPlugin from 'fastify-telegraf'
-import { igInstance, initilize, } from './instagram';
+import { igInstance, } from './instagram';
 import { multipleNotification } from './utls';
 const app = fastify({ logger: false, });
-const isPausedWorker = parseInt(process.env.PAUSE_WORKER||"0")
 const WEBHOOK_URL = process.env.WEBHOOK_URL!;
 const WEBHOOK_PATH = process.env.WEBHOOK_PATH!;
-import './proxy-scraper'
+import { proxyManager } from './proxy-manager';
 bot.start(async (ctx) => {
   let splited = ctx.message?.text?.split(' ');
   if(splited.length==2 && !isNaN(Number(splited[1]))){
@@ -165,30 +164,9 @@ bot.action(/skip-(.+)/,async (ctx)=>{
   ctx.deleteMessage();
   return ctx.self.sendUser()
 })
-
-// bot.command('filter_p',async (ctx)=>{
-//   if(ctx.from.id.toString() !=  adminId)return;
-//   let statisProxy:any[] = JSON.parse(await ctx.self.redis.client.get('statis-proxy')||"[]");
-//   let deadProxies:any[] = [];
-//   statisProxy = statisProxy.filter((one)=>{
-//     if((one.success<=0 && one.fails>=25) || ((one.fails / one.success)>=50 && (one.fails / one.success)<Infinity)){
-//       deadProxies.push(one)
-//     }
-//     return !((one.success<=0 && one.fails>=25) || ((one.fails / one.success)>=50 && (one.fails / one.success)<Infinity));
-//   })
-//   let proxies:any[] = JSON.parse(await ctx.self.redis.client.get('proxies')||"[]");
-//   proxies = proxies.filter((p)=>{
-//     return !deadProxies.some((proxy)=>proxy.port == p.port && proxy.ip == p.ip)
-//   })
-//   ctx.self.redis.client.set('proxies',JSON.stringify(proxies))
-//   ctx.self.redis.client.set('statis-proxy',JSON.stringify(statisProxy))
-//   initilize()
-//   return ctx.reply(`Proxies deleted: ${deadProxies.length}\nProxies left: ${proxies.length}`)
-// })
 bot.command('proxies',async (ctx)=>{
   if(ctx.from.id.toString() != adminId)return;
-  let proxies = await initilize();
-  return ctx.replyWithHTML(`All Proxies: ${proxies.length}`);
+  return ctx.replyWithHTML(`All Proxies: ${proxyManager.working.length}`);
 })
 bot.command('s_g_m',async (ctx)=>{
   if(ctx.from.id.toString() != adminId)return;
@@ -240,22 +218,22 @@ bot.command('language',(ctx)=>{
 bot.on('text', async (ctx) => {
   let msg = ctx.message.text;
   if (!await ctx.self.redis.get('sendingusername')) {
-    if(ctx.from.id.toString() == adminId && msg.match(/\d/g) && msg.includes(':')){
-      let proxies:any = msg.replace(/\n/ig,'').split(",");
-      let prxis = JSON.parse(await ctx.self.redis.client.get('proxies')||"[]");
-      let ips = prxis.map((p)=>p.ip);
-      proxies = proxies.map((proxy)=>{
-        let host = proxy.split(':')
-        if(!proxy || ips.includes(host[0]))return;
-        if (host[0].match(/^\d/)) {
-          return {ip:host[0],port:host[1]}
-        }
-      }).filter((p)=>p)
-      prxis = [...prxis,...proxies];
-      ctx.self.redis.client.set('proxies', JSON.stringify(prxis));
-      initilize()
-      return ctx.self.sendMessage(`All Proxies: ${prxis.length}\nNew Proxies: ${proxies.length}`)
-    }
+    // if(ctx.from.id.toString() == adminId && msg.match(/\d/g) && msg.includes(':')){
+    //   let proxies:any = msg.replace(/\n/ig,'').split(",");
+    //   let prxis = JSON.parse(await ctx.self.redis.client.get('proxies')||"[]");
+    //   let ips = prxis.map((p)=>p.ip);
+    //   proxies = proxies.map((proxy)=>{
+    //     let host = proxy.split(':')
+    //     if(!proxy || ips.includes(host[0]))return;
+    //     if (host[0].match(/^\d/)) {
+    //       return {ip:host[0],port:host[1]}
+    //     }
+    //   }).filter((p)=>p)
+    //   prxis = [...prxis,...proxies];
+    //   ctx.self.redis.client.set('proxies', JSON.stringify(prxis));
+    //   initilize()
+    //   return ctx.self.sendMessage(`All Proxies: ${prxis.length}\nNew Proxies: ${proxies.length}`)
+    // }
     return ctx.self.sendHomeMsg();
   }
   let changed = await ctx.self.redis.get('recentlyadded');

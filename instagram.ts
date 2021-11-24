@@ -5,59 +5,59 @@ import * as Tunnel from 'tunnel';
 import { client } from './redis';
 import { adminId, bot } from './global';
 import { Client } from './client';
-
-export const proxies = {
-    async get(){
-        return JSON.parse(await  client.get('proxies')||"[]");
-    },
-    async push(newProxies){
-        let all = await proxies.get()
-        all = all.filter((p)=>{
-            return !newProxies.some((proxy)=>proxy.port == p.port && proxy.ip == p.ip)
-        })
-        all.push(...newProxies)
-        client.set('proxies',JSON.stringify(all));
-        initilize()
-    },
-    async remove(pr){
-        if(!pr)return;
-        let proxies = JSON.parse(await  client.get('proxies')||"[]");
-        let filtered = proxies.filter((proxy)=>proxy.ip != pr?.ip);
-        client.set('proxies',JSON.stringify(filtered));
-        initilize()
-    }
-};
-let poxis;
-let statisticsProxies;
-export const initilize = async ()=>{
-    [poxis,statisticsProxies] = await Promise.all([
-        proxies.get(),
-        client.get('statis-proxy')
-    ])
-    statisticsProxies = JSON.parse(statisticsProxies||"[]");
-    return poxis;
-}
-initilize()
-let proxyIndex = -1;
-const getProxy = async ()=>{
-    proxyIndex++
-    try{
-        let host = poxis[proxyIndex]
-        if(proxyIndex >= poxis.length){
-            proxyIndex = -1;
-        }
-        return host
-    }catch(e){
-        proxyIndex = -1;
-        return null;
-    }
-}
+import { proxyManager } from './proxy-manager';
+// export const proxies = {
+//     async get(){
+//         return JSON.parse(await  client.get('proxies')||"[]");
+//     },
+//     async push(newProxies){
+//         let all = await proxies.get()
+//         all = all.filter((p)=>{
+//             return !newProxies.some((proxy)=>proxy.port == p.port && proxy.ip == p.ip)
+//         })
+//         all.push(...newProxies)
+//         client.set('proxies',JSON.stringify(all));
+//         initilize()
+//     },
+//     async remove(pr){
+//         if(!pr)return;
+//         let proxies = JSON.parse(await  client.get('proxies')||"[]");
+//         let filtered = proxies.filter((proxy)=>proxy.ip != pr?.ip);
+//         client.set('proxies',JSON.stringify(filtered));
+//         initilize()
+//     }
+// };
+// let poxis;
+// let statisticsProxies;
+// export const initilize = async ()=>{
+//     [poxis,statisticsProxies] = await Promise.all([
+//         proxies.get(),
+//         client.get('statis-proxy')
+//     ])
+//     statisticsProxies = JSON.parse(statisticsProxies||"[]");
+//     return poxis;
+// }
+// initilize()
+// let proxyIndex = -1;
+// const getProxy = ()=>{
+//     proxyIndex++
+//     try{
+//         let host = poxis[proxyIndex]
+//         if(proxyIndex >= poxis.length){
+//             proxyIndex = -1;
+//         }
+//         return host
+//     }catch(e){
+//         proxyIndex = -1;
+//         return null;
+//     }
+// }
 class IG {
     username:string
     session: { userAgent: string; appAgent: string; cookies: string; };
     client:IgApiClient;
     password:string
-    proxy:{ip:string,port:string,pass:string,username:string};
+    proxy:{ip:string,port:string,pass?:string,username?:string};
     constructor(username: string,password: string){
         this.username = username;
         this.password = password
@@ -69,7 +69,7 @@ class IG {
         return await new Promise(r => setTimeout(() => r(true), ms))
     }
     async request(url: string,tunnelName:string = ''){
-        let tunnel = await this.getTunnel(tunnelName);
+        let tunnel = this.getTunnel(tunnelName);
         const source = axios.CancelToken.source();
         const timeout = setTimeout(() => {
           source.cancel('timeout');
@@ -100,7 +100,7 @@ class IG {
                     return resolve(null);
                 }
                 if(msg?.includes("429")){
-                    proxies.remove(this.proxy);
+                    proxyManager.remove(this.proxy)
                 }
                 this.statisProxy('dead')
                 return resolve(await this.request(url,tunnelName));
@@ -166,7 +166,7 @@ class IG {
         return null;
     }
     async getFollowers(id:string){
-        let tunnel = await this.getTunnel();
+        let tunnel = this.getTunnel();
         const source = axios.CancelToken.source();
         const timeout = setTimeout(() => {
           source.cancel('timeout');
@@ -196,7 +196,7 @@ class IG {
                 console.log("Get Followers Error:", ( e as any).message);
                 // this.statisProxy('dead')
                 if(( e as any).message?.includes("429")){
-                    await proxies.remove(this.proxy);
+                    proxyManager.remove(this.proxy);
                     return resolve(await this.getFollowers(id));
                 }
                 if(!e.response || ( e as any).message?.includes("429")){
@@ -219,9 +219,9 @@ class IG {
         let data:any = await this.request(`https://www.instagram.com/${username}/?__a=1`,'Profile')
         return data?.graphql?.user
     }
-    async getTunnel(func='Trying'){
+    getTunnel(func='Trying'){
         let tunnel;
-        this.proxy = await getProxy()
+        this.proxy = proxyManager.getProxy()
         if(this.proxy){
             console.log(func,'Proxy:', this.proxy?.ip);
             
@@ -250,30 +250,30 @@ class IG {
     }
     async statisProxy(state:string){
         let proxy = {...this.proxy}
-        if(!proxy.ip)return;
-        let found = statisticsProxies.find((one)=>one.ip == proxy.ip && one.port == proxy.port)
-        if(found){
-            state == 'work' ? found.success = found.success+1 : found.fails = found.fails+1;
-            found.state = state
-        }else{
-            found = {
-                ip:proxy.ip,
-                port:proxy.port,
-                success:state == 'work'?1:0,
-                fails:state == 'dead'?1:0,
-                state
-            }
-        }
-        statisticsProxies = statisticsProxies.filter((one)=>!(one.ip == proxy.ip && one.port == proxy.port))
-        if(found.success <= 0 && found.fails >= 5 || ((found.fails / found.success) >= 10 && (found.fails / found.success)<Infinity) && found.state == 'dead'){
-            poxis = poxis.filter((p)=>!(p.ip == proxy.ip && p.port == proxy.port))
-            client.set('proxies',JSON.stringify(poxis))
-            bot.telegram.sendMessage(adminId,`Proxy Deleted: ${found.ip}:${found.port}\nSuccess: ${found.success}\nFails: ${found.fails}\n\nProxies Left: ${poxis.length}`);
-        }else{
-            statisticsProxies.unshift(found)
-        }
+        // if(!proxy.ip)return;
+        // let found = statisticsProxies.find((one)=>one.ip == proxy.ip && one.port == proxy.port)
+        // if(found){
+        //     state == 'work' ? found.success = found.success+1 : found.fails = found.fails+1;
+        //     found.state = state
+        // }else{
+        //     found = {
+        //         ip:proxy.ip,
+        //         port:proxy.port,
+        //         success:state == 'work'?1:0,
+        //         fails:state == 'dead'?1:0,
+        //         state
+        //     }
+        // }
+        // statisticsProxies = statisticsProxies.filter((one)=>!(one.ip == proxy.ip && one.port == proxy.port))
+        // if(found.success <= 0 && found.fails >= 5 || ((found.fails / found.success) >= 10 && (found.fails / found.success)<Infinity) && found.state == 'dead'){
+        //     poxis = poxis.filter((p)=>!(p.ip == proxy.ip && p.port == proxy.port))
+        //     client.set('proxies',JSON.stringify(poxis))
+        //     bot.telegram.sendMessage(adminId,`Proxy Deleted: ${found.ip}:${found.port}\nSuccess: ${found.success}\nFails: ${found.fails}\n\nProxies Left: ${poxis.length}`);
+        // }else{
+        //     statisticsProxies.unshift(found)
+        // }
         
-        client.set('statis-proxy',JSON.stringify(statisticsProxies));
+        // client.set('statis-proxy',JSON.stringify(statisticsProxies));
     }
 }
 
