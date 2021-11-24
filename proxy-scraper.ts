@@ -14,7 +14,7 @@ class ProxyScraper{
     }
     async start(){
         try{
-            let proxies:any = await axios.get(`https://api.proxyscrape.com/?request=displayproxies&proxytype=http&anonimity=elite&limit=${this.limit}`)
+            let proxies:any = await axios.get(`https://api.proxyscrape.com/?request=displayproxies&proxytype=http&anonimity=elite,anonymous&limit=${this.limit}`)
             proxies = proxies.data.split('\r\n').filter((o:string)=>o)
             this.all = proxies.length
             proxies.map((p:string)=>{
@@ -78,6 +78,6 @@ class ProxyScraper{
     }
 }
 setInterval(()=>{
-    let scraper = new ProxyScraper({limit:500,checkTimes:2})
+    let scraper = new ProxyScraper({limit:800,checkTimes:2})
     scraper.start()
 },60000*5)
