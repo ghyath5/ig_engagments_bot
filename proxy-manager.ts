@@ -93,7 +93,10 @@ export class ProxyManager{
         }
         let state = await check()
         if(!state)return;
-        if(this.isExist(proxy))return;     
+        if(this.isExist(proxy))return;
+        if(this.working.length>=250){
+            this.working.shift()
+        }  
         this.working.push(proxy);
     }
 
