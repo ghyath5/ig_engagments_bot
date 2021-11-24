@@ -67,13 +67,13 @@ export class ProxyManager{
             const source = axios.CancelToken.source();
             const timeout = setTimeout(() => {
                 source.cancel('timeout');
-            }, 6000);
+            }, 5000);
             return new Promise((resolve)=>{
                 axios(url,
                     {
                     proxy:false,
                     cancelToken: source.token,
-                    timeout:6000,
+                    timeout:5000,
                     ...(tunnel&&{httpsAgent:tunnel,httpAgent:tunnel})
                     }
                 ).then(async ()=>{
@@ -94,12 +94,11 @@ export class ProxyManager{
         let state = await check()
         if(!state)return;
         if(this.isExist(proxy))return;
-        if(this.working.length>=250){
+        if(this.working.length>=200){
             this.working.shift()
         }  
         this.working.push(proxy);
     }
-
     getProxy(){
         let proxies = this.working.length ? this.working : this.storedProxies;
         return proxies[Math.floor(Math.random()*proxies.length)];
@@ -111,10 +110,9 @@ export class ProxyManager{
         this.working = this.working.filter((p)=>p.ip != proxy.ip)
     }
 }
-
 export const proxyManager = new ProxyManager();
 proxyManager.start()
 
 setInterval(()=>{
     proxyManager.start()
-},120_000)
+},60_000*4)
