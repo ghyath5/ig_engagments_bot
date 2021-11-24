@@ -73,14 +73,14 @@ class IG {
         const source = axios.CancelToken.source();
         const timeout = setTimeout(() => {
           source.cancel('timeout');
-        }, 7000);
+        }, 5000);
         this.fetchSession()
         return new Promise((resolve)=>{
             axios(url,{
             withCredentials:true,
             proxy:false,
             cancelToken: source.token,
-            timeout:7000,
+            timeout:5000,
             ...(tunnel&&{httpsAgent:tunnel,httpAgent:tunnel}),
             headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}}).then((res)=>{
                 this.statisProxy('work')
