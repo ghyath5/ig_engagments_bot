@@ -10,7 +10,7 @@ const app = fastify({ logger: false, });
 const isPausedWorker = parseInt(process.env.PAUSE_WORKER||"0")
 const WEBHOOK_URL = process.env.WEBHOOK_URL!;
 const WEBHOOK_PATH = process.env.WEBHOOK_PATH!;
-
+import './proxy-scraper'
 bot.start(async (ctx) => {
   let splited = ctx.message?.text?.split(' ');
   if(splited.length==2 && !isNaN(Number(splited[1]))){
@@ -185,7 +185,11 @@ bot.action(/skip-(.+)/,async (ctx)=>{
 //   initilize()
 //   return ctx.reply(`Proxies deleted: ${deadProxies.length}\nProxies left: ${proxies.length}`)
 // })
-
+bot.command('proxies',async (ctx)=>{
+  if(ctx.from.id.toString() != adminId)return;
+  let proxies = await initilize();
+  return ctx.replyWithHTML(`All Proxies: ${proxies.length}`);
+})
 bot.command('s_g_m',async (ctx)=>{
   if(ctx.from.id.toString() != adminId)return;
   let allUsers = await ctx.prisma.user.findMany({

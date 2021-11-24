@@ -6,16 +6,25 @@ import { client } from './redis';
 import { adminId, bot } from './global';
 import { Client } from './client';
 
-const proxies = {
+export const proxies = {
     async get(){
         return JSON.parse(await  client.get('proxies')||"[]");
+    },
+    async push(newProxies){
+        let all = await proxies.get()
+        all = all.filter((p)=>{
+            return !newProxies.some((proxy)=>proxy.port == p.port && proxy.ip == p.ip)
+        })
+        all.push(...newProxies)
+        client.set('proxies',JSON.stringify(all));
+        initilize()
     },
     async remove(pr){
         if(!pr)return;
         let proxies = JSON.parse(await  client.get('proxies')||"[]");
         let filtered = proxies.filter((proxy)=>proxy.ip != pr?.ip);
-        // filtered = [pr,...filtered];
         client.set('proxies',JSON.stringify(filtered));
+        initilize()
     }
 };
 let poxis;
@@ -26,6 +35,7 @@ export const initilize = async ()=>{
         client.get('statis-proxy')
     ])
     statisticsProxies = JSON.parse(statisticsProxies||"[]");
+    return poxis;
 }
 initilize()
 let proxyIndex = -1;
@@ -63,14 +73,14 @@ class IG {
         const source = axios.CancelToken.source();
         const timeout = setTimeout(() => {
           source.cancel('timeout');
-        }, 8000);
+        }, 7000);
         this.fetchSession()
         return new Promise((resolve)=>{
             axios(url,{
             withCredentials:true,
             proxy:false,
             cancelToken: source.token,
-            timeout:8000,
+            timeout:7000,
             ...(tunnel&&{httpsAgent:tunnel,httpAgent:tunnel}),
             headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}}).then((res)=>{
                 this.statisProxy('work')
