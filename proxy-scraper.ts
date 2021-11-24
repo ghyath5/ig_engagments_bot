@@ -58,6 +58,6 @@ class ProxyScraper{
     }
 }
 setInterval(()=>{
-    let scraper = new ProxyScraper({limit:50})
+    let scraper = new ProxyScraper({limit:100})
     scraper.start()
-},60000*5)
+},60000*10)
