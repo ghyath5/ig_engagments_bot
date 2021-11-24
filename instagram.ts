@@ -88,15 +88,14 @@ class IG {
             })
             .catch(async(e)=>{
                 console.log(`${tunnelName} Error:`, ( e as any).message);
+                if(( e as any).message?.includes("404")){
+                    return resolve(null);
+                }
                 if(( e as any).message?.includes("429")){
                     proxies.remove(this.proxy);
-                    return resolve(await this.request(url,tunnelName));
                 }
-                if(!e.response || ( e as any).message?.includes("429")){
-                    this.statisProxy('dead')
-                    return resolve(await this.request(url,tunnelName));
-                }
-                return resolve(null);
+                this.statisProxy('dead')
+                return resolve(await this.request(url,tunnelName));
             }).finally(()=>{
                 clearTimeout(timeout)
             })
