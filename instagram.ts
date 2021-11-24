@@ -87,11 +87,19 @@ class IG {
                 return resolve(res?.data)
             })
             .catch(async(e)=>{
-                console.log(`${tunnelName} Error:`, ( e as any).message);
-                if(( e as any).message?.includes("404")){
+                let msg = ( e as any)?.message
+                console.log(`${tunnelName} Error:`,msg);
+                if(msg?.includes("400")){
+                    this.statisProxy('work')
+                    bot.telegram.sendMessage(adminId,`Error occured: ${msg}`)
+                    await this.sleep(60000)
+                    return resolve(await this.request(url,tunnelName));
+                }
+                if(msg?.includes("404")){
+                    this.statisProxy('work')
                     return resolve(null);
                 }
-                if(( e as any).message?.includes("429")){
+                if(msg?.includes("429")){
                     proxies.remove(this.proxy);
                 }
                 this.statisProxy('dead')
