@@ -89,9 +89,9 @@ bot.action('sendusertofollow', async (ctx) => {
 bot.action(/rep-(.+)/, async (ctx) => {
   let reason = ctx.match['input'].split('-')[1];
   let username = ctx.match['input'].split('-')[2];
-  let profile = await igInstance.checkProfile(username) as any;
-  ctx.deleteMessage();
   await ctx.self.addAccountToSkipped(username);
+  ctx.deleteMessage();
+  let profile = await igInstance.checkProfile(username) as any;
   ctx.self.sendUser();
   if(!profile || profile.is_private){
     bot.telegram.sendMessage(adminId,`Report about <a href="https://instagram.com/${username}">@${username}</a> ${reason}`,{parse_mode:"HTML"});
