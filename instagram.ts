@@ -2,56 +2,10 @@ import {  IgApiClient } from 'instagram-private-api';
 import { promises as fs } from "fs";
 import axios from 'axios';
 import * as Tunnel from 'tunnel';
-import { client } from './redis';
-import { adminId, bot } from './global';
+// import { adminId, bot } from './global';
 import { Client } from './client';
 import { proxyManager } from './proxy-manager';
-// export const proxies = {
-//     async get(){
-//         return JSON.parse(await  client.get('proxies')||"[]");
-//     },
-//     async push(newProxies){
-//         let all = await proxies.get()
-//         all = all.filter((p)=>{
-//             return !newProxies.some((proxy)=>proxy.port == p.port && proxy.ip == p.ip)
-//         })
-//         all.push(...newProxies)
-//         client.set('proxies',JSON.stringify(all));
-//         initilize()
-//     },
-//     async remove(pr){
-//         if(!pr)return;
-//         let proxies = JSON.parse(await  client.get('proxies')||"[]");
-//         let filtered = proxies.filter((proxy)=>proxy.ip != pr?.ip);
-//         client.set('proxies',JSON.stringify(filtered));
-//         initilize()
-//     }
-// };
-// let poxis;
-// let statisticsProxies;
-// export const initilize = async ()=>{
-//     [poxis,statisticsProxies] = await Promise.all([
-//         proxies.get(),
-//         client.get('statis-proxy')
-//     ])
-//     statisticsProxies = JSON.parse(statisticsProxies||"[]");
-//     return poxis;
-// }
-// initilize()
-// let proxyIndex = -1;
-// const getProxy = ()=>{
-//     proxyIndex++
-//     try{
-//         let host = poxis[proxyIndex]
-//         if(proxyIndex >= poxis.length){
-//             proxyIndex = -1;
-//         }
-//         return host
-//     }catch(e){
-//         proxyIndex = -1;
-//         return null;
-//     }
-// }
+import { RequestManager } from './request-manager';
 class IG {
     username:string
     session: { userAgent: string; appAgent: string; cookies: string; };
@@ -68,46 +22,52 @@ class IG {
         const ms = Math.floor(Math.random() * (max - min + 1) + min)
         return await new Promise(r => setTimeout(() => r(true), ms))
     }
-    async request(url: string,tunnelName:string = ''){
-        let tunnel = this.getTunnel(tunnelName);
-        const source = axios.CancelToken.source();
-        const timeout = setTimeout(() => {
-          source.cancel('timeout');
-        }, 5000);
+    // async request(url: string,tunnelName:string = ''){
+    //     let tunnel = this.getTunnel(tunnelName);
+    //     const source = axios.CancelToken.source();
+    //     const timeout = setTimeout(() => {
+    //       source.cancel('timeout');
+    //     }, 5000);
+    //     this.fetchSession()
+    //     return new Promise((resolve)=>{
+    //         axios(url,{
+    //         withCredentials:true,
+    //         proxy:false,
+    //         cancelToken: source.token,
+    //         timeout:5000,
+    //         ...(tunnel&&{httpsAgent:tunnel,httpAgent:tunnel}),
+    //         headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}}).then((res)=>{
+    //             this.statisProxy('work')
+    //             return resolve(res?.data)
+    //         })
+    //         .catch(async(e)=>{
+    //             let msg = ( e as any)?.message
+    //             console.log(`${tunnelName} Error:`,msg);
+    //             if(msg?.includes("400")){
+    //                 this.statisProxy('work')
+    //                 bot.telegram.sendMessage(adminId,`Error occured: ${msg}`)
+    //                 await this.sleep(60000)
+    //                 return resolve(await this.request(url,tunnelName));
+    //             }
+    //             if(msg?.includes("404")){
+    //                 this.statisProxy('work')
+    //                 return resolve(null);
+    //             }
+    //             if(msg?.includes("429")){
+    //                 proxyManager.remove(this.proxy)
+    //             }
+    //             this.statisProxy('dead')
+    //             return resolve(await this.request(url,tunnelName));
+    //         }).finally(()=>{
+    //             clearTimeout(timeout)
+    //         })
+    //     })
+    // }
+    async req(url: string){
         this.fetchSession()
-        return new Promise((resolve)=>{
-            axios(url,{
-            withCredentials:true,
-            proxy:false,
-            cancelToken: source.token,
-            timeout:5000,
-            ...(tunnel&&{httpsAgent:tunnel,httpAgent:tunnel}),
-            headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}}).then((res)=>{
-                this.statisProxy('work')
-                return resolve(res?.data)
-            })
-            .catch(async(e)=>{
-                let msg = ( e as any)?.message
-                console.log(`${tunnelName} Error:`,msg);
-                if(msg?.includes("400")){
-                    this.statisProxy('work')
-                    bot.telegram.sendMessage(adminId,`Error occured: ${msg}`)
-                    await this.sleep(60000)
-                    return resolve(await this.request(url,tunnelName));
-                }
-                if(msg?.includes("404")){
-                    this.statisProxy('work')
-                    return resolve(null);
-                }
-                if(msg?.includes("429")){
-                    proxyManager.remove(this.proxy)
-                }
-                this.statisProxy('dead')
-                return resolve(await this.request(url,tunnelName));
-            }).finally(()=>{
-                clearTimeout(timeout)
-            })
-        })
+        let rqManager = new RequestManager(this.session);
+        let response = await rqManager.request(url)
+        return response
     }
     async login(){
         const userId = await this.loadSession()
@@ -147,7 +107,6 @@ class IG {
     fetchSession(){
         try {
             let cookies = `csrftoken=${this.client.state.extractCookieValue('csrftoken')};mid=${this.client.state.extractCookieValue('mid')};rur=${this.client.state.extractCookieValue('rur')};ds_user_id=${this.client.state.extractCookieValue('ds_user_id')};sessionid=${this.client.state.extractCookieValue('sessionid')}`
-
             this.session = {
                 userAgent: this.client.state.webUserAgent,
                 appAgent: this.client.state.appUserAgent,
@@ -190,7 +149,6 @@ class IG {
                 'X-IG-EU-DC-ENABLED':'undefined',
                 Authorization:'',
                 "Cookie":this.session.cookies}}).then((res)=>{
-                    this.statisProxy('work')
                 return resolve({status:true,users:(res.data as any)?.users});
             }).catch(async(e)=>{
                 console.log("Get Followers Error:", ( e as any).message);
@@ -200,7 +158,6 @@ class IG {
                     return resolve(await this.getFollowers(id));
                 }
                 if(!e.response || ( e as any).message?.includes("429")){
-                    this.statisProxy('dead')
                     // await this.sleep(800);
                     return resolve(await this.getFollowers(id));
                 }
@@ -216,7 +173,7 @@ class IG {
             await client.getLang()
             client.translate('handlingRequest').send()
         }
-        let data:any = await this.request(`https://www.instagram.com/${username}/?__a=1`,'Profile')
+        let data:any = await this.req(`https://www.instagram.com/${username}/?__a=1`)
         return data?.graphql?.user
     }
     getTunnel(func='Trying'){
@@ -224,7 +181,6 @@ class IG {
         this.proxy = proxyManager.getProxy()
         if(this.proxy){
             console.log(func,'Proxy:', this.proxy?.ip);
-            
             tunnel = Tunnel.httpsOverHttp({
                 proxy: {
                     host: this.proxy.ip,
@@ -236,7 +192,7 @@ class IG {
         return tunnel
     }
     async getFollowing(id:string,cursor?:string){
-        let result:any = await this.request(`https://www.instagram.com/graphql/query/?query_id=17874545323001329&id=${id}&first=50${cursor? ('&after='+cursor):''}`,'Following');
+        let result:any = await this.req(`https://www.instagram.com/graphql/query/?query_id=17874545323001329&id=${id}&first=50${cursor? ('&after='+cursor):''}`);
         return result?.data?.user?.edge_follow
     }
     async checkIfollowed(username:string,id:string,cursor?:string){
@@ -247,33 +203,6 @@ class IG {
         // if(!result.page_info?.has_next_page)return false;
        // return await this.checkIfollowed(username,id,result.page_info.end_cursor);
          return false;
-    }
-    async statisProxy(state:string){
-        let proxy = {...this.proxy}
-        // if(!proxy.ip)return;
-        // let found = statisticsProxies.find((one)=>one.ip == proxy.ip && one.port == proxy.port)
-        // if(found){
-        //     state == 'work' ? found.success = found.success+1 : found.fails = found.fails+1;
-        //     found.state = state
-        // }else{
-        //     found = {
-        //         ip:proxy.ip,
-        //         port:proxy.port,
-        //         success:state == 'work'?1:0,
-        //         fails:state == 'dead'?1:0,
-        //         state
-        //     }
-        // }
-        // statisticsProxies = statisticsProxies.filter((one)=>!(one.ip == proxy.ip && one.port == proxy.port))
-        // if(found.success <= 0 && found.fails >= 5 || ((found.fails / found.success) >= 10 && (found.fails / found.success)<Infinity) && found.state == 'dead'){
-        //     poxis = poxis.filter((p)=>!(p.ip == proxy.ip && p.port == proxy.port))
-        //     client.set('proxies',JSON.stringify(poxis))
-        //     bot.telegram.sendMessage(adminId,`Proxy Deleted: ${found.ip}:${found.port}\nSuccess: ${found.success}\nFails: ${found.fails}\n\nProxies Left: ${poxis.length}`);
-        // }else{
-        //     statisticsProxies.unshift(found)
-        // }
-        
-        // client.set('statis-proxy',JSON.stringify(statisticsProxies));
     }
 }
 

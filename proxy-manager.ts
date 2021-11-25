@@ -3,7 +3,7 @@ import { adminId, bot } from "./global";
 import * as Tunnel from 'tunnel';
 import { client } from "./redis";
 // import eventemitter from "./eventemitter";
-type ProxyType = {
+export type ProxyType = {
     ip:string;
     port:string;
     pass?:string,username?:string
@@ -94,9 +94,9 @@ export class ProxyManager{
         let state = await check()
         if(!state)return;
         if(this.isExist(proxy))return;
-        if(this.working.length>=200){
+        if(this.working.length>=400){
             this.working.shift()
-        }  
+        } 
         this.working.push(proxy);
     }
     getProxy(){
@@ -111,8 +111,18 @@ export class ProxyManager{
     }
 }
 export const proxyManager = new ProxyManager();
-proxyManager.start()
+proxyManager.start();
 
-setInterval(()=>{
-    proxyManager.start()
-},60_000*28)
+
+const start = ()=>{
+    console.log('Start get prpxies');
+    console.log(proxyManager.working.length*4000);
+    
+    setTimeout(async ()=>{
+        proxyManager.start()
+        await new Promise((r)=>setTimeout(r,10000))
+        start()
+    },(4000*proxyManager.working.length||30_000))
+}
+
+start()
