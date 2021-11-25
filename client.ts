@@ -410,11 +410,11 @@ if(!isPausedWorker){
             if(fakefollows>0){
                 follower.redis.client.decr(`${followerPk}:fakefollows`);
             }
-            let todayfollowed = parseInt(await follower.redis.get('todayfollowed')||"0")
-            if(!todayfollowed){
-                follower.redis.set('todayfollowed',"1",{"EX":60*60*1})
+            let hourlyfollows = parseInt(await follower.redis.get('hourlyfollows')||"0")
+            if(!hourlyfollows){
+                follower.redis.set('hourlyfollows',"1",{"EX":60*60*1})
             }else{
-                follower.redis.client.incr(`${followerPk}:todayfollowed`);
+                follower.redis.client.incr(`${followerPk}:hourlyfollows`);
             }
             const followedAccounts = await follower.followedAccounts();
             if(followedAccounts.includes(usernameToFollow))return;
