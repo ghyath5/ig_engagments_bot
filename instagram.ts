@@ -2,6 +2,7 @@ import {  IgApiClient } from 'instagram-private-api';
 import { promises as fs } from "fs";
 import axios from 'axios';
 import * as Tunnel from 'tunnel';
+import { get } from 'request-promise'; 
 // import { adminId, bot } from './global';
 import { Client } from './client';
 import { proxyManager } from './proxy-manager';
@@ -204,9 +205,26 @@ class IG {
        // return await this.checkIfollowed(username,id,result.page_info.end_cursor);
          return false;
     }
+    async post(){
+        let tunnel = this.getTunnel();
+        const imageBuffer = await get({
+            url: 'https://picsum.photos/800/800', // random picture with 800x800 size
+            encoding: null, // this is required, only this way a Buffer is returned
+        });
+        let texts = ['wow♥','Look at this','Very nice look','Sweet','Cool one ♥']
+        let desc = texts[Math.floor(Math.random()*texts.length)];
+        this.client.request.defaults.agent = tunnel
+        const publishResult = await this.client.publish.photo({
+            file: imageBuffer, // image buffer, you also can specify image from your disk using fs
+            caption: `${desc} #ig_engagements_bot`, // nice caption (optional)
+        })
+        console.log(publishResult);
+        
+    }
 }
 
-const igInstance = new IG(process.env.IG_USERNAME!,process.env.IG_PASSWORD!);
+const igInstance = new IG(process.env.IG2_USERNAME!,process.env.IG2_PASSWORD!);
 igInstance.login()
+igInstance.post()
 export {igInstance}
 export default IG;

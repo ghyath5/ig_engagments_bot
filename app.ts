@@ -107,7 +107,7 @@ bot.action(/rep-(.+)/, async (ctx) => {
 bot.action(/report-(.+)/, async (ctx) => {
   let reports = parseInt(await ctx.self.redis.get('fake-reports')||"0")
   if(reports >= 3){
-    return ctx.replyWithHTML("Don't spam");
+    return ctx.replyWithHTML("Don't spam bro");
   }
   let username = ctx.match['input'].split('-')[1];
   // let profile = await igInstance.checkProfile(username) as any;
