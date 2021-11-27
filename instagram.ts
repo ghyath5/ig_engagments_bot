@@ -227,9 +227,8 @@ class IG {
                 caption: `${desc} #ig_engagements_bot`, // nice caption (optional)
             }).catch(async (e) => {
                 console.log('retrying', e.message);
-
                 if (tries >= 20) return null;
-                await this.sleep(10_000);
+                await this.sleep(1000);
                 return await make()
             })
             return publishResult
