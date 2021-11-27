@@ -6,18 +6,18 @@ export const langs = {
     // it: 'Italiana 🇮🇹',
     // fr: 'Français 🇫🇷',
     // de: 'Deutsch 🇩🇪',    
-    es: 'Española 🇪🇸',
-    fa:'فارسی 🇮🇷'
+    // es: 'Española 🇪🇸',
+    // fa:'فارسی 🇮🇷'
     // tr: 'Türk 🇹🇷',
     // ru: 'русский 🇷🇺'
 };
 
 i18n.configure({
-    directory:path.join(__dirname, '/'),
-    autoReload:true,
-    retryInDefaultLocale:true,
-    locales:Object.keys(langs),
-    defaultLocale:'en'
+    directory: path.join(__dirname, '/'),
+    autoReload: true,
+    retryInDefaultLocale: true,
+    locales: Object.keys(langs),
+    defaultLocale: 'en'
 })
 
 export default i18n;
