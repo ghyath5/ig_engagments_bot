@@ -199,6 +199,14 @@ bot.command('w_s', async (ctx) => {
     client.translate('showthisaccount').send()
   })
 })
+bot.command('share_links', async (ctx) => {
+  if (ctx.from.id.toString() != adminId) return;
+  let allUsers = await ctx.prisma.user.findMany({ where: { active: true } });
+  let ids = allUsers.map((u) => u.id);
+  multipleNotification(ids, (client) => {
+    client.translate('sharebotdesc', { link: client.myLink() }).send()
+  })
+})
 bot.command('post', async (ctx) => {
   if (ctx.from.id.toString() != adminId) return;
   const { username, password } = getCredentials();
@@ -226,6 +234,9 @@ bot.command('profile', async (ctx) => {
 bot.command('language', (ctx) => {
   return ctx.self.translate('selectLanguage').send(ctx.self.keyboard.langagues());
 })
+// bot.on('location', (ctx) => {
+//   ctx.self.setLocation(ctx.message.location);
+// })
 bot.on('text', async (ctx) => {
   let msg = ctx.message.text;
   if (!await ctx.self.redis.get('sendingusername')) {
@@ -265,10 +276,13 @@ bot.on('text', async (ctx) => {
   return ctx.self.translate('usernamewrong').send();
 })
 app.register(telegrafPlugin, { bot, path: WEBHOOK_PATH })
-
 bot.telegram.setWebhook(WEBHOOK_URL + WEBHOOK_PATH).then(() => {
   console.log('Webhook is set on', WEBHOOK_URL)
 })
-//bot.launch()
+if (process.env.DEV) {
+  console.log('Dev start');
+
+  bot.launch()
+}
 
 app.listen(process.env.PORT!, '0.0.0.0')
