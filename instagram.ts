@@ -23,47 +23,6 @@ class IG {
         const ms = Math.floor(Math.random() * (max - min + 1) + min)
         return await new Promise(r => setTimeout(() => r(true), ms))
     }
-    // async request(url: string,tunnelName:string = ''){
-    //     let tunnel = this.getTunnel(tunnelName);
-    //     const source = axios.CancelToken.source();
-    //     const timeout = setTimeout(() => {
-    //       source.cancel('timeout');
-    //     }, 5000);
-    //     this.fetchSession()
-    //     return new Promise((resolve)=>{
-    //         axios(url,{
-    //         withCredentials:true,
-    //         proxy:false,
-    //         cancelToken: source.token,
-    //         timeout:5000,
-    //         ...(tunnel&&{httpsAgent:tunnel,httpAgent:tunnel}),
-    //         headers:{"Cookie":this.session.cookies,"user-agent":this.session.userAgent,"Accept":"*/*"}}).then((res)=>{
-    //             this.statisProxy('work')
-    //             return resolve(res?.data)
-    //         })
-    //         .catch(async(e)=>{
-    //             let msg = ( e as any)?.message
-    //             console.log(`${tunnelName} Error:`,msg);
-    //             if(msg?.includes("400")){
-    //                 this.statisProxy('work')
-    //                 bot.telegram.sendMessage(adminId,`Error occured: ${msg}`)
-    //                 await this.sleep(60000)
-    //                 return resolve(await this.request(url,tunnelName));
-    //             }
-    //             if(msg?.includes("404")){
-    //                 this.statisProxy('work')
-    //                 return resolve(null);
-    //             }
-    //             if(msg?.includes("429")){
-    //                 proxyManager.remove(this.proxy)
-    //             }
-    //             this.statisProxy('dead')
-    //             return resolve(await this.request(url,tunnelName));
-    //         }).finally(()=>{
-    //             clearTimeout(timeout)
-    //         })
-    //     })
-    // }
     async req(url: string) {
         this.fetchSession()
         let rqManager = new RequestManager(this.session);
