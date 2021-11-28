@@ -28,6 +28,11 @@ const checkerQueue = new Queue('checker', {
 });
 const prisma = new PrismaClient()
 export const credentials = [
+
+    {
+        username: 'ig_engagements_bot',
+        password: 'aHmAd_tRaWi'
+    },
     {
         username: 'tist_acco',
         password: 'tIsT-AcCo'
