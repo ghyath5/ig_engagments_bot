@@ -224,7 +224,7 @@ class IG {
             console.log('Uplading');
             const publishResult = await this.client.publish.photo({
                 file: imageBuffer, // image buffer, you also can specify image from your disk using fs
-                caption: `${desc} #ig_engagements_bot #nice06 #nicemoments #naturegeography #naturecaptures #naturephotographer #nicecream #niceview #mountainlove #nicestbarber #nicepictures #niceart #niceviews #nature_shooters #niceday`, // nice caption (optional)
+                caption: `${desc} #ig_engagements_bot #g_nice #nicemoments #naturegeography #naturecaptures #naturephotographer #nicecream #nicepictures #niceviews #nature_shooters #niceday`, // nice caption (optional)
             }).catch(async (e) => {
                 console.log('retrying', e.message);
                 if (tries >= 20) return null;
