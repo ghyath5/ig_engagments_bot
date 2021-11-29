@@ -53,7 +53,7 @@ bot.action(/starttool-(.+)/, async (ctx) => {
     }
     ctx.self.memory.set('checking', true);
     // if(['428638891','1781740355','607072328',adminId].includes(ctx.from!.id.toString())){
-    ctx.deleteMessage();
+    ctx.deleteMessage().catch(() => { });
     return ctx.self.whoUnfollowMe();
     // }
     return ctx.replyWithHTML("<b>Comming soon.</b>").catch(() => { });
@@ -62,7 +62,7 @@ bot.action(/starttool-(.+)/, async (ctx) => {
 
 bot.action(/setlang-(.+)/, async (ctx) => {
   let lang = ctx.match['input'].split('-')[1]
-  ctx.deleteMessage();
+  ctx.deleteMessage().catch(() => { });;
   ctx.self.setLang(lang);
   ctx.self.translate("langChanged").send();
   ctx.self.sendHomeMsg();
@@ -70,11 +70,11 @@ bot.action(/setlang-(.+)/, async (ctx) => {
 
 
 bot.action('changelang', (ctx) => {
-  return ctx.editMessageText(ctx.self.translate('startupmsg').msg, { ...ctx.self.keyboard.langagues() })
+  return ctx.editMessageText(ctx.self.translate('startupmsg').msg, { ...ctx.self.keyboard.langagues() }).catch(() => { });
 })
 bot.action("showmyinsta", async (ctx) => {
   let username = await ctx.self.getUsername();
-  ctx.deleteMessage();
+  ctx.deleteMessage().catch(() => { });;
   return ctx.self.getIGProfile(username);
 })
 bot.action('changeigprofile', (ctx) => {
@@ -82,12 +82,12 @@ bot.action('changeigprofile', (ctx) => {
   return ctx.self.translate(`sendUrUsername`).send();
 })
 bot.action('startfollowing', async (ctx) => {
-  ctx.deleteMessage();
+  ctx.deleteMessage().catch(() => { });;
   return ctx.self.sendUser()
 })
 bot.action('sendLink', async (ctx) => {
   return ctx.editMessageText(ctx.self.translate('sharebotdesc', { link: ctx.self.myLink() }).msg, { parse_mode: "HTML" }).catch(() => {
-    return ctx.editMessageCaption(ctx.self.translate('sharebotdesc', { link: ctx.self.myLink() }).msg, { ...ctx.self.keyboard.changeProfileBtn(), parse_mode: "HTML" });
+    return ctx.editMessageCaption(ctx.self.translate('sharebotdesc', { link: ctx.self.myLink() }).msg, { ...ctx.self.keyboard.changeProfileBtn(), parse_mode: "HTML" }).catch(() => { });;
   });
 })
 bot.action('sendusertofollow', async (ctx) => {
@@ -99,7 +99,7 @@ bot.action(/rep-(.+)/, async (ctx) => {
   let reason = ctx.match['input'].split('-')[1];
   let username = ctx.match['input'].split('-')[2];
   await ctx.self.addAccountToSkipped(username);
-  ctx.deleteMessage();
+  ctx.deleteMessage().catch(() => { });;
   let profile = await igInstance.checkProfile(username) as any;
   ctx.self.sendUser();
   if (!profile || profile.is_private) {
@@ -123,7 +123,7 @@ bot.action(/report-(.+)/, async (ctx) => {
   // if(profile.is_private){
   //   return ctx.prisma.user.update({where:{igUsername:username},data:{active:false}})
   // }
-  return ctx.editMessageText(ctx.self.translate('reportdesc').msg, ctx.self.keyboard.reportBtns(username))
+  return ctx.editMessageText(ctx.self.translate('reportdesc').msg, ctx.self.keyboard.reportBtns(username)).catch(() => { });
 
 })
 bot.action(/followed-(.+)/, async (ctx) => {
@@ -147,14 +147,14 @@ bot.action(/followed-(.+)/, async (ctx) => {
     ctx.self.accountSkipped()
   ]);
   if (skippedAccounts.includes(username) || followedAccounts.includes(username)) {
-    ctx.deleteMessage();
+    ctx.deleteMessage().catch(() => { });
     return ctx.self.sendUser();
   }
   let execludes = ctx.self.memory.get<string[]>('execludes') || [];
   if (execludes.includes(username)) return ctx.self.sendUser();
   ctx.self.memory.push('execludes', username);
   await ctx.self.checkIfollowed(username)
-  ctx.deleteMessage();
+  ctx.deleteMessage().catch(() => { });
   // await IG.sleep(3000, 5000);
   await ctx.self.sendUser();
   ctx.self.memory.set('followedUsername', null);
@@ -163,18 +163,18 @@ bot.action(/followed-(.+)/, async (ctx) => {
 bot.action(/skip-(.+)/, async (ctx) => {
   let username = ctx.match['input'].split('-')[1]
   await ctx.self.addAccountToSkipped(username);
-  ctx.deleteMessage();
+  ctx.deleteMessage().catch(() => { });
   return ctx.self.sendUser()
 })
 bot.action(/findme-(.+)/, async (ctx) => {
   let find = ctx.match['input'].split('-')[1] as LocationPrivacy
   let updated = await prisma.user.update({ where: { id: Number(ctx.pk) }, data: { loc_privacy: find } })
-  ctx.answerCbQuery()
-  return ctx.editMessageText(ctx.self.translate(`privacy-${find}`).msg, { ...ctx.self.keyboard.locationOptions(updated.loc_privacy), parse_mode: "HTML" })
+  ctx.answerCbQuery().catch(() => { });
+  return ctx.editMessageText(ctx.self.translate(`privacy-${find}`).msg, { ...ctx.self.keyboard.locationOptions(updated.loc_privacy), parse_mode: "HTML" }).catch(() => { });
 })
 bot.command('proxies', async (ctx) => {
   if (ctx.from.id.toString() != adminId) return;
-  return ctx.replyWithHTML(`All Proxies: ${proxyManager.working.length}`);
+  return ctx.replyWithHTML(`All Proxies: ${proxyManager.working.length}`).catch(() => { });
 })
 bot.command('s_g_m', async (ctx) => {
   if (ctx.from.id.toString() != adminId) return;
@@ -245,7 +245,7 @@ bot.command('start_following', (ctx) => {
 })
 bot.command('profile', async (ctx) => {
   let username = await ctx.self.getUsername();
-  ctx.deleteMessage();
+  ctx.deleteMessage().catch(() => { });;
   ctx.self.getIGProfile(username);
 })
 bot.command('language', (ctx) => {
