@@ -36,10 +36,6 @@ export const credentials = [
     {
         username: process.env.IG_USERNAME!,
         password: process.env.IG_PASSWORD!,
-    },
-    {
-        username: process.env.IG2_USERNAME!,
-        password: process.env.IG2_PASSWORD!
     }
 ]
 let index = -1;
