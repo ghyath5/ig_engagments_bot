@@ -196,7 +196,7 @@ class IG {
     }
 }
 
-const igInstance = new IG(process.env.IG2_USERNAME!, process.env.IG2_PASSWORD!);
+const igInstance = new IG(process.env.IG_USERNAME!, process.env.IG_PASSWORD!);
 igInstance.login()
 export { igInstance }
 export default IG;
