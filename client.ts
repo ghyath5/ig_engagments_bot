@@ -351,9 +351,32 @@ export class Client {
             this.accountSkipped()
         ])
 
-        let accounts = await this.userRaw.nearByUsers([...execludes, ...accountsSkipped])
-        if (!accounts?.length) return this.translate('notusertofolw').send();
-        let account = accounts[0];
+        // let account = await this.userRaw.nearByUsers([...execludes, ...accountsSkipped])
+        // console.log(account);
+
+        let account = await prisma.account.findFirst({
+            where: {
+                main: true,
+                owner: {
+                    id: { not: this.pk },
+                    gems: { gte: 2 },
+                    active: true
+                },
+                username: { notIn: [...execludes, ...accountsSkipped] },
+                active: true,
+                followings: {
+                    none: {
+                        follower_id: { equals: me.igId }
+                    }
+                },
+            },
+            orderBy: {
+                owner: {
+                    gems: 'desc'
+                }
+            }
+        })
+        if (!account) return this.translate('notusertofolw').send();
         // const user = await igInstance.checkProfile(account.igUsername) as any;
         // if(!user)return;
         bot.telegram.sendMessage(this.pk, `${this.translate('dofollow', { username: account.username }).msg}\n${this.translate('moregemsmorefollowers').msg}`,
