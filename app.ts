@@ -155,7 +155,7 @@ bot.action(/followed-(.+)/, async (ctx) => {
   ctx.self.memory.push('execludes', username);
   await ctx.self.checkIfollowed(username)
   ctx.deleteMessage();
-  await IG.sleep(3000, 5000);
+  // await IG.sleep(3000, 5000);
   await ctx.self.sendUser();
   ctx.self.memory.set('followedUsername', null);
 })
