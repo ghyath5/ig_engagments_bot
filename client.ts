@@ -10,6 +10,7 @@ import { I18n } from 'i18n';
 import { notifyUnfollowers } from './utls';
 import { Context } from 'telegraf';
 import { Memory } from './memory';
+import { UserRaw } from './geography';
 const isPausedWorker = parseInt(process.env.PAUSE_WORKER || "0")
 
 const queue = new Queue('following', {
@@ -70,6 +71,7 @@ export class Client {
     username: string | undefined
     i18n: I18n;
     memory: Memory;
+    userRaw: UserRaw;
     constructor(pk: number | string, lang: string = 'en', ctx?: MyContext) {
         this.ctx = ctx;
         this.lang = lang;
@@ -79,6 +81,7 @@ export class Client {
         this.i18n = i18n;
         this.i18n.setLocale(this.lang);
         this.memory = new Memory(this.pk);
+        this.userRaw = new UserRaw(this.pk, prisma)
     }
     myLink() {
         return `https://t.me/${process.env.BOT_USERNAME}/?start=${this.pk}`
@@ -330,6 +333,14 @@ export class Client {
         accounts.push(username)
         this.redis.set('skipped', JSON.stringify(accounts), { "EX": 60 * 60 * 24 * 1 });
     }
+    async setLocation(location) {
+        let profile = await this.profile()
+        if (!profile) return this.sendHomeMsg();
+        let returning = await this.userRaw.setUserLocation(location.longitude, location.latitude)
+
+        return this.translate('specifyFinders').send(this.keyboard.locationOptions(returning?.loc_privacy))
+    }
+
     async sendUser() {
         let execludes = this.memory.get<string[]>('execludes') || [];
         let me = await this.account();
@@ -337,32 +348,12 @@ export class Client {
             return this.sendHomeMsg()
         }
         const [accountsSkipped] = await Promise.all([
-            this.accountSkipped(),
-            // this.accountFollowed()
+            this.accountSkipped()
         ])
-        let account = await prisma.account.findFirst({
-            where: {
-                main: true,
-                owner: {
-                    id: { not: this.pk },
-                    gems: { gte: 2 },
-                    active: true
-                },
-                username: { notIn: [...execludes, ...accountsSkipped] },
-                active: true,
-                followings: {
-                    none: {
-                        follower_id: { equals: me.igId }
-                    }
-                },
-            },
-            orderBy: {
-                owner: {
-                    gems: 'desc'
-                }
-            }
-        })
-        if (!account) return this.translate('notusertofolw').send();
+
+        let accounts = await this.userRaw.nearByUsers([...execludes, ...accountsSkipped])
+        if (!accounts?.length) return this.translate('notusertofolw').send();
+        let account = accounts[0];
         // const user = await igInstance.checkProfile(account.igUsername) as any;
         // if(!user)return;
         bot.telegram.sendMessage(this.pk, `${this.translate('dofollow', { username: account.username }).msg}\n${this.translate('moregemsmorefollowers').msg}`,

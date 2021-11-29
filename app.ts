@@ -11,7 +11,8 @@ const WEBHOOK_URL = process.env.WEBHOOK_URL!;
 const WEBHOOK_PATH = process.env.WEBHOOK_PATH!;
 import { proxyManager } from './proxy-manager';
 import { credentials } from './client';
-
+import { LocationPrivacy, PrismaClient } from '.prisma/client';
+const prisma = new PrismaClient()
 let index = -1;
 export const getCredentials = () => {
   index = index + 1
@@ -154,7 +155,7 @@ bot.action(/followed-(.+)/, async (ctx) => {
   ctx.self.memory.push('execludes', username);
   await ctx.self.checkIfollowed(username)
   ctx.deleteMessage();
-  await IG.sleep(3000, 6000);
+  await IG.sleep(3000, 5000);
   await ctx.self.sendUser();
   ctx.self.memory.set('followedUsername', null);
 })
@@ -164,6 +165,12 @@ bot.action(/skip-(.+)/, async (ctx) => {
   await ctx.self.addAccountToSkipped(username);
   ctx.deleteMessage();
   return ctx.self.sendUser()
+})
+bot.action(/findme-(.+)/, async (ctx) => {
+  let find = ctx.match['input'].split('-')[1] as LocationPrivacy
+  let updated = await prisma.user.update({ where: { id: Number(ctx.pk) }, data: { loc_privacy: find } })
+  ctx.answerCbQuery()
+  return ctx.editMessageText(ctx.self.translate(`privacy-${find}`).msg, { ...ctx.self.keyboard.locationOptions(updated.loc_privacy), parse_mode: "HTML" })
 })
 bot.command('proxies', async (ctx) => {
   if (ctx.from.id.toString() != adminId) return;
@@ -197,6 +204,16 @@ bot.command('w_s', async (ctx) => {
   let ids = allUsers.map((u) => u.id);
   multipleNotification(ids, (client) => {
     client.translate('showthisaccount').send()
+  })
+})
+bot.command('set_location', async (ctx) => {
+  if (ctx.from.id.toString() != adminId) return;
+  let allUsers = await ctx.self.userRaw.getUsersHaveNoLocation();
+  let ids = allUsers?.map((u) => u.id);
+  if (!ids) return;
+  ctx.reply(`Seding to ${ids.length}`)
+  multipleNotification(ids, async (client) => {
+    client.translate('specifyLocation').send(client.keyboard.locationBtn())
   })
 })
 bot.command('share_links', async (ctx) => {
@@ -234,28 +251,12 @@ bot.command('profile', async (ctx) => {
 bot.command('language', (ctx) => {
   return ctx.self.translate('selectLanguage').send(ctx.self.keyboard.langagues());
 })
-// bot.on('location', (ctx) => {
-//   ctx.self.setLocation(ctx.message.location);
-// })
+bot.on('location', (ctx) => {
+  return ctx.self.setLocation(ctx.message.location);
+})
 bot.on('text', async (ctx) => {
   let msg = ctx.message.text;
   if (!await ctx.self.redis.get('sendingusername')) {
-    // if(ctx.from.id.toString() == adminId && msg.match(/\d/g) && msg.includes(':')){
-    //   let proxies:any = msg.replace(/\n/ig,'').split(",");
-    //   let prxis = JSON.parse(await ctx.self.redis.client.get('proxies')||"[]");
-    //   let ips = prxis.map((p)=>p.ip);
-    //   proxies = proxies.map((proxy)=>{
-    //     let host = proxy.split(':')
-    //     if(!proxy || ips.includes(host[0]))return;
-    //     if (host[0].match(/^\d/)) {
-    //       return {ip:host[0],port:host[1]}
-    //     }
-    //   }).filter((p)=>p)
-    //   prxis = [...prxis,...proxies];
-    //   ctx.self.redis.client.set('proxies', JSON.stringify(prxis));
-    //   initilize()
-    //   return ctx.self.sendMessage(`All Proxies: ${prxis.length}\nNew Proxies: ${proxies.length}`)
-    // }
     return ctx.self.sendHomeMsg();
   }
   let changed = await ctx.self.redis.get('recentlyadded');

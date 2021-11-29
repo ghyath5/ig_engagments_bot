@@ -57,6 +57,10 @@
 	"waitplease": "Wait please ...",
 	"handlingRequest": "Working on it ...",
 	"locationBtn": "Send my location",
-	"specifyFinders": "Specify who can find your account to follow you.\n<b>If you choose nearby only, you account will appear for nearby users only.</b>",
-	"specifyLocation": "For better experiance, please send your location to find nearby users to follow\nYou can specify who can find you here, after you specify your location."
+	"specifyFinders": "<i>Your location has been updated successfully.</i>\nSpecify who can find your account to follow you.\n<b>If you choose nearby only, you account will appear for nearby users only.</b>",
+	"specifyLocation": "ًWant nearby followers? just press the below button and send your current location.\nYou can specify who can find you here, after you specify your location.",
+	"nearbyonly": "Nearby only",
+	"allusers": "All Users",
+	"privacy-all": "Your account will be visible for all users to follow.",
+	"privacy-nearby": "You have choosen <b>Nearby Only</b>, your account will only be visible to nearby users."
 }

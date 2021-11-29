@@ -10,17 +10,20 @@ datasource db {
   url      = env("PG_DATABASE_URL")
 }
 
+enum LocationPrivacy {
+  all
+  nearby
+}
+
 model User {
-  id        Int       @id
-  // igUsername String    @unique
-  // igId       String    @unique
-  gems      Int       @default(2)
-  active    Boolean   @default(true)
-  accounts  Account[] @relation("ownership")
-  // follows    Follow[]  @relation("follows")
-  // followings Follow[]  @relation("followings")
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @default(now()) @updatedAt
+  id          Int                                  @id
+  gems        Int                                  @default(5)
+  active      Boolean                              @default(true)
+  accounts    Account[]                            @relation("ownership")
+  loc_privacy LocationPrivacy                      @default(all)
+  location    Unsupported("extensions.geography")?
+  createdAt   DateTime                             @default(now())
+  updatedAt   DateTime                             @default(now()) @updatedAt
 }
 
 model Account {
@@ -39,9 +42,32 @@ model Follow {
   follower_id String
   followed_id String
 
-  follower Account @relation("follows", fields: [follower_id], references: [igId], onUpdate: Cascade, onDelete:Cascade)
-  followed Account @relation("followings", fields: [followed_id], references: [igId], onUpdate: Cascade, onDelete:Cascade)
+  follower Account @relation("follows", fields: [follower_id], references: [igId], onUpdate: Cascade, onDelete: Cascade)
+  followed Account @relation("followings", fields: [followed_id], references: [igId], onUpdate: Cascade, onDelete: Cascade)
 
   createdAt DateTime @default(now())
   @@id([followed_id, follower_id])
 }
+
+// model UserAccount {
+//   id              Int             @id
+//   igId            String          @unique
+//   username        String          @unique
+//   gems            Int
+//   location        String
+//   loc_privacy     LocationPrivacy
+//   followers_name  String[]
+//   followings_name String[]
+//   createdAt       DateTime
+//   updatedAt       DateTime
+// }
+
+// model spatial_ref_sys {
+//   srid      Int     @id
+//   auth_name String? @db.VarChar(256)
+//   auth_srid Int?
+//   srtext    String? @db.VarChar(2048)
+//   proj4text String? @db.VarChar(2048)
+
+//   @@ignore
+// }
