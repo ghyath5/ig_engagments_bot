@@ -347,34 +347,31 @@ export class Client {
             this.accountSkipped()
         ])
 
-        // let account = await this.userRaw.nearByUsers([...execludes, ...accountsSkipped])
-        // console.log(account);
-
-        let account = await prisma.account.findFirst({
-            where: {
-                main: true,
-                owner: {
-                    id: { not: this.pk },
-                    gems: { gte: 2 },
-                    active: true
-                },
-                username: { notIn: [...execludes, ...accountsSkipped] },
-                active: true,
-                followings: {
-                    none: {
-                        follower_id: { equals: me.igId }
-                    }
-                },
-            },
-            orderBy: {
-                owner: {
-                    gems: 'desc'
-                }
-            }
-        })
-        if (!account) return this.translate('notusertofolw').send();
-        // const user = await igInstance.checkProfile(account.igUsername) as any;
-        // if(!user)return;
+        let accounts = await this.userRaw.nearByUsers([...execludes, ...accountsSkipped])
+        let account = accounts[0];
+        // let account = await prisma.account.findFirst({
+        //     where: {
+        //         main: true,
+        //         owner: {
+        //             id: { not: this.pk },
+        //             gems: { gte: 2 },
+        //             active: true
+        //         },
+        //         username: { notIn: [...execludes, ...accountsSkipped] },
+        //         active: true,
+        //         followings: {
+        //             none: {
+        //                 follower_id: { equals: me.igId }
+        //             }
+        //         },
+        //     },
+        //     orderBy: {
+        //         owner: {
+        //             gems: 'desc'
+        //         }
+        //     }
+        // })
+        if (!accounts?.length) return this.translate('notusertofolw').send();
         bot.telegram.sendMessage(this.pk, `${this.translate('dofollow', { username: account.username }).msg}\n${this.translate('moregemsmorefollowers').msg}`,
             {
                 ...this.keyboard.panel(account.username),

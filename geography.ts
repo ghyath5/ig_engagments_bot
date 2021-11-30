@@ -4,6 +4,8 @@ interface GeoUser {
     dist: Number
     username: string
     gems: Number
+    long: Number
+    lat: Number
 }
 export class UserRaw {
     pk: number | string
@@ -16,8 +18,6 @@ export class UserRaw {
     async setUserLocation(long, lat) {
         await this.prisma.$executeRaw<User>`UPDATE "User" SET location = extensions.ST_SetSRID(extensions.ST_MakePoint(${long}::float,${lat}::float),4326) WHERE id = ${this.pk};`
         let user = await this.prisma.user.findUnique({ where: { id: Number(this.pk) } })
-        console.log(user?.loc_privacy);
-
         return user;
     }
     async getUsersHaveNoLocation() {
