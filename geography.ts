@@ -28,6 +28,14 @@ export class UserRaw {
             console.log(e);
         }
     }
+    async hasLocation() {
+        try {
+            const result: any[] = await this.prisma.$queryRaw`SELECT FROM "User" WHERE location is null AND id = ${this.pk}`
+            return !Boolean(result?.length);
+        } catch (e) {
+            return false;
+        }
+    }
 
     async nearByUsers(skippedUsernames: string[]): Promise<GeoUser[]> {
         let skipped = skippedUsernames.join(',') ? skippedUsernames.join(',') : ''

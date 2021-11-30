@@ -1,4 +1,4 @@
-import { adminId, bot, IG, MyContext, } from './global';
+import { adminId, bot, IG, MyContext, randomItem, } from './global';
 import { Redis } from './redis';
 import { ExtraReplyMessage } from 'telegraf/typings/telegram-types';
 import { Account, Follow, PrismaClient, User } from '.prisma/client';
@@ -45,6 +45,9 @@ const getCredentials = () => {
     return credentials[index]
 }
 export class Client {
+    async hasLocation() {
+        return await this.userRaw.hasLocation()
+    }
     async enterByLink(id) {
         if (id == this.pk) return;
         let me = await prisma.user.findUnique({ where: { id: this.pk } });
@@ -432,10 +435,14 @@ if (!isPausedWorker) {
             let oClient = await follower.saveFollowAction(otherUser.igId)
             let otherClient = new Client(otherUser.owner.id);
             let userLang = await otherClient.getLang();
-            bot.telegram.sendMessage(otherUser.owner.id, `<b>${followerUsername}</b> ${otherClient.translate('followedyou', { gems: oClient.owner.gems }, userLang).msg}`, {
+            await bot.telegram.sendMessage(otherUser.owner.id, `<b>${followerUsername}</b> ${otherClient.translate('followedyou', { gems: oClient.owner.gems }, userLang).msg}`, {
                 ...otherClient.keyboard.inlineKeyboard([{ text: otherClient.translate('startfollowbtn').msg, callback_data: "sendusertofollow" }]),
                 parse_mode: "HTML"
             }).catch((e) => { });
+            let location = await otherClient.hasLocation()
+            if (!location && randomItem([0, 1, 0])) {
+                otherClient.translate('specifyLocation').send(otherClient.keyboard.locationBtn())
+            }
         }
 
         follower.memory.shift('execludes', usernameToFollow);
