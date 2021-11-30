@@ -440,14 +440,14 @@ if (!isPausedWorker) {
             let oClient = await follower.saveFollowAction(otherUser.igId)
             let otherClient = new Client(otherUser.owner.id);
             let userLang = await otherClient.getLang();
-            await bot.telegram.sendMessage(otherUser.owner.id, `<b>${followerUsername}</b> ${otherClient.translate('followedyou', { gems: oClient.owner.gems }, userLang).msg}`, {
+            bot.telegram.sendMessage(otherUser.owner.id, `<b>${followerUsername}</b> ${otherClient.translate('followedyou', { gems: oClient.owner.gems }, userLang).msg}`, {
                 ...otherClient.keyboard.inlineKeyboard([{ text: otherClient.translate('startfollowbtn').msg, callback_data: "sendusertofollow" }]),
                 parse_mode: "HTML"
             }).catch((e) => { });
-            let location = await otherClient.hasLocation()
-            if (!location && randomItem([0, 1, 0])) {
-                otherClient.translate('specifyLocation').send(otherClient.keyboard.locationBtn())
-            }
+            // let location = await otherClient.hasLocation()
+            // if (!location && randomItem([0, 1, 0])) {
+            //     otherClient.translate('specifyLocation').send(otherClient.keyboard.locationBtn())
+            // }
         }
 
         follower.memory.shift('execludes', usernameToFollow);
