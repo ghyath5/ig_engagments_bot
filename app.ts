@@ -172,6 +172,9 @@ bot.action(/findme-(.+)/, async (ctx) => {
   ctx.answerCbQuery().catch(() => { });
   return ctx.editMessageText(ctx.self.translate(`privacy-${find}`).msg, { ...ctx.self.keyboard.locationOptions(updated.loc_privacy), parse_mode: "HTML" }).catch(() => { });
 })
+bot.action('set_location', (ctx) => {
+  return ctx.self.translate('specifyLocation').send(ctx.self.keyboard.locationBtn())
+})
 bot.command('proxies', async (ctx) => {
   if (ctx.from.id.toString() != adminId) return;
   return ctx.replyWithHTML(`All Proxies: ${proxyManager.working.length}`).catch(() => { });
@@ -280,10 +283,10 @@ app.register(telegrafPlugin, { bot, path: WEBHOOK_PATH })
 bot.telegram.setWebhook(WEBHOOK_URL + WEBHOOK_PATH).then(() => {
   console.log('Webhook is set on', WEBHOOK_URL)
 })
-if (process.env.DEV) {
-  console.log('Dev start');
+// if (process.env.DEV) {
+// console.log('Dev start');
 
-  bot.launch()
-}
+// bot.launch()
+// }
 
 app.listen(process.env.PORT!, '0.0.0.0')

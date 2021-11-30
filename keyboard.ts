@@ -44,7 +44,7 @@ export class Keyboard {
             [{ text: this.client.translate('changelang').msg, callback_data: `changelang` }],
             [{ text: this.client.translate('tools').msg, callback_data: `showtools` }],
             [{ text: this.client.translate('howwork').msg, callback_data: `howwork` }],
-            [{ text: this.client.translate('sharebot').msg, callback_data: `sendLink` }]
+            [{ text: this.client.translate('locationBtn').msg, callback_data: `set_location` }]
         ];
         return this.inlineKeyboard(buttons)
     }
