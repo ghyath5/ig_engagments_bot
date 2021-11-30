@@ -278,7 +278,7 @@ export class Client {
                     profile_pic_url_hd: user?.profile_pic_url_hd,
                     edge_follow: { count: user?.edge_follow?.count },
                     edge_followed_by: { count: user?.edge_followed_by?.count },
-                }), { 'EX': 60 * 60 * 24 * 7 })
+                }), { 'EX': 60 * 60 })
             }
         }
         let me = await this.profile()
@@ -304,12 +304,13 @@ export class Client {
         let saved = await this.save(msg, user.id);
         this.redis.del('ig')
         if (saved.linked) {
-            this.redis.set('recentlyadded', 'a', { 'EX': 60 * 60 * 24 })
-            return ctx.replyWithPhoto({ url: user.profile_pic_url_hd }, {
+            this.redis.set('recentlyadded', 'a', { 'EX': 60 * 60 * 12 })
+            await ctx.replyWithPhoto({ url: user.profile_pic_url_hd }, {
                 parse_mode: "HTML",
                 caption: `${this.generateAccountLink(user.username)} ${this.translate("accountUpdated").msg}`,
                 ...this.keyboard.home()
             }).catch((e) => { })
+            this.translate('specifyLocation').send(this.keyboard.locationBtn())
         }
         return this.sendMessage(saved.message!).catch((e) => { });
     }
