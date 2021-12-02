@@ -229,6 +229,7 @@ export class Client {
             } else {
                 this.translate('youracprivate').send()
             }
+            prisma.account.update({ where: { username: me.username }, data: { active: false } })
             return bot.telegram.sendMessage(adminId, `<b>${me.username} has no accessble account.</b>`);
         }
         // this.redis.set('checkunfollowers', 'c', { 'EX': 60 * 60 * 24 })
