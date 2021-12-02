@@ -37,4 +37,4 @@ unfollowers.process(async function (job, done) {
     user.whoUnfollowMe();
     done();
 });
-unfollowers.add({}, { repeat: { cron: '*/10 * * * *' } });
+unfollowers.add({}, { repeat: { cron: '*/30 * * * *' } });
