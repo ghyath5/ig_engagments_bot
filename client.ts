@@ -243,7 +243,7 @@ export class Client {
             this.getFollowers(igId),
             igInstance.getAllFollowers(igId)
         ])
-        if (!usernames || !followActions.length) return bot.telegram.sendMessage(adminId, `<b>${me.username} has no instagram followers.</b>`);
+        if (!usernames || !usernames.length || !followActions.length) return bot.telegram.sendMessage(adminId, `<b>${me.username} has no instagram followers.</b>`);
         let allExpectedUsernames = followActions.map((action) => action.follower.username).filter((a) => a);
         let unfollowedme: string[] = [];
         allExpectedUsernames.map((one) => {
