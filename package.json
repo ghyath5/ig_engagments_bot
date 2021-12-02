@@ -10,6 +10,7 @@
     "generate": "prisma generate"
   },
   "devDependencies": {
+    "@types/bull": "^3.15.6",
     "@types/i18n": "^0.13.1",
     "@types/node": "^16.11.1",
     "@types/redis": "2.8.31",
@@ -24,12 +25,13 @@
     "@prisma/client": "^3.5.0",
     "axios": "^0.23.0",
     "bee-queue": "^1.4.0",
+    "bull": "^4.1.1",
     "dotenv": "^10.0.0",
     "fastify": "^3.22.1",
     "fastify-telegraf": "^1.0.2",
     "i18n": "^0.13.3",
-    "instagram_mqtt": "^1.2.2",
     "instagram-private-api": "https://github.com/ghyath5/instagram-private-api",
+    "instagram_mqtt": "^1.2.2",
     "redis": "4.0.0-rc.3",
     "telegraf": "^4.4.2",
     "ts-node": "^10.2.0",
