@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 import { adminId, bot, IG } from './global';
 import './middlewares/onStart'
+import './schedular'
 import fastify from 'fastify';
 import telegrafPlugin from 'fastify-telegraf'
 import { igInstance, } from './instagram';
@@ -51,10 +52,10 @@ bot.action(/starttool-(.+)/, async (ctx) => {
     if (ctx.self.memory.get('checking')) {
       return;
     }
-    ctx.self.memory.set('checking', true);
+    // ctx.self.memory.set('checking', true);
     // if(['428638891','1781740355','607072328',adminId].includes(ctx.from!.id.toString())){
-    ctx.deleteMessage().catch(() => { });
-    return ctx.self.whoUnfollowMe();
+    // ctx.deleteMessage().catch(() => { });
+    // return ctx.self.whoUnfollowMe();
     // }
     return ctx.replyWithHTML("<b>Comming soon.</b>").catch(() => { });
   }
