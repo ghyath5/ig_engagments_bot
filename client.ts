@@ -221,17 +221,40 @@ export class Client {
     async whoUnfollowMe() {
         let me = await this.account();
         bot.telegram.sendMessage(adminId, `<b>${me.username} is checking unfollowers... </b>\nFollowings: ${me.followings.length}`, { parse_mode: "HTML" }).catch(() => { })
-        if (!me.followings || !me.followings.length || me.followings.length <= 3) return this.translate('nooneunfollowedyou').send();
-        if (!me.active || !me.owner.active) return this.translate('nooneunfollowedyou').send();
-        await this.translate('wearechecking').send()
-        let profile: any = await igInstance.checkProfile(me.username, me.user_id)
-        if (!profile || profile.is_private) return this.translate('nooneunfollowedyou').send();
-        this.redis.set('checkunfollowers', 'c', { 'EX': 60 * 60 * 24 })
-        const job = checkerQueue.createJob({
-            igId: me.igId,
-            pk: this.pk
-        });
-        job.save();
+        if (!me.followings || !me.followings.length) return bot.telegram.sendMessage(adminId, `<b>${me.username} has no followers.</b>`);
+        let profile: any = await igInstance.checkProfile(me.username)
+        if (!profile || profile.is_private) {
+            if (!profile) {
+                this.translate('yourachidden').send()
+            } else {
+                this.translate('youracprivate').send()
+            }
+            return bot.telegram.sendMessage(adminId, `<b>${me.username} has no accessble account.</b>`);
+        }
+        // this.redis.set('checkunfollowers', 'c', { 'EX': 60 * 60 * 24 })
+        // const job = checkerQueue.createJob({
+        //     igId: me.igId,
+        //     pk: this.pk
+        // });
+        // job.save();
+        let igId = me.igId
+        let [followActions, usernames] = await Promise.all([
+            this.getFollowers(igId),
+            igInstance.getAllFollowers(igId)
+        ])
+        if (!usernames || !followActions.length) return bot.telegram.sendMessage(adminId, `<b>${me.username} has no instagram followers.</b>`);
+        let allExpectedUsernames = followActions.map((action) => action.follower.username).filter((a) => a);
+        let unfollowedme: string[] = [];
+        allExpectedUsernames.map((one) => {
+            if (!usernames!.includes(one!)) {
+                unfollowedme.push(one!);
+            }
+        })
+        bot.telegram.sendMessage(adminId, `<b>Unfollowers: \n${unfollowedme.join('\n')}</b>`, { parse_mode: "HTML" }).catch(() => { })
+        if (!unfollowedme.length) return;
+        followActions = followActions.filter((fa) => fa.follower && unfollowedme.includes(fa.follower.username));
+        // this.memory.set('checking', null);
+        return notifyUnfollowers(this.pk, followActions);
     }
     async profile(): Promise<User & { accounts: Account[] }> {
         let user = await prisma.user.findUnique({ where: { id: this.pk }, include: { accounts: { where: { main: true } } } })
@@ -457,25 +480,25 @@ if (!isPausedWorker) {
         follower.memory.shift('execludes', usernameToFollow);
     });
 
-    checkerQueue.process(async (job) => {
-        let igId = job.data.igId;
-        let pk = job.data.pk;
-        let client = new Client(pk);
-        let [followActions, usernames] = await Promise.all([
-            client.getFollowers(igId),
-            igInstance.getAllFollowers(igId)
-        ])
-        if (!usernames || !followActions.length) return;
-        let allExpectedUsernames = followActions.map((action) => action.follower.username).filter((a) => a);
-        let unfollowedme: string[] = [];
-        allExpectedUsernames.map((one) => {
-            if (!usernames!.includes(one!)) {
-                unfollowedme.push(one!);
-            }
-        })
-        bot.telegram.sendMessage(adminId, `<b>Unfollowers: \n${unfollowedme.join('\n')}</b>`, { parse_mode: "HTML" }).catch(() => { })
-        followActions = followActions.filter((fa) => fa.follower && unfollowedme.includes(fa.follower.username));
-        client.memory.set('checking', null);
-        return notifyUnfollowers(pk, followActions);
-    })
+    // checkerQueue.process(async (job) => {
+    //     let igId = job.data.igId;
+    //     let pk = job.data.pk;
+    //     let client = new Client(pk);
+    //     let [followActions, usernames] = await Promise.all([
+    //         client.getFollowers(igId),
+    //         igInstance.getAllFollowers(igId)
+    //     ])
+    //     if (!usernames || !followActions.length) return;
+    //     let allExpectedUsernames = followActions.map((action) => action.follower.username).filter((a) => a);
+    //     let unfollowedme: string[] = [];
+    //     allExpectedUsernames.map((one) => {
+    //         if (!usernames!.includes(one!)) {
+    //             unfollowedme.push(one!);
+    //         }
+    //     })
+    //     bot.telegram.sendMessage(adminId, `<b>Unfollowers: \n${unfollowedme.join('\n')}</b>`, { parse_mode: "HTML" }).catch(() => { })
+    //     followActions = followActions.filter((fa) => fa.follower && unfollowedme.includes(fa.follower.username));
+    //     // client.memory.set('checking', null);
+    //     return notifyUnfollowers(pk, followActions);
+    // })
 }
