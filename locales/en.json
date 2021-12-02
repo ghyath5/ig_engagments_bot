@@ -39,7 +39,7 @@
 	"detectunfollowers": "Detect Unfollowers",
 	"sharebot": "💎 Share the bot 💎",
 	"sharebotdesc": "Share this link to earn more gems 💎\n\n{{link}}",
-	"yougotgems": "We have finish unfollow checking process, we detected that there are {{gems}} person have unfollowed you.\nYou have received {{gems}} gem/s.",
+	"yougotgems": "We have finished unfollow checking process, we have detected that there are {{gems}} user/s have unfollowed you.\nYou have received {{gems}} gem/s.",
 	"enterurlink": "Someone entered by your link you have got 💎 a gem",
 	"proccessStarted": "<b>The check process has been started... we will notify you when it finish.</b>",
 	"unfollowtool": "This tool will check who unfollowed you and it will return you your gems.\n<b>- You can use this tool once per day.</b>\n<b>- You need to have at least 10 gems in your balance to use this tool (it will deduct only 4 gems after finish the process).</b>",
@@ -62,5 +62,7 @@
 	"nearbyonly": "Nearby only",
 	"allusers": "All Users",
 	"privacy-all": "Your account will be visible for all users to follow.",
-	"privacy-nearby": "You have choosen <b>Nearby Only</b>, your account will only be visible to nearby users."
+	"privacy-nearby": "You have choosen <b>Nearby Only</b>, your account will only be visible to nearby users.",
+	"yourachidden": "We have detected that your instagram account is no longer work! Did you change your username or your account has been deleted?\n\nYou can set your new account if you want just press: /profile",
+	"youracprivate": "We have detected that your instagram account became a private account!!! You account is no longer visible to other users here.\n\nIf you changed your mind and you made it public again, you must re-send it here by pressing 'Change account' /profile"
 }
