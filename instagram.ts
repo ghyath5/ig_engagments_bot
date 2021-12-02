@@ -89,7 +89,7 @@ class IG {
         const source = axios.CancelToken.source();
         const timeout = setTimeout(() => {
             source.cancel('timeout');
-        }, 15000);
+        }, 8000);
         let headers = this.client.request.getDefaultHeaders()
         this.fetchSession()
         return await new Promise((resolve) => {
@@ -101,7 +101,7 @@ class IG {
                 },
                 cancelToken: source.token,
                 withCredentials: true,
-                timeout: 20000,
+                timeout: 8000,
                 proxy: false,
                 ...(tunnel && { httpsAgent: tunnel, httpAgent: tunnel }),
                 headers: {
