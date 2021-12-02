@@ -42,7 +42,7 @@ export class Keyboard {
             [{ text: this.client.translate('startfollowbtn').msg, callback_data: `startfollowing` }],
             [{ text: this.client.translate('myinstabtn').msg, callback_data: `showmyinsta` }],
             [{ text: this.client.translate('changelang').msg, callback_data: `changelang` }],
-            [{ text: this.client.translate('tools').msg, callback_data: `showtools` }],
+            // [{ text: this.client.translate('tools').msg, callback_data: `showtools` }],
             [{ text: this.client.translate('howwork').msg, callback_data: `howwork` }],
             [{ text: this.client.translate('locationBtn').msg, callback_data: `set_location` }]
         ];
