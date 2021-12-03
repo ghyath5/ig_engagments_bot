@@ -83,7 +83,8 @@ bot.action('changeigprofile', (ctx) => {
   return ctx.self.translate(`sendUrUsername`).send();
 })
 bot.action('startfollowing', async (ctx) => {
-  ctx.deleteMessage().catch(() => { });;
+  ctx.deleteMessage().catch(() => { });
+  ctx.answerCbQuery().catch(() => { });
   return ctx.self.sendUser()
 })
 bot.action('sendLink', async (ctx) => {
