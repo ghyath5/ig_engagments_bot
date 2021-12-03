@@ -11,7 +11,7 @@ const app = fastify({ logger: false, });
 const WEBHOOK_URL = process.env.WEBHOOK_URL!;
 const WEBHOOK_PATH = process.env.WEBHOOK_PATH!;
 import { proxyManager } from './proxy-manager';
-import { credentials } from './client';
+import { Client, credentials } from './client';
 import { LocationPrivacy, PrismaClient } from '.prisma/client';
 const prisma = new PrismaClient()
 let index = -1;
@@ -101,12 +101,19 @@ bot.action(/rep-(.+)/, async (ctx) => {
   let reason = ctx.match['input'].split('-')[1];
   let username = ctx.match['input'].split('-')[2];
   await ctx.self.addAccountToSkipped(username);
-  ctx.deleteMessage().catch(() => { });;
+  ctx.deleteMessage().catch(() => { });
   let profile = await igInstance.checkProfile(username) as any;
   ctx.self.sendUser();
   if (!profile || profile.is_private) {
     bot.telegram.sendMessage(adminId, `Report about <a href="https://instagram.com/${username}">@${username}</a> ${reason}`, { parse_mode: "HTML" });
-    return ctx.prisma.account.update({ where: { username: username }, data: { active: false } })
+    let user = await ctx.prisma.account.update({ where: { username }, data: { active: false }, select: { owner: true } })
+    if (!user?.owner) return
+    let cl = new Client(user.owner.id);
+    await cl.getLang()
+    if (!profile) {
+      return cl.translate('yourachidden').send()
+    }
+    return cl.translate('youracprivate').send()
   }
   bot.telegram.sendMessage(adminId, `Report about <a href="https://instagram.com/${username}">@${username}</a> ${reason} but not deleted!`, { parse_mode: "HTML" });
   let reports = parseInt(await ctx.self.redis.get('fake-reports') || "0")
