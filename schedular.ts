@@ -34,6 +34,7 @@ unfollowers.process(async function (job, done) {
     client.set(`last_unfollow_check`, date)
     if (!result) return;
     const user = new Client(result?.user_id)
+    await user.getLang()
     user.whoUnfollowMe();
     done();
 });
