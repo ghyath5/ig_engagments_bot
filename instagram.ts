@@ -189,8 +189,8 @@ class IG {
                 file: image, // image buffer, you also can specify image from your disk using fs
                 caption: desc
             }).catch(async (e) => {
-                if (e.message.includes('Bad Request')) return null;
                 console.log('retrying', e.message);
+                if (e.message.includes('Bad Request')) return null;
                 if (tries >= 20) return null;
                 await this.sleep(1000);
                 return await make()
