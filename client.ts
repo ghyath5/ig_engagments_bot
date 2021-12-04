@@ -4,7 +4,6 @@ import { ExtraReplyMessage } from 'telegraf/typings/telegram-types';
 import { Account, Follow, PrismaClient, User } from '.prisma/client';
 import { Keyboard } from './keyboard';
 import Queue from 'bee-queue';
-import { igInstance } from './instagram';
 import i18n from "./locales";
 import { I18n } from 'i18n';
 import { notifyUnfollowers } from './utls';
@@ -28,30 +27,6 @@ const checkerQueue = new Queue('checker', {
     isWorker: !isPausedWorker
 });
 const prisma = new PrismaClient()
-export const credentials = [
-    {
-        username: 'ig_engagements_bot',
-        password: 'aHmAd_tRaWi'
-    },
-    {
-        username: 'tist_acco',
-        password: 'tIsT-AcCo'
-    },
-    {
-        username: process.env.IG_USERNAME!,
-        password: process.env.IG_PASSWORD!,
-    },
-    {
-        username: process.env.IG2_USERNAME!,
-        password: process.env.IG2_PASSWORD!,
-    }
-]
-let index = -1;
-const getCredentials = () => {
-    index = index + 1
-    if (index >= credentials.length) index = 0;
-    return credentials[index]
-}
 export class Client {
     async hasLocation() {
         return await this.userRaw.hasLocation()
@@ -222,6 +197,7 @@ export class Client {
         let me = await this.account();
         bot.telegram.sendMessage(adminId, `<b>${me.username} is checking unfollowers... </b>\nFollowings: ${me.followings.length}`, { parse_mode: "HTML" }).catch(() => { })
         if (!me.followings || !me.followings.length) return bot.telegram.sendMessage(adminId, `<b>${me.username} has no followers.</b>`);
+        let igInstance = await IG.getInstance();
         let profile: any = await igInstance.checkProfile(me.username)
         if (!profile || !profile.id || profile.is_private) {
             if (!profile?.id) {
@@ -293,6 +269,7 @@ export class Client {
     async getIGProfile(username = this.username) {
         let user = JSON.parse(await this.redis.get('ig') || "{}")
         if (!user?.id) {
+            let igInstance = await IG.getInstance();
             user = await igInstance.checkProfile(username, this.pk) as any
             if (user) {
                 this.redis.set('ig', JSON.stringify({
@@ -320,6 +297,7 @@ export class Client {
     }
     async register(msg: string, ctx: Context) {
         this.translate('waitplease').send();
+        let igInstance = await IG.getInstance();
         let user = (await igInstance.checkProfile(msg, this.pk) as any);
         if (!user?.id || user.is_private || user.is_verified) {
             return this.translate('usernamewrong').send();
@@ -416,8 +394,7 @@ if (!isPausedWorker) {
         const followerPk = job.data.followerPk;
         const followerLang = job.data.followerLang;
         const follower = new Client(followerPk, followerLang);
-        const { username, password } = getCredentials();
-        const ig = new IG(username, password);
+        const ig = new IG();
         await ig.login()
         // let execludes = follower.memory.get<string[]>('execludes') || [];
         let fakefollows = parseInt(await follower.redis.get(`fakefollows`) || "0")

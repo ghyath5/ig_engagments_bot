@@ -97,6 +97,7 @@ export class ProxyManager {
         if (this.working.length >= 400) {
             this.working.shift()
         }
+        storedProxies.push([proxy])
         this.working.push(proxy);
     }
     getProxy() {

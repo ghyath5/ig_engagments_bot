@@ -5,21 +5,14 @@ import './middlewares/onStart'
 import './schedular'
 import fastify from 'fastify';
 import telegrafPlugin from 'fastify-telegraf'
-import { igInstance, } from './instagram';
 import { multipleNotification } from './utls';
 const app = fastify({ logger: false, });
 const WEBHOOK_URL = process.env.WEBHOOK_URL!;
 const WEBHOOK_PATH = process.env.WEBHOOK_PATH!;
 import { proxyManager } from './proxy-manager';
-import { Client, credentials } from './client';
+import { Client } from './client';
 import { LocationPrivacy, PrismaClient } from '.prisma/client';
 const prisma = new PrismaClient()
-let index = -1;
-export const getCredentials = () => {
-  index = index + 1
-  if (index >= credentials.length) index = 0;
-  return credentials[index]
-}
 bot.start(async (ctx) => {
   let splited = ctx.message?.text?.split(' ');
   if (splited.length == 2 && !isNaN(Number(splited[1]))) {
@@ -84,7 +77,6 @@ bot.action('changeigprofile', (ctx) => {
 })
 bot.action('startfollowing', async (ctx) => {
   ctx.deleteMessage().catch(() => { });
-  ctx.answerCbQuery().catch(() => { });
   return ctx.self.sendUser()
 })
 bot.action('sendLink', async (ctx) => {
@@ -93,6 +85,7 @@ bot.action('sendLink', async (ctx) => {
   });
 })
 bot.action('sendusertofollow', async (ctx) => {
+  ctx.answerCbQuery().catch(() => { });
   return ctx.self.sendUser()
 })
 
@@ -102,6 +95,7 @@ bot.action(/rep-(.+)/, async (ctx) => {
   let username = ctx.match['input'].split('-')[2];
   await ctx.self.addAccountToSkipped(username);
   ctx.deleteMessage().catch(() => { });
+  let igInstance = await IG.getInstance();
   let profile = await igInstance.checkProfile(username) as any;
   ctx.self.sendUser();
   if (!profile || profile.is_private) {
@@ -238,10 +232,9 @@ bot.command('share_links', async (ctx) => {
 })
 bot.command('post', async (ctx) => {
   if (ctx.from.id.toString() != adminId) return;
-  const { username, password } = getCredentials();
-  const ig = new IG(username, password);
+  const ig = new IG();
   await ig.login()
-  ctx.reply(`${username} is uploading an image...`)
+  ctx.reply(`${ig.username} is uploading an image...`)
 
   await ig.post()
   return ctx.reply("Posted");

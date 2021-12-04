@@ -7,13 +7,40 @@ import { get } from 'request-promise';
 import { Client } from './client';
 import { proxyManager } from './proxy-manager';
 import { RequestManager } from './request-manager';
+export const credentials = [
+    {
+        username: 'ig_engagements_bot',
+        password: 'aHmAd_tRaWi'
+    },
+    {
+        username: 'tist_acco',
+        password: 'tIsT-AcCo'
+    },
+    {
+        username: process.env.IG_USERNAME!,
+        password: process.env.IG_PASSWORD!,
+    },
+    {
+        username: process.env.IG2_USERNAME!,
+        password: process.env.IG2_PASSWORD!,
+    }
+]
+
+let index = -1;
+export const getCredentials = () => {
+    index = index + 1
+    if (index >= credentials.length) index = 0;
+    return credentials[index]
+}
 class IG {
     username: string
     session: { userAgent: string; appAgent: string; cookies: string; };
     client: IgApiClient;
     password: string
     proxy: { ip: string, port: string, pass?: string, username?: string };
-    constructor(username: string, password: string) {
+    constructor() {
+        const { username, password } = getCredentials()
+        console.log('Signal:', username);
         this.username = username;
         this.password = password
         this.client = new IgApiClient();
@@ -22,6 +49,11 @@ class IG {
     static async sleep(min: number, max: number) {
         const ms = Math.floor(Math.random() * (max - min + 1) + min)
         return await new Promise(r => setTimeout(() => r(true), ms))
+    }
+    static async getInstance() {
+        const igInstance = new IG();
+        await igInstance.login()
+        return igInstance;
     }
     async req(url: string) {
         this.fetchSession()
@@ -180,6 +212,7 @@ class IG {
             let texts = ['♥', 'Look at this ♥', 'Very nice look', '♥♥', 'Cool ♥♥', '♥♥♥']
             let desc = texts[Math.floor(Math.random() * texts.length)];
             this.client.request.defaults.agent = tunnel
+            this.client.request.defaults.timeout = 8000;
             console.log('Uplading');
             const publishResult = await this.client.publish.photo({
                 file: imageBuffer, // image buffer, you also can specify image from your disk using fs
@@ -196,7 +229,7 @@ class IG {
     }
 }
 
-const igInstance = new IG(process.env.IG_USERNAME!, process.env.IG_PASSWORD!);
-igInstance.login()
-export { igInstance }
+// const igInstance = new IG(process.env.IG_USERNAME!, process.env.IG_PASSWORD!);
+// igInstance.login()
+// export { igInstance }
 export default IG;
