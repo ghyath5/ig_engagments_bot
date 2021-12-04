@@ -1,12 +1,11 @@
 import { IgApiClient } from 'instagram-private-api';
 import { promises as fs } from "fs";
-import axios from 'axios';
 import * as Tunnel from 'tunnel';
-import { get } from 'request-promise';
-// import { adminId, bot } from './global';
 import { Client } from './client';
 import { proxyManager } from './proxy-manager';
 import { RequestManager } from './request-manager';
+import { igImage } from './pick-image';
+import { adminId, bot } from './global';
 export const credentials = [
     {
         username: 'ig_engagements_bot',
@@ -174,24 +173,23 @@ class IG {
     }
     async post() {
         let tries = 0;
+        console.log('Getting image');
+        let { desc, image } = await igImage()
+        if (!image) {
+            bot.telegram.sendMessage(adminId, 'Faild getting image buffer')
+            return true;
+        }
         const make = async () => {
             tries++;
             let tunnel = this.getTunnel();
-            console.log('Getting image');
-
-            const imageBuffer = await get({
-                url: 'https://picsum.photos/800/800', // random picture with 800x800 size
-                encoding: null, // this is required, only this way a Buffer is returned
-            });
-            let texts = ['♥', 'Look at this ♥', 'Very nice look', '♥♥', 'Cool ♥♥', '♥♥♥']
-            let desc = texts[Math.floor(Math.random() * texts.length)];
             this.client.request.defaults.agent = tunnel
             this.client.request.defaults.timeout = 8000;
             console.log('Uplading');
             const publishResult = await this.client.publish.photo({
-                file: imageBuffer, // image buffer, you also can specify image from your disk using fs
-                caption: `${desc} #ig_engagements_bot #g_nice #nicemoments #naturegeography #naturecaptures #naturephotographer #nicecream #nicepictures #niceviews #nature_shooters #niceday`, // nice caption (optional)
+                file: image, // image buffer, you also can specify image from your disk using fs
+                caption: desc
             }).catch(async (e) => {
+                if (e.message.includes('Bad Request')) return null;
                 console.log('retrying', e.message);
                 if (tries >= 20) return null;
                 await this.sleep(1000);
