@@ -141,7 +141,7 @@ bot.action(/followed-(.+)/, async (ctx) => {
     return ctx.self.translate('youspamfollow').send()
   }
   let hourlyfollows = parseInt(await ctx.self.redis.get('hourlyfollows') || "0")
-  if ((hourlyfollows >= 15) && adminId != ctx.from!.id.toString()) {
+  if ((hourlyfollows >= 20) && adminId != ctx.from!.id.toString()) {
     ctx.self.memory.set('followedUsername', null);
     return ctx.self.translate('followedexcedded').send();
   }
