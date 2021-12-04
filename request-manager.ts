@@ -11,9 +11,13 @@ export class RequestManager {
   requestsAtime: number = 20;
   page: number = 0;
   response: any = null;
+  headers: {};
+  params: {}
   callResponse: (data) => void;
-  constructor(session) {
+  constructor(session, headers, params) {
     this.session = session
+    this.headers = headers || { "Cookie": this.session.cookies, "user-agent": this.session.userAgent, "Accept": "*/*" }
+    this.params = params || {}
   }
   fetchProxies() {
     this.page = 0;
@@ -52,12 +56,13 @@ export class RequestManager {
     }, 5000);
     return new Promise((resolve, reject) => {
       axios(url, {
+        params: { ...this.params },
         withCredentials: true,
         proxy: false,
         cancelToken: source.token,
         timeout: 5000,
         ...(tunnel && { httpsAgent: tunnel, httpAgent: tunnel }),
-        headers: { "Cookie": this.session.cookies, "user-agent": this.session.userAgent, "Accept": "*/*" }
+        headers: this.headers
       }).then((res) => {
         console.log('Success');
         return resolve(res?.data)

@@ -55,9 +55,9 @@ class IG {
         await igInstance.login()
         return igInstance;
     }
-    async req(url: string) {
+    async req(url: string, headers = null, params = {}) {
         this.fetchSession()
-        let rqManager = new RequestManager(this.session);
+        let rqManager = new RequestManager(this.session, headers, params);
         let response = await rqManager.request(url)
         return response
     }
@@ -117,49 +117,23 @@ class IG {
         return null;
     }
     async getFollowers(id: string) {
-        let tunnel = this.getTunnel();
-        const source = axios.CancelToken.source();
-        const timeout = setTimeout(() => {
-            source.cancel('timeout');
-        }, 8000);
-        let headers = this.client.request.getDefaultHeaders()
         this.fetchSession()
-        return await new Promise((resolve) => {
-            axios(`https://i.instagram.com/api/v1/friendships/${id}/followers/`, {
-                params: {
-                    order: 'default',
-                    query: '',
-                    count: 999999
-                },
-                cancelToken: source.token,
-                withCredentials: true,
-                timeout: 8000,
-                proxy: false,
-                ...(tunnel && { httpsAgent: tunnel, httpAgent: tunnel }),
-                headers: {
-                    ...headers,
-                    'X-IG-EU-DC-ENABLED': 'undefined',
-                    Authorization: '',
-                    "Cookie": this.session.cookies
-                }
-            }).then((res) => {
-                return resolve({ status: true, users: (res.data as any)?.users });
-            }).catch(async (e) => {
-                console.log("Get Followers Error:", (e as any).message);
-                // this.statisProxy('dead')
-                if ((e as any).message?.includes("429")) {
-                    proxyManager.remove(this.proxy);
-                    return resolve(await this.getFollowers(id));
-                }
-                if (!e.response || (e as any).message?.includes("429")) {
-                    // await this.sleep(800);
-                    return resolve(await this.getFollowers(id));
-                }
-                return resolve({ status: false });
-            }).finally(() => {
-                clearTimeout(timeout);
-            })
-        })
+        let headers: any = this.client.request.getDefaultHeaders()
+        headers = {
+            ...headers,
+            'X-IG-EU-DC-ENABLED': 'undefined',
+            Authorization: '',
+            "Cookie": this.session.cookies
+        }
+        const params = {
+            order: 'default',
+            query: '',
+            count: 999999
+        }
+        let data = await this.req(`https://i.instagram.com/api/v1/friendships/${id}/followers/`, headers, params)
+        if (!data?.users) return { status: false }
+        console.log(data.users.length);
+        return { status: true, users: data.users }
     }
     async checkProfile(username: any, userPk?) {
         if (userPk) {
