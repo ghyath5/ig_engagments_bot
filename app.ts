@@ -182,6 +182,28 @@ bot.command('proxies', async (ctx) => {
   if (ctx.from.id.toString() != adminId) return;
   return ctx.replyWithHTML(`All Proxies: ${proxyManager.working.length}`).catch(() => { });
 })
+bot.command('promote', async (ctx) => {
+  if (ctx.from.id.toString() != adminId) return;
+  let me = await ctx.self.account()
+  let allUsers = await ctx.prisma.account.findMany({
+    where: {
+      main: true,
+      user_id: { not: 94974028 },
+      username: { not: "joood9516" },
+      follows: {
+        none: {
+          followed_id: { equals: me.igId }
+        }
+      },
+    }
+  });
+  let ids = allUsers.map((u) => u.user_id);
+  multipleNotification(ids, (client) => {
+    client.translate('followdeveloper').send({
+      ...client.keyboard.inlineKeyboard([[{ text: client.translate('followed').msg, callback_data: `followed-ghyathdarwish` }]])
+    })
+  })
+})
 bot.command('s_g_m', async (ctx) => {
   if (ctx.from.id.toString() != adminId) return;
   let allUsers = await ctx.prisma.user.findMany({

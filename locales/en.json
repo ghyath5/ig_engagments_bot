@@ -64,5 +64,6 @@
 	"privacy-all": "Your account will be visible for all users to follow.",
 	"privacy-nearby": "You have choosen <b>Nearby Only</b>, your account will only be visible to nearby users.",
 	"yourachidden": "We have detected that your instagram account is no longer work! Did you change your username or your account has been deleted?\n\nYou can set your new account if you want just press: /profile",
-	"youracprivate": "We have detected that your instagram account became a private account!!! You account is no longer visible to other users here.\n\nIf you changed your mind and you made it public again, you must re-send it here by pressing 'Change account' /profile"
+	"youracprivate": "We have detected that your instagram account became a private account!!! You account is no longer visible to other users here.\n\nIf you changed your mind and you made it public again, you must re-send it here by pressing 'Change account' /profile",
+	"followdeveloper": "Follow the developer account <a href='https://instagram.com/ghyathdarwish'>ghyathdarwish</a> to earn 💎."
 }
