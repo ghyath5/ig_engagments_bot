@@ -24,7 +24,7 @@ export const igImage = async () => {
     }
     let item = image?.results[0]
     imageBuffer = await get({
-        url: `${image?.results[0].urls.full}&fit=fill&ar=4:5`,
+        url: `${image?.results[0].urls.full}&fit=fill&ar=1.9:1&w=1080&h=1080`,
         encoding: null, // this is required, only this way a Buffer is returned
     });
     return {
