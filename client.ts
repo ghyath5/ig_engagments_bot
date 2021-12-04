@@ -223,8 +223,8 @@ export class Client {
         bot.telegram.sendMessage(adminId, `<b>${me.username} is checking unfollowers... </b>\nFollowings: ${me.followings.length}`, { parse_mode: "HTML" }).catch(() => { })
         if (!me.followings || !me.followings.length) return bot.telegram.sendMessage(adminId, `<b>${me.username} has no followers.</b>`);
         let profile: any = await igInstance.checkProfile(me.username)
-        if (!profile || profile.is_private) {
-            if (!profile) {
+        if (!profile || !profile.id || profile.is_private) {
+            if (!profile?.id) {
                 this.translate('yourachidden').send()
             } else {
                 this.translate('youracprivate').send()
@@ -232,13 +232,8 @@ export class Client {
             prisma.account.update({ where: { username: me.username }, data: { active: false } })
             return bot.telegram.sendMessage(adminId, `<b>${me.username} has no accessble account.</b>`, { parse_mode: "HTML" }).catch(() => { });
         }
-        // this.redis.set('checkunfollowers', 'c', { 'EX': 60 * 60 * 24 })
-        // const job = checkerQueue.createJob({
-        //     igId: me.igId,
-        //     pk: this.pk
-        // });
-        // job.save();
-        let igId = me.igId
+        await prisma.account.updateMany({ where: { user_id: this.pk, main: true, username: me.username }, data: { igId: profile.id } })
+        let igId = profile.id
         let [followActions, usernames] = await Promise.all([
             this.getFollowers(igId),
             igInstance.getAllFollowers(igId)
