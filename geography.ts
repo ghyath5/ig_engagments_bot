@@ -6,6 +6,7 @@ interface GeoUser {
     gems: Number
     long: Number
     lat: Number
+    followings: Number
 }
 export class UserRaw {
     pk: number | string
