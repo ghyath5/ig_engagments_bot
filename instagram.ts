@@ -7,10 +7,10 @@ import { RequestManager } from './request-manager';
 import { igImage } from './pick-image';
 import { adminId, bot } from './global';
 export const credentials = [
-    {
-        username: 'ig_engagements_bot',
-        password: 'Ghyath#123!'
-    },
+   // {
+     //   username: 'ig_engagements_bot',
+     //   password: 'Ghyath#123!'
+   // },
     {
         username: 'tist_acco',
         password: 'tIsT-AcCo'
