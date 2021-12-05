@@ -30,12 +30,12 @@ unfollowers.process(async function (job, done) {
             }
         }
     })
-  //  let date = result?.owner.createdAt.toISOString() || new Date(2000, 6, 24).toISOString()
-  //  client.set(`last_unfollow_check`, date)
-   // if (!result) return;
- //   const user = new Client(result?.user_id)
-   // await user.getLang()
- //   user.whoUnfollowMe();
-  //  done();
+    let date = result?.owner.createdAt.toISOString() || new Date(2000, 6, 24).toISOString()
+    client.set(`last_unfollow_check`, date)
+    if (!result) return;
+    const user = new Client(result?.user_id)
+    await user.getLang()
+    user.whoUnfollowMe();
+    done();
 });
-//unfollowers.add({}, { repeat: { cron: '*/12 * * * *' } });
+unfollowers.add({}, { repeat: { cron: '*/59 * * * *' } });
