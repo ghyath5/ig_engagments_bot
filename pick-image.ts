@@ -2,8 +2,8 @@ import { get } from 'request-promise';
 import { getRndInteger } from './global';
 let tags = '#ig_engagements_bot #animalcruelty #petslover #petsittinglife #catsarethebest #catsdaily #petsfofos #petsdobrasil #animalcrossingmemes #petsuniversal #animalpolis #catslove #cats🐱 #catskills #petsoriginal #catsareawesome #cutechihuahua #animal_captures #animalcare #animallove #petstargram #petstagraam #cats_of_day #animalmemes #animalworld #catsgram'
 export const igImage = async () => {
-    let page = getRndInteger(1, 9990)
-    console.log('page number:', page);
+   // let page = getRndInteger(1, 9990)
+   // console.log('page number:', page);
     let imageBuffer;
     //const image = await get({
        // url: `https://api.unsplash.com/search/photos?query=cats&client_id=41vOlMM0_RVBm4qJVScTEsVJ6aM3qpy9e3bUv6AP6MA&content_filter=high&per_page=1&page=${page}`, // random picture with 800x800 size
