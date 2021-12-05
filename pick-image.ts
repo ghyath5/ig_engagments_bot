@@ -11,7 +11,7 @@ export const igImage = async () => {
        // json: true
     //});
     //if (!image?.results || !image?.results.length || !image?.results[0].urls.full) {
-     if(true){   
+   //  if(true){   
         imageBuffer = await get({
             url: 'https://picsum.photos/800/800', // random picture with 800x800 size
             encoding: null, // this is required, only this way a Buffer is returned
@@ -22,14 +22,14 @@ export const igImage = async () => {
             desc: tags,
             image: imageBuffer
         };
-    }
-    let item = image?.results[0]
-    imageBuffer = await get({
-        url: `${image?.results[0].urls.full}&fit=fill&ar=1.9:1&w=1080&h=1080`,
-        encoding: null, // this is required, only this way a Buffer is returned
-    });
-    return {
-        desc: `${item.alt_description} ${tags}`,
-        image: imageBuffer
-    };
+ //   }
+   // let item = image?.results[0]
+ //   imageBuffer = await get({
+  //      url: `${image?.results[0].urls.full}&fit=fill&ar=1.9:1&w=1080&h=1080`,
+ //       encoding: null, // this is required, only this way a Buffer is returned
+  //  });
+  //  return {
+ //       desc: `${item.alt_description} ${tags}`,
+    //  image: imageBuffer
+  //  };
 }
