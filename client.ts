@@ -357,6 +357,7 @@ export class Client {
         ])
 
         let accounts = await this.userRaw.nearByUsers([...execludes, ...accountsSkipped])
+        if (!accounts?.length) return this.translate('notusertofolw').send();
         let account = accounts[0];
         // let account = await prisma.account.findFirst({
         //     where: {
@@ -380,8 +381,18 @@ export class Client {
         //         }
         //     }
         // })
-        if (!accounts?.length) return this.translate('notusertofolw').send();
-        bot.telegram.sendMessage(this.pk, `${this.translate('dofollow', { username: account.username }).msg}\n${this.translate('moregemsmorefollowers').msg}`,
+        let msg = this.translate('moregemsmorefollowers').msg;
+        if (account.dist != null) {
+            let dist = Number(account.dist)
+            if (dist >= 1000) {
+                let distance = (dist / 1000).toFixed(0)
+                msg = this.translate('fardistanc', { distance, unit: this.translate('kilom').msg }).msg
+            } else {
+                let distance = dist.toFixed(0)
+                msg = this.translate('fardistanc', { distance, unit: this.translate('meter').msg }).msg
+            }
+        }
+        bot.telegram.sendMessage(this.pk, `${this.translate('dofollow', { username: account.username }).msg}\n\n${msg}\n\n\n${this.translate('notePrivate').msg}`,
             {
                 ...this.keyboard.panel(account.username),
                 parse_mode: "HTML",

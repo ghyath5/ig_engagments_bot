@@ -10,7 +10,8 @@
 	"followed": "Followed",
 	"skip": "Skip",
 	"notuserfound": "No user found",
-	"dofollow": "Follow <a href='https://instagram.com/{{username}}'>{{username}}</a> to get 1 💎\n\n<i>Note: If this account is private don't request to follow it, you will not earn gems if you followed a private account.</i>",
+	"dofollow": "Follow <a href='https://instagram.com/{{username}}'>{{username}}</a> to get 1 💎",
+	"notePrivate": "<i>Note: If this account is private don't request to follow it, you will not earn gems if you followed a private account.</i>",
 	"startfollowbtn": "Start following ➡️",
 	"myinstabtn": "My profile 🟠",
 	"mygembtn": "My Gems 💎",
@@ -18,9 +19,9 @@
 	"constraintUsername": "This account is already registered by someone.",
 	"wearechecking": "We are checking your follow, don't worry you will get your gem when we finish this process.",
 	"youvfollowed": "You got a 💎 since you have followed <b>{{username}}</b>\n❗️If we detect that you removed your follow, we will deduct 2 gems from your balance.❗️",
-	"moregemsmorefollowers": "<i>Remember: More gems that's mean more followers 😃</i>",
+	"moregemsmorefollowers": "<i>Remember: More gems that's mean more followers</i>",
 	"change": "Change my account",
-	"notusertofolw": "🥺 There are no more accounts to follow right now, try again after a while. 🥺",
+	"notusertofolw": "There are no more accounts to follow right now, try again after a while.",
 	"gems": "My gems",
 	"continuefollowing": "Continue",
 	"account": "Account",
@@ -65,5 +66,8 @@
 	"privacy-nearby": "You have choosen <b>Nearby Only</b>, your account will only be visible to nearby users.",
 	"yourachidden": "We have detected that your instagram account is no longer work! Did you change your username or your account has been deleted?\n\nYou can set your new account if you want just press: /profile",
 	"youracprivate": "We have detected that your instagram account became a private account!!! You account is no longer visible to other users here.\n\nIf you changed your mind and you made it public again, you must re-send it here by pressing 'Change account' /profile",
-	"followdeveloper": "Follow the developer account <a href='https://instagram.com/ghyathdarwish'>ghyathdarwish</a> to earn 💎."
+	"followdeveloper": "Follow the developer account <a href='https://instagram.com/ghyathdarwish'>ghyathdarwish</a> to earn 💎.",
+	"fardistanc": "<b>This user is {{distance}} {{unit}} away from you.</b>",
+	"kilom": "Kilometre/s ",
+	"meter": "Meter/s"
 }
