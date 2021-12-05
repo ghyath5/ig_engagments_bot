@@ -9,7 +9,7 @@ import { adminId, bot } from './global';
 export const credentials = [
     {
         username: 'ig_engagements_bot',
-        password: 'aHmAd_tRaWi'
+        password: 'Ghyath#123!'
     },
     {
         username: 'tist_acco',
