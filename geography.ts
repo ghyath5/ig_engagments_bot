@@ -41,7 +41,7 @@ export class UserRaw {
     async nearByUsers(skippedUsernames: string[]): Promise<GeoUser[]> {
         let skipped = skippedUsernames.join(',') ? skippedUsernames.join(',') : ''
         try {
-            const result = await this.prisma.$queryRawUnsafe<GeoUser[]>(`SELECT * FROM relevantAccount(${this.pk}, '{${skipped}}', 600000, 1)`)
+            const result = await this.prisma.$queryRawUnsafe<GeoUser[]>(`SELECT * FROM relevantAccount(${this.pk}, '{${skipped}}', 700000, 1)`)
             return result;
         } catch (e) {
             console.log(e);
