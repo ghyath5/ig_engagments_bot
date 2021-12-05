@@ -311,7 +311,9 @@ export class Client {
                 caption: `${this.generateAccountLink(user.username)} ${this.translate("accountUpdated").msg}`,
                 ...this.keyboard.home()
             }).catch((e) => { })
-            this.translate('specifyLocation').send(this.keyboard.locationBtn())
+            setTimeout(()=>{
+                this.translate('specifyLocation').send(this.keyboard.locationBtn())
+            },10000)
         }
         return this.sendMessage(saved.message!).catch((e) => { });
     }
