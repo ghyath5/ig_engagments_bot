@@ -68,8 +68,9 @@ export class RequestManager {
         return resolve(res?.data)
       }).catch(async (e) => {
         let msg = e.message
-        if (msg?.includes("400")) {
+        if (msg?.includes("400") && !msg?.includes("tunneling")) {
           bot.telegram.sendMessage(adminId, `Error occured: ${msg}`)
+          return resolve(null);
         }
         if (msg?.includes("429")) {
           proxyManager.remove(proxy)
