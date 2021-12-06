@@ -13,10 +13,6 @@ export const credentials = [
         password: 'tIsT-AcCo'
     },
     {
-        username: 'ig_engagements_bot',
-        password: 'Ghyath!321#'
-    },
-    {
         username: process.env.IG_USERNAME!,
         password: process.env.IG_PASSWORD!,
     },
