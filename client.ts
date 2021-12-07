@@ -43,7 +43,7 @@ export class Client {
         const myUsername = account.username;
         const job = queue.createJob({ usernameToFollow: username, followerIGId: account.igId, followerUsername: myUsername, followerPk: this.pk, followerLang: this.lang });
         job.save();
-        this.translate('wearechecking').send();
+       // this.translate('wearechecking').send();
     }
     ctx?: MyContext;
     lang: string;
