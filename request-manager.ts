@@ -78,9 +78,9 @@ export class RequestManager {
         if (msg?.includes("404")) {
           return resolve(null);
         }
-        if(this.page>=3){
-          bot.telegram.sendMessage(adminId, `Maybe stucked: ${msg}`)
-          await sleep (4000);
+        if(this.page>=4){
+         // bot.telegram.sendMessage(adminId, `Maybe stucked: ${msg}`)
+          await sleep (8000);
         }
         return reject(false)
       }).finally(() => {
