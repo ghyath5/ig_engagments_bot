@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 import { adminId, bot, IG } from './global';
 import './middlewares/onStart'
-import './schedular'
+// import './schedular'
 import fastify from 'fastify';
 import telegrafPlugin from 'fastify-telegraf'
 import { multipleNotification } from './utls';
